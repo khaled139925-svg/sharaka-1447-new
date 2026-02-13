@@ -6,7 +6,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 
-const LOGO_URL = 'https://private-us-east-1.manuscdn.com/user_upload_by_module/session_file/310519663333045223/rXaunJeoqnztcFsl.png?Expires=1802413495&Signature=gDDnBD9nDi8als-Qt0axako7NqvAn5H5sKYuDoKTREdV18rjB670Nxc495YhEr5tbpRsAgmyObWMsc29C-os0v5xR1Ie4TBw0Mw1vgBY0aUWug7VIUdwWgOnS4fkeLJSX4OF3dU8f9~yU91N~3XQyYnLzGPH7GM97RImmTditl2jlRsKhRcg57Ou5IftEHLJmIuc3P~lYKKilr8lGlllybAPmFaw-q7RSIHGhW87l0iIqBRy~7YIR6xRtfIp1ZXmSClWCDZeZ4Cpx1Lol5~GSXYDV2znITz4Y~uXPyEQn0F6zg7wYDUx67X81ZbqQZ2RN1CICj-RYJoXwlSVpzE16w__&Key-Pair-Id=K2HSFNDJXOU9YS';
+const LOGO_URL = 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663333045223/ulkhpqXvgwOhgZuZ.jpeg';
 
 const COUNTRIES = [
   { code: 'SA', name: 'السعودية', flag: '🇸🇦' },
@@ -101,12 +101,8 @@ export default function Home() {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-card shadow-md border-b border-border">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src={LOGO_URL} alt="Sharaka" className="h-12 w-12 object-contain" />
-            <div className="hidden sm:flex flex-col">
-              <span className="font-bold text-lg text-primary">شراكة</span>
-              <span className="text-xs text-accent">شريك نجاحك</span>
-            </div>
+            <div className="flex items-center gap-3">
+            <img src={LOGO_URL} alt="Sharaka" className="h-14 w-auto object-contain" />
           </div>
 
           {/* Country Selector */}
@@ -147,7 +143,7 @@ export default function Home() {
         {/* Hero Section */}
         <section className="py-20 bg-gradient-to-b from-secondary to-background">
           <div className="container mx-auto px-4 text-center space-y-6">
-            <img src={LOGO_URL} alt="Sharaka" className="h-32 w-32 mx-auto" />
+            <img src={LOGO_URL} alt="Sharaka" className="h-40 w-auto mx-auto" />
             <h1 className="text-5xl md:text-6xl font-bold text-primary">شريك نجاحك</h1>
             <p className="text-xl text-foreground/70 max-w-2xl mx-auto">
               منصة أعمال رقمية متكاملة تجمع الاستشارات والتعهيد وإدارة المشاريع والسوق الإلكتروني ونظام النقاط

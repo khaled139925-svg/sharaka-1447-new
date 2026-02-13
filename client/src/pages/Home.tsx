@@ -146,23 +146,34 @@ const PATHS = [
   },
 ];
 
-// دالة لإرسال البيانات عبر البريد الإلكتروني
+// دالة لإرسال البيانات عبر البريد الإلكتروني باستخدام Formspree
 const sendEmailNotification = async (subject: string, data: any) => {
   try {
-    // هذا مثال على كيفية إرسال البيانات إلى خادم
-    // يمكن استخدام FormSubmit أو EmailJS أو أي خدمة أخرى
-    console.log('إرسال بيانات إلى البريد:', { subject, data, email: USER_EMAIL });
-    
-    // يمكن استخدام FormSubmit.co مثلاً:
-    const formData = new FormData();
-    formData.append('email', USER_EMAIL);
-    formData.append('subject', subject);
-    formData.append('message', JSON.stringify(data, null, 2));
-    
-    // هذا مثال فقط - يحتاج إلى تكوين فعلي
-    alert(`تم إرسال البيانات بنجاح إلى ${USER_EMAIL}`);
+    const emailBody = `الموضوع: ${subject}\nالبريد المرسل إليه: ${USER_EMAIL}\nالوقت: ${new Date().toLocaleString('ar-SA')}\n\nالبيانات:\n${JSON.stringify(data, null, 2)}`;
+
+    const response = await fetch('https://formspree.io/f/xyzpqwab', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: USER_EMAIL,
+        message: emailBody,
+        subject: subject,
+      }),
+    });
+
+    if (response.ok) {
+      alert(`✅ تم إرسال البيانات بنجاح إلى ${USER_EMAIL}`);
+      return true;
+    } else {
+      alert('❌ حدث خطأ في الإرسال. يرجى المحاولة لاحقاً');
+      return false;
+    }
   } catch (error) {
     console.error('خطأ في الإرسال:', error);
+    alert('❌ خطأ في الاتصال. تأكد من اتصالك بالإنترنت');
+    return false;
   }
 };
 

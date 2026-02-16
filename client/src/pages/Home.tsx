@@ -387,13 +387,12 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Tagline - Below Country Selector */}
-          <div className="absolute right-4 -bottom-8 hidden md:block">
-            <p className="text-xs font-semibold text-accent animate-pulse whitespace-nowrap">{t.tagline}</p>
-          </div>
-
           {/* Controls - Right side */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 relative">
+            {/* Tagline - Below Country Selector */}
+            <div className="absolute right-0 -bottom-7">
+              <p className="text-xs font-semibold text-accent animate-pulse whitespace-nowrap">{t.tagline}</p>
+            </div>
             {/* Language Selector */}
             <div className="relative">
               <button

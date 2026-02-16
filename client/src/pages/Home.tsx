@@ -478,8 +478,8 @@ export default function Home() {
               </p>
             </div>
 
-            <p className="text-lg md:text-xl text-foreground/70 max-w-3xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
-              {t.description}
+            <p className="text-sm md:text-base text-foreground/60 max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200 font-medium">
+              {isRTL ? 'منصة أعمال رقمية متكاملة تجمع الاستشارات، التعهيد وإدارة المشاريع، السوق الإلكتروني، ونظام نقاط وشريك نجاحك' : 'An integrated digital business platform that brings together consultations, outsourcing and project management, e-commerce marketplace, points system and your success partner'}
             </p>
             <Button className="btn-primary hover:shadow-lg hover:scale-105 transition-all duration-300 text-lg px-8 py-6">
               {t.startNow}

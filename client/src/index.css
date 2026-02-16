@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Import Noto Naskh Arabic Font */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -120,6 +123,14 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Noto Naskh Arabic', 'Poppins', sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Noto Naskh Arabic', 'Poppins', sans-serif;
+    font-weight: 700;
+  }
+  p, span, div {
+    font-family: 'Noto Naskh Arabic', 'Poppins', sans-serif;
   }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),

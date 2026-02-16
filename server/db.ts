@@ -166,13 +166,3 @@ export async function getUserConversation(userId: number) {
     .where(eq(conversations.userId, userId))
     .limit(1);
 }
-
-export async function getAllConversations() {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-
-  return await db
-    .select()
-    .from(conversations)
-    .orderBy(desc(conversations.createdAt));
-}

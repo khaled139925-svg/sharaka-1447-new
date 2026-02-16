@@ -3,7 +3,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
-import { createOrGetConversation, addMessage, getConversationMessages, getUserConversation, getAllConversations } from "./db";
+import { createOrGetConversation, addMessage, getConversationMessages, getUserConversation } from "./db";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -39,18 +39,12 @@ export const appRouter = router({
     sendAdminReply: protectedProcedure
       .input(z.object({ conversationId: z.number(), content: z.string().min(1) }))
       .mutation(async ({ input, ctx }) => {
+        // تحقق من أن المستخدم هو admin
         if (ctx.user.role !== "admin") {
           throw new Error("Only admins can send replies");
         }
         return await addMessage(input.conversationId, ctx.user.id, input.content, "admin");
       }),
-    
-    getAllConversations: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== "admin") {
-        throw new Error("Only admins can view all conversations");
-      }
-      return await getAllConversations();
-    }),
   }),
 });
 

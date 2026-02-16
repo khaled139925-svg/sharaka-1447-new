@@ -68,6 +68,9 @@ const translations = {
     staffManagementDesc: 'إدارة متكاملة لموارد بشرية احترافية',
     projectManagement: 'إدارة المشاريع',
     projectManagementDesc: 'تخطيط وتنفيذ المشاريع بكفاءة عالية',
+    chatSupport: 'دعم فوري',
+    chatMessage: 'مرحبا! كيف يمكننا مساعدتك؟',
+    typeMessage: 'اكتب رسالتك...',
   },
   en: {
     selectCountry: 'Select Country',
@@ -123,6 +126,9 @@ const translations = {
     staffManagementDesc: 'Integrated professional human resources management',
     projectManagement: 'Project Management',
     projectManagementDesc: 'Planning and executing projects with high efficiency',
+    chatSupport: 'Live Support',
+    chatMessage: 'Hello! How can we help you?',
+    typeMessage: 'Type your message...',
   }
 };
 
@@ -369,6 +375,8 @@ export default function Home() {
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [selectedConsultant, setSelectedConsultant] = useState<typeof CONSULTANTS[0] | null>(null);
   const [selectedPath, setSelectedPath] = useState<typeof PATHS[0] | null>(null);
+  const [showChatWidget, setShowChatWidget] = useState(false);
+  const [chatMessage, setChatMessage] = useState('');
   const [contactData, setContactData] = useState({
     name: '',
     email: '',
@@ -380,6 +388,18 @@ export default function Home() {
   const t = translations[language];
   const currentCountry = COUNTRIES.find(c => c.code === selectedCountry);
   const isRTL = language === 'ar';
+
+  const handleChatSend = async () => {
+    if (chatMessage.trim()) {
+      try {
+        // إرسال الرسالة عبر البريد الإلكتروني
+        await sendEmailNotification('رسالة دردشة فورية', { message: chatMessage });
+        setChatMessage('');
+      } catch (error) {
+        console.error('خطأ في إرسال الرسالة:', error);
+      }
+    }
+  };
 
   return (
     <div className={`min-h-screen bg-background ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
@@ -833,6 +853,73 @@ export default function Home() {
             </div>
           </div>
         </section>
+        {/* Chat Widget */}
+        <div className="fixed bottom-6 right-6 z-40">
+          {showChatWidget ? (
+            <div className="bg-card rounded-lg shadow-2xl w-80 md:w-96 max-h-96 flex flex-col animate-in slide-in-from-bottom-4 duration-300">
+              {/* Chat Header */}
+              <div className="bg-primary text-primary-foreground p-4 rounded-t-lg flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <MessageCircle size={24} />
+                  <div>
+                    <h3 className="text-lg md:text-xl font-bold">{t.chatSupport}</h3>
+                    <p className="text-xs md:text-sm opacity-80">نحن متاحون الآن</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowChatWidget(false)}
+                  className="text-primary-foreground hover:opacity-80 transition-opacity duration-300"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Chat Body */}
+              <div className="flex-1 p-4 bg-secondary overflow-y-auto">
+                <div className="space-y-3">
+                  {/* Bot Message */}
+                  <div className="flex justify-start">
+                    <div className="bg-primary text-primary-foreground p-3 rounded-lg max-w-xs text-sm md:text-base">
+                      {t.chatMessage}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Chat Footer */}
+              <div className="border-t border-border p-3 bg-card rounded-b-lg">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder={t.typeMessage}
+                    value={chatMessage}
+                    onChange={(e) => setChatMessage(e.target.value)}
+                    className="flex-1 px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        handleChatSend();
+                      }
+                    }}
+                  />
+                  <button
+                    onClick={handleChatSend}
+                    className="bg-primary text-primary-foreground px-3 py-2 rounded-lg hover:opacity-90 transition-opacity duration-300"
+                  >
+                    <ArrowRight size={18} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowChatWidget(true)}
+              className="bg-primary text-primary-foreground rounded-full p-4 shadow-lg hover:shadow-2xl hover:scale-110 transition-all duration-300 animate-bounce"
+              title={t.chatSupport}
+            >
+              <MessageCircle size={28} />
+            </button>
+          )}
+        </div>
       </main>
 
       {/* Footer */}

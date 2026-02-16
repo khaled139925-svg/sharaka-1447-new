@@ -467,14 +467,7 @@ export default function Home() {
         {/* Hero Section */}
         <section className="py-16 md:py-24 bg-gradient-to-b from-secondary to-background">
           <div className="container mx-auto px-4 text-center space-y-6">
-            {/* 3D Rotating Sphere Logo */}
-            <div className="sphere-container">
-              <div className="sphere-wrapper">
-                <div className="sphere-inner">
-                  <img src={LOGO_URL} alt="Sharaka" className="sphere-logo" />
-                </div>
-              </div>
-            </div>
+            <img src={LOGO_URL} alt="Sharaka" className="h-48 md:h-56 w-auto mx-auto animate-bounce" style={{ animationDuration: '3s' }} />
             
             <div>
               <h1 className="text-5xl md:text-7xl font-bold text-primary mb-2 animate-in fade-in slide-in-from-bottom-4 duration-700">

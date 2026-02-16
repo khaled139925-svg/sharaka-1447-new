@@ -1,18 +1,29 @@
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
-import { useAuth } from "@/_core/hooks/useAuth";
-import { MessageCircle, Send, Loader2, ArrowLeft } from 'lucide-react';
+import { MessageCircle, Send, Loader2, ArrowLeft, LogOut } from 'lucide-react';
+import { useLocation } from 'wouter';
 
 export default function AdminDashboard() {
-  const { user, isAuthenticated } = useAuth();
   const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
   const [replyMessage, setReplyMessage] = useState('');
+  const [, setLocation] = useLocation();
+  const [isAdminSession, setIsAdminSession] = useState(false);
+
+  // التحقق من الجلسة عند تحميل الصفحة
+  useEffect(() => {
+    const adminSession = localStorage.getItem('adminSession');
+    if (adminSession === 'true') {
+      setIsAdminSession(true);
+    } else {
+      setLocation('/admin-login');
+    }
+  }, [setLocation]);
 
   // جلب جميع المحادثات
   const { data: conversations, isLoading: conversationsLoading, refetch: refetchConversations } = trpc.chat.getAllConversations.useQuery(
     undefined,
-    { enabled: isAuthenticated && user?.role === 'admin' }
+    { enabled: isAdminSession }
   );
 
   // جلب الرسائل للمحادثة المختارة
@@ -39,13 +50,18 @@ export default function AdminDashboard() {
     });
   };
 
-  // التحقق من أن المستخدم هو مسؤول
-  if (!isAuthenticated || user?.role !== 'admin') {
+  const handleLogout = () => {
+    localStorage.removeItem('adminSession');
+    localStorage.removeItem('adminLoginTime');
+    setLocation('/admin-login');
+  };
+
+  // التحقق من الجلسة
+  if (!isAdminSession) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-primary mb-4">الوصول مرفوض</h1>
-          <p className="text-foreground/70 text-lg">أنت لا تملك صلاحيات الوصول إلى لوحة التحكم</p>
+          <h1 className="text-3xl font-bold text-primary mb-4">جاري التحميل...</h1>
         </div>
       </div>
     );
@@ -55,12 +71,21 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-card shadow-md border-b border-border sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
-          <h1 className="text-3xl font-bold text-primary flex items-center gap-2">
-            <MessageCircle size={32} />
-            لوحة تحكم الرسائل
-          </h1>
-          <p className="text-foreground/70 mt-1">إدارة المحادثات والرد على العملاء</p>
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-primary flex items-center gap-2">
+              <MessageCircle size={32} />
+              لوحة تحكم الرسائل
+            </h1>
+            <p className="text-foreground/70 mt-1">إدارة المحادثات والرد على العملاء</p>
+          </div>
+          <Button
+            onClick={handleLogout}
+            className="btn-outline flex items-center gap-2"
+          >
+            <LogOut size={18} />
+            تسجيل خروج
+          </Button>
         </div>
       </header>
 
@@ -77,7 +102,7 @@ export default function AdminDashboard() {
                 </div>
               ) : conversations && conversations.length > 0 ? (
                 <div className="space-y-2 max-h-[600px] overflow-y-auto">
-                    {conversations.map((conv: any) => (
+                  {conversations.map((conv: any) => (
                     <button
                       key={conv.id}
                       onClick={() => setSelectedConversation(conv.id)}
@@ -121,7 +146,7 @@ export default function AdminDashboard() {
                       <Loader2 className="animate-spin text-primary" size={32} />
                     </div>
                   ) : messages && messages.length > 0 ? (
-                    messages.map((msg) => (
+                    messages.map((msg: any) => (
                       <div
                         key={msg.id}
                         className={`flex ${msg.senderType === 'user' ? 'justify-start' : 'justify-end'}`}

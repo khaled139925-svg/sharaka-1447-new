@@ -458,10 +458,7 @@ export default function Home() {
           </div>
           </div>
         </div>
-        {/* Tagline Below Header */}
-        <div className="container mx-auto px-4 py-2 text-right">
-          <p className="text-xs font-semibold text-accent animate-pulse">{t.tagline}</p>
-        </div>
+
       </header>
       {/* End of Header */}
 
@@ -472,18 +469,18 @@ export default function Home() {
             <img src={LOGO_URL} alt="Sharaka" className="h-48 md:h-56 w-auto mx-auto animate-bounce" style={{ animationDuration: '3s' }} />
             
             <div>
-              <h1 className="text-5xl md:text-7xl font-bold text-primary mb-2 animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <h1 className="text-6xl md:text-8xl font-bold text-primary mb-2 animate-in fade-in slide-in-from-bottom-4 duration-700">
                 {t.tagline}
               </h1>
-              <p className="text-2xl md:text-3xl font-bold text-accent animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
+              <p className="text-3xl md:text-4xl font-bold text-accent animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
                 {t.platformName}
               </p>
             </div>
 
-            <p className="text-sm md:text-base text-foreground/60 max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200 font-medium">
+            <p className="text-lg md:text-xl text-foreground/60 max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200 font-medium">
               {isRTL ? 'منصة أعمال رقمية متكاملة تجمع الاستشارات، التعهيد وإدارة المشاريع، السوق الإلكتروني، ونظام نقاط وشريك نجاحك' : 'An integrated digital business platform that brings together consultations, outsourcing and project management, e-commerce marketplace, points system and your success partner'}
             </p>
-            <Button className="btn-primary hover:shadow-lg hover:scale-105 transition-all duration-300 text-lg px-8 py-6">
+            <Button className="btn-primary hover:shadow-lg hover:scale-105 transition-all duration-300 text-xl px-10 py-8">
               {t.startNow}
             </Button>
           </div>
@@ -502,8 +499,8 @@ export default function Home() {
               return (
                 <div key={idx} className="card p-6 group hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer">
                   <Icon className="w-12 h-12 text-accent mb-4 group-hover:scale-125 transition-transform duration-300" />
-                  <h3 className="text-xl font-bold text-primary mb-2">{item.title}</h3>
-                  <p className="text-foreground/70 text-sm">{item.desc}</p>
+                  <h3 className="text-2xl font-bold text-primary mb-2">{item.title}</h3>
+                  <p className="text-foreground/70 text-base">{item.desc}</p>
                 </div>
               );
             })}
@@ -514,8 +511,8 @@ export default function Home() {
         <section id="consultants" className="py-16 md:py-20 bg-secondary">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-primary mb-4">{t.consultants}</h2>
-              <p className="text-lg text-foreground/70">{t.consultantsDesc}</p>
+              <h2 className="text-5xl font-bold text-primary mb-4">{t.consultants}</h2>
+              <p className="text-xl text-foreground/70">{t.consultantsDesc}</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -526,9 +523,9 @@ export default function Home() {
                     alt={consultant.name} 
                     className="w-full h-48 object-cover rounded-lg mb-4 group-hover:scale-105 transition-transform duration-300"
                   />
-                  <h3 className="text-xl font-bold text-primary mb-2">{isRTL ? consultant.name : consultant.nameEn}</h3>
-                  <p className="text-accent font-semibold text-sm mb-3">{isRTL ? consultant.specialty : consultant.specialtyEn}</p>
-                  <p className="text-foreground/70 text-sm mb-6">{isRTL ? consultant.bio : consultant.bioEn}</p>
+                  <h3 className="text-2xl font-bold text-primary mb-2">{isRTL ? consultant.name : consultant.nameEn}</h3>
+                  <p className="text-accent font-semibold text-base mb-3">{isRTL ? consultant.specialty : consultant.specialtyEn}</p>
+                  <p className="text-foreground/70 text-base mb-6">{isRTL ? consultant.bio : consultant.bioEn}</p>
                   <Button 
                     onClick={() => setSelectedConsultant(consultant)}
                     className="w-full btn-primary justify-center hover:shadow-lg transition-all duration-300"

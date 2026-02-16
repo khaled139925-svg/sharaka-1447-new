@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import emailjs from '@emailjs/browser';
+import { chatService } from '@/lib/supabase';
 import { 
   Users, Briefcase, ShoppingBag, Award, MessageCircle, Info, 
   ChevronRight, MapPin, TrendingUp, Zap, Mail, Phone, AlertCircle,
@@ -377,6 +378,9 @@ export default function Home() {
   const [selectedPath, setSelectedPath] = useState<typeof PATHS[0] | null>(null);
   const [showChatWidget, setShowChatWidget] = useState(false);
   const [chatMessage, setChatMessage] = useState('');
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
+  const [isLoadingChat, setIsLoadingChat] = useState(false);
   const [contactData, setContactData] = useState({
     name: '',
     email: '',
@@ -392,11 +396,35 @@ export default function Home() {
   const handleChatSend = async () => {
     if (chatMessage.trim()) {
       try {
-        // إرسال الرسالة عبر البريد الإلكتروني
+        setIsLoadingChat(true);
+        if (!conversationId) {
+          const newConversation = await chatService.createConversation({
+            user_name: 'زائر',
+            user_email: 'visitor@sharaka.com',
+            subject: 'رسالة من الدردشة الفورية',
+            status: 'open',
+          });
+          setConversationId(newConversation.id);
+          const newMessage = await chatService.addMessage({
+            conversation_id: newConversation.id,
+            sender: 'user',
+            content: chatMessage,
+          });
+          setChatMessages([newMessage]);
+        } else {
+          const newMessage = await chatService.addMessage({
+            conversation_id: conversationId,
+            sender: 'user',
+            content: chatMessage,
+          });
+          setChatMessages([...chatMessages, newMessage]);
+        }
         await sendEmailNotification('رسالة دردشة فورية', { message: chatMessage });
         setChatMessage('');
       } catch (error) {
         console.error('خطأ في إرسال الرسالة:', error);
+      } finally {
+        setIsLoadingChat(false);
       }
     }
   };

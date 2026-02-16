@@ -142,6 +142,7 @@ const COUNTRIES = [
   { code: 'QA', name: 'قطر', nameEn: 'Qatar', flag: '🇶🇦', region: 'gulf' },
   { code: 'BH', name: 'البحرين', nameEn: 'Bahrain', flag: '🇧🇭', region: 'gulf' },
   { code: 'OM', name: 'عمان', nameEn: 'Oman', flag: '🇴🇲', region: 'gulf' },
+  { code: 'YE', name: 'اليمن', nameEn: 'Yemen', flag: '🇾🇪', region: 'gulf' },
   // العالم العربي
   { code: 'EG', name: 'مصر', nameEn: 'Egypt', flag: '🇪🇬', region: 'arab' },
   { code: 'JO', name: 'الأردن', nameEn: 'Jordan', flag: '🇯🇴', region: 'arab' },

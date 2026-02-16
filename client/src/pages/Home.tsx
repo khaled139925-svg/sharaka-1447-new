@@ -508,8 +508,8 @@ export default function Home() {
         <section id="consultants" className="py-16 md:py-20 bg-secondary">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-              <h2 className="text-6xl font-bold text-primary mb-4">{t.consultants}</h2>
-              <p className="text-2xl text-foreground/70">{t.consultantsDesc}</p>
+              <h2 className="text-7xl md:text-8xl font-bold text-primary mb-4">{t.consultants}</h2>
+              <p className="text-3xl md:text-4xl text-foreground/70">{t.consultantsDesc}</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -520,9 +520,9 @@ export default function Home() {
                     alt={consultant.name} 
                     className="w-full h-48 object-cover rounded-lg mb-4 group-hover:scale-105 transition-transform duration-300"
                   />
-                  <h3 className="text-3xl font-bold text-primary mb-2">{isRTL ? consultant.name : consultant.nameEn}</h3>
-                  <p className="text-accent font-semibold text-lg mb-3">{isRTL ? consultant.specialty : consultant.specialtyEn}</p>
-                  <p className="text-foreground/70 text-lg mb-6">{isRTL ? consultant.bio : consultant.bioEn}</p>
+                  <h3 className="text-4xl md:text-5xl font-bold text-primary mb-2">{isRTL ? consultant.name : consultant.nameEn}</h3>
+                  <p className="text-accent font-semibold text-2xl md:text-3xl mb-3">{isRTL ? consultant.specialty : consultant.specialtyEn}</p>
+                  <p className="text-foreground/70 text-xl md:text-2xl mb-6">{isRTL ? consultant.bio : consultant.bioEn}</p>
                   <Button 
                     onClick={() => setSelectedConsultant(consultant)}
                     className="w-full btn-primary justify-center hover:shadow-lg transition-all duration-300"
@@ -561,8 +561,8 @@ export default function Home() {
         {/* Services Section */}
         <section id="services" className="py-16 md:py-20 container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-6xl font-bold text-primary mb-4">{t.services}</h2>
-            <p className="text-2xl text-foreground/70">{t.servicesDesc}</p>
+            <h2 className="text-7xl md:text-8xl font-bold text-primary mb-4">{t.services}</h2>
+            <p className="text-3xl md:text-4xl text-foreground/70">{t.servicesDesc}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
@@ -571,8 +571,8 @@ export default function Home() {
               return (
                 <div key={service.id} className="card p-8 group hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
                   <Icon className="w-12 h-12 text-accent mb-4 group-hover:scale-125 transition-transform duration-300" />
-                  <h3 className="text-2xl font-bold text-primary mb-3">{isRTL ? service.title : service.titleEn}</h3>
-                  <p className="text-lg text-foreground/70">{isRTL ? service.description : service.descriptionEn}</p>
+                  <h3 className="text-3xl md:text-4xl font-bold text-primary mb-3">{isRTL ? service.title : service.titleEn}</h3>
+                  <p className="text-xl md:text-2xl text-foreground/70">{isRTL ? service.description : service.descriptionEn}</p>
                 </div>
               );
             })}
@@ -580,10 +580,10 @@ export default function Home() {
 
           <div className="bg-blue-50 border-r-4 border-primary rounded-lg p-8 hover:shadow-lg transition-all duration-300">
             <div className="flex gap-4">
-              <AlertCircle className="text-primary flex-shrink-0" size={24} />
+              <AlertCircle className="text-primary flex-shrink-0" size={32} />
               <div>
-                <h4 className="text-2xl font-bold text-primary mb-2">{t.commitment}</h4>
-                <p className="text-lg text-foreground/80">{t.commitmentText}</p>
+                <h4 className="text-3xl md:text-4xl font-bold text-primary mb-2">{t.commitment}</h4>
+                <p className="text-xl md:text-2xl text-foreground/80">{t.commitmentText}</p>
               </div>
             </div>
           </div>
@@ -593,8 +593,8 @@ export default function Home() {
         <section id="marketplace" className="py-16 md:py-20 bg-secondary">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-              <h2 className="text-6xl font-bold text-primary mb-4">{t.marketplace}</h2>
-              <p className="text-2xl text-foreground/70">{t.marketplaceDesc}</p>
+              <h2 className="text-7xl md:text-8xl font-bold text-primary mb-4">{t.marketplace}</h2>
+              <p className="text-3xl md:text-4xl text-foreground/70">{t.marketplaceDesc}</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -607,15 +607,15 @@ export default function Home() {
                   />
                   <div className="flex items-start justify-between mb-4">
                     <div>
-                      <h3 className="text-xl font-bold text-primary">{isRTL ? store.name : store.nameEn}</h3>
-                      <p className="text-accent text-base font-semibold">{isRTL ? store.category : store.categoryEn}</p>
+                      <h3 className="text-2xl md:text-3xl font-bold text-primary">{isRTL ? store.name : store.nameEn}</h3>
+                      <p className="text-accent text-lg md:text-xl font-semibold">{isRTL ? store.category : store.categoryEn}</p>
                     </div>
                     <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded">
                       <span className="text-yellow-500">★</span>
-                      <span className="font-semibold text-sm text-primary">{store.rating}</span>
+                      <span className="font-semibold text-lg text-primary">{store.rating}</span>
                     </div>
                   </div>
-                  <p className="text-foreground/70 text-sm mb-4">{store.reviews} {isRTL ? 'تقييم' : 'reviews'}</p>
+                  <p className="text-foreground/70 text-lg md:text-xl mb-4">{store.reviews} {isRTL ? 'تقييم' : 'reviews'}</p>
                   <Button className="w-full btn-secondary justify-center hover:shadow-lg transition-all duration-300">
                     <ShoppingBag size={18} />
                     {t.enterStore}
@@ -629,8 +629,8 @@ export default function Home() {
         {/* Paths Section */}
         <section id="paths" className="py-16 md:py-20 container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-6xl font-bold text-primary mb-4">{t.paths}</h2>
-            <p className="text-2xl text-foreground/70">{t.pathsDesc}</p>
+            <h2 className="text-7xl md:text-8xl font-bold text-primary mb-4">{t.paths}</h2>
+            <p className="text-3xl md:text-4xl text-foreground/70">{t.pathsDesc}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -641,8 +641,8 @@ export default function Home() {
                 className="card p-8 group hover:shadow-2xl hover:-translate-y-3 transition-all duration-300 cursor-pointer"
               >
                 <div className="text-5xl mb-4 group-hover:scale-125 transition-transform duration-300">{path.icon}</div>
-                <h3 className="text-2xl font-bold text-primary mb-2">{isRTL ? path.title : path.titleEn}</h3>
-                <p className="text-foreground/70 text-lg mb-4">{isRTL ? path.desc : path.descEn}</p>
+                <h3 className="text-3xl md:text-4xl font-bold text-primary mb-2">{isRTL ? path.title : path.titleEn}</h3>
+                <p className="text-foreground/70 text-xl md:text-2xl mb-4">{isRTL ? path.desc : path.descEn}</p>
                 <ArrowRight className="text-accent group-hover:translate-x-2 transition-transform duration-300" size={20} />
               </div>
             ))}
@@ -653,8 +653,8 @@ export default function Home() {
               <div className="bg-card rounded-lg shadow-2xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom-4 duration-300">
                 <div className="flex justify-between items-center mb-6">
                   <div>
-                    <div className="text-5xl mb-2">{selectedPath.icon}</div>
-                    <h3 className="text-4xl font-bold text-primary">{isRTL ? selectedPath.title : selectedPath.titleEn}</h3>
+                    <div className="text-6xl md:text-7xl mb-2">{selectedPath.icon}</div>
+                    <h3 className="text-5xl md:text-6xl font-bold text-primary">{isRTL ? selectedPath.title : selectedPath.titleEn}</h3>
                   </div>
                   <button 
                     onClick={() => setSelectedPath(null)}
@@ -666,24 +666,24 @@ export default function Home() {
 
                 <div className="space-y-6">
                   <div>
-                    <h4 className="text-2xl font-bold text-primary mb-4">{isRTL ? 'الدورات المتاحة:' : 'Available Courses:'}</h4>
+                    <h4 className="text-3xl md:text-4xl font-bold text-primary mb-4">{isRTL ? 'الدورات المتاحة:' : 'Available Courses:'}</h4>
                     <div className="space-y-3">
                       {selectedPath.courses.map((course, idx) => (
                         <div key={idx} className="p-4 bg-secondary rounded-lg hover:shadow-md transition-all duration-300">
-                          <p className="font-semibold text-primary">{isRTL ? course.name : course.nameEn}</p>
-                          <p className="text-sm text-foreground/70">{isRTL ? 'المدة:' : 'Duration:'} {isRTL ? course.duration : course.durationEn}</p>
+                          <p className="font-semibold text-primary text-lg md:text-xl">{isRTL ? course.name : course.nameEn}</p>
+                          <p className="text-base md:text-lg text-foreground/70">{isRTL ? 'المدة:' : 'Duration:'} {isRTL ? course.duration : course.durationEn}</p>
                         </div>
                       ))}
                     </div>
                   </div>
 
                   <div>
-                    <h4 className="text-2xl font-bold text-primary mb-4">{isRTL ? 'الشهادات:' : 'Certificates:'}</h4>
+                    <h4 className="text-3xl md:text-4xl font-bold text-primary mb-4">{isRTL ? 'الشهادات:' : 'Certificates:'}</h4>
                     <div className="space-y-2">
                       {selectedPath.certificates.map((cert, idx) => (
                         <div key={idx} className="flex items-center gap-2 p-3 bg-secondary rounded-lg">
-                          <Award className="text-accent" size={20} />
-                          <span className="text-primary font-semibold">{isRTL ? cert : selectedPath.certificatesEn[idx]}</span>
+                          <Award className="text-accent" size={24} />
+                          <span className="text-primary font-semibold text-lg md:text-xl">{isRTL ? cert : selectedPath.certificatesEn[idx]}</span>
                         </div>
                       ))}
                     </div>
@@ -705,8 +705,8 @@ export default function Home() {
         <section id="points" className="py-16 md:py-20 bg-primary text-primary-foreground">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-              <h2 className="text-6xl font-bold mb-4">{t.points}</h2>
-              <p className="text-2xl opacity-90">{t.pointsDesc}</p>
+              <h2 className="text-7xl md:text-8xl font-bold mb-4">{t.points}</h2>
+              <p className="text-3xl md:text-4xl opacity-90">{t.pointsDesc}</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
@@ -718,9 +718,9 @@ export default function Home() {
                 const Icon = step.icon;
                 return (
                   <div key={idx} className="text-center hover:scale-105 transition-transform duration-300">
-                    <Icon className="w-12 h-12 mx-auto mb-4 opacity-80 hover:opacity-100 transition-opacity duration-300" />
-                    <h4 className="text-2xl font-bold mb-2">{step.title}</h4>
-                    <p className="text-lg opacity-80">{step.desc}</p>
+                    <Icon className="w-16 h-16 mx-auto mb-4 opacity-80 hover:opacity-100 transition-opacity duration-300" />
+                    <h4 className="text-3xl md:text-4xl font-bold mb-2">{step.title}</h4>
+                    <p className="text-xl md:text-2xl opacity-80">{step.desc}</p>
                   </div>
                 );
               })}
@@ -732,8 +732,8 @@ export default function Home() {
         <section id="contact" className="py-16 md:py-20 bg-secondary">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-              <h2 className="text-6xl font-bold text-primary mb-4">{t.contact}</h2>
-              <p className="text-2xl text-foreground/70">{t.contactDesc}</p>
+              <h2 className="text-7xl md:text-8xl font-bold text-primary mb-4">{t.contact}</h2>
+              <p className="text-3xl md:text-4xl text-foreground/70">{t.contactDesc}</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
@@ -745,9 +745,9 @@ export default function Home() {
                 const Icon = contact.icon;
                 return (
                   <div key={idx} className="card p-8 text-center hover:shadow-lg hover:-translate-y-2 transition-all duration-300">
-                    <Icon className="w-12 h-12 text-accent mx-auto mb-4 hover:scale-125 transition-transform duration-300" />
-                    <h4 className="text-xl font-bold text-primary mb-2">{contact.title}</h4>
-                    <p className="text-lg text-foreground/70">{contact.value}</p>
+                    <Icon className="w-16 h-16 text-accent mx-auto mb-4 hover:scale-125 transition-transform duration-300" />
+                    <h4 className="text-2xl md:text-3xl font-bold text-primary mb-2">{contact.title}</h4>
+                    <p className="text-xl md:text-2xl text-foreground/70">{contact.value}</p>
                   </div>
                 );
               })}
@@ -812,15 +812,15 @@ export default function Home() {
         {/* About Section */}
         <section id="about" className="py-16 md:py-20 container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-primary mb-4">{t.about}</h2>
+            <h2 className="text-6xl md:text-7xl font-bold text-primary mb-4">{t.about}</h2>
           </div>
 
           <div className="card max-w-3xl mx-auto p-8 hover:shadow-lg transition-all duration-300">
             <div className="flex gap-4 mb-4">
-              <Info className="w-8 h-8 text-accent flex-shrink-0" />
+              <Info className="w-12 h-12 text-accent flex-shrink-0" />
               <div>
-                <h3 className="text-2xl font-bold text-primary mb-4">{t.vision}</h3>
-                <p className="text-foreground/70 leading-relaxed">{t.visionText}</p>
+                <h3 className="text-3xl md:text-4xl font-bold text-primary mb-4">{t.vision}</h3>
+                <p className="text-lg md:text-xl text-foreground/70 leading-relaxed">{t.visionText}</p>
               </div>
             </div>
           </div>
@@ -832,38 +832,38 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
-              <h4 className="font-bold mb-4">{t.quickLinks}</h4>
-              <ul className="space-y-2 text-sm opacity-80">
+              <h4 className="font-bold mb-4 text-lg md:text-xl">{t.quickLinks}</h4>
+              <ul className="space-y-2 text-base md:text-lg opacity-80">
                 <li><a href="#consultants" className="hover:text-accent transition-colors duration-300">{t.consultants}</a></li>
                 <li><a href="#services" className="hover:text-accent transition-colors duration-300">{t.services}</a></li>
                 <li><a href="#marketplace" className="hover:text-accent transition-colors duration-300">{t.marketplace}</a></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-bold mb-4">{t.services}</h4>
-              <ul className="space-y-2 text-sm opacity-80">
+              <h4 className="font-bold mb-4 text-lg md:text-xl">{t.services}</h4>
+              <ul className="space-y-2 text-base md:text-lg opacity-80">
                 <li><a href="#" className="hover:text-accent transition-colors duration-300">{isRTL ? 'التعهيد' : 'Outsourcing'}</a></li>
                 <li><a href="#" className="hover:text-accent transition-colors duration-300">{t.consultants}</a></li>
                 <li><a href="#" className="hover:text-accent transition-colors duration-300">{t.points}</a></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-bold mb-4">{t.legal}</h4>
-              <ul className="space-y-2 text-sm opacity-80">
+              <h4 className="font-bold mb-4 text-lg md:text-xl">{t.legal}</h4>
+              <ul className="space-y-2 text-base md:text-lg opacity-80">
                 <li><a href="#" className="hover:text-accent transition-colors duration-300">{t.privacy}</a></li>
                 <li><a href="#" className="hover:text-accent transition-colors duration-300">{t.terms}</a></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-bold mb-4">{t.contact}</h4>
-              <ul className="space-y-2 text-sm opacity-80">
+              <h4 className="font-bold mb-4 text-lg md:text-xl">{t.contact}</h4>
+              <ul className="space-y-2 text-base md:text-lg opacity-80">
                 <li>{t.email}: {USER_EMAIL}</li>
                 <li>{t.phoneLabel}: +966 11 2345 6789</li>
               </ul>
             </div>
           </div>
 
-          <div className="border-t border-primary-foreground/20 pt-8 text-center text-sm opacity-80">
+          <div className="border-t border-primary-foreground/20 pt-8 text-center text-base md:text-lg opacity-80">
             <p>&copy; 2026 {isRTL ? 'منصة شراكة' : 'Sharaka Platform'}. {t.allRights}.</p>
           </div>
         </div>

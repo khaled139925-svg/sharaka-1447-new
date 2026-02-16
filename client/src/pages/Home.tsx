@@ -496,7 +496,7 @@ export default function Home() {
               const Icon = item.icon;
               return (
                 <div key={idx} className="card p-6 group hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer">
-                  <Icon className="w-8 h-8 text-accent mb-4 group-hover:scale-125 transition-transform duration-300" />
+                  <Icon className="w-6 h-6 text-accent mb-4 group-hover:scale-125 transition-transform duration-300" />
                   <h3 className="text-3xl font-bold text-primary mb-2">{item.title}</h3>
                   <p className="text-foreground/70 text-lg">{item.desc}</p>
                 </div>
@@ -571,7 +571,7 @@ export default function Home() {
               const Icon = service.icon;
               return (
                 <div key={service.id} className="card p-8 group hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
-                  <Icon className="w-8 h-8 text-accent mb-4 group-hover:scale-125 transition-transform duration-300" />
+                  <Icon className="w-6 h-6 text-accent mb-4 group-hover:scale-125 transition-transform duration-300" />
                   <h3 className="text-3xl md:text-4xl font-bold text-primary mb-3">{isRTL ? service.title : service.titleEn}</h3>
                   <p className="text-xl md:text-2xl text-foreground/70">{isRTL ? service.description : service.descriptionEn}</p>
                 </div>
@@ -604,7 +604,7 @@ export default function Home() {
                   <img 
                     src={store.image} 
                     alt={store.name} 
-                    className="w-full h-24 object-cover rounded-lg mb-4 group-hover:scale-110 transition-transform duration-300"
+                    className="w-full h-16 object-cover rounded-lg mb-4 group-hover:scale-110 transition-transform duration-300"
                   />
                   <div className="flex items-start justify-between mb-4">
                     <div>

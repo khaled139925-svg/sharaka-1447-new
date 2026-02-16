@@ -377,7 +377,12 @@ export default function Home() {
     <div className={`min-h-screen bg-background ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Header */}
       <header className="sticky top-0 z-50 bg-card shadow-md border-b border-border">
-        <div className="container mx-auto px-4 py-3 pb-8 md:pb-3 flex items-center justify-between relative">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between relative">
+          {/* Tagline - Below Country Selector */}
+          <div className="absolute right-4 bottom-0 translate-y-full pt-1">
+            <p className="text-xs font-semibold text-accent animate-pulse whitespace-nowrap">{t.tagline}</p>
+          </div>
+          <div className="pb-8 md:pb-0 flex items-center justify-between w-full">
           {/* Logo */}
           <div className="flex items-center gap-2">
             <img src={LOGO_URL} alt="Sharaka" className="h-16 w-auto object-contain hover:scale-110 transition-transform duration-300" />
@@ -389,10 +394,6 @@ export default function Home() {
 
           {/* Controls - Right side */}
           <div className="flex items-center gap-3 relative">
-            {/* Tagline - Below Country Selector */}
-            <div className="absolute right-0 -bottom-7">
-              <p className="text-xs font-semibold text-accent animate-pulse whitespace-nowrap">{t.tagline}</p>
-            </div>
             {/* Language Selector */}
             <div className="relative">
               <button
@@ -458,6 +459,7 @@ export default function Home() {
                 </div>
               )}
             </div>
+          </div>
           </div>
         </div>
       </header>

@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { 
@@ -65,6 +67,10 @@ const translations = {
     staffManagementDesc: 'إدارة متكاملة لموارد بشرية احترافية',
     projectManagement: 'إدارة المشاريع',
     projectManagementDesc: 'تخطيط وتنفيذ المشاريع بكفاءة عالية',
+    chatSupport: 'دعم فوري',
+    chatMessage: 'مرحبا! كيف يمكننا مساعدتك؟',
+    chatClose: 'إغلاق',
+    typeMessage: 'اكتب رسالتك...',
   },
   en: {
     selectCountry: 'Select Country',
@@ -120,6 +126,10 @@ const translations = {
     staffManagementDesc: 'Integrated professional human resources management',
     projectManagement: 'Project Management',
     projectManagementDesc: 'Planning and executing projects with high efficiency',
+    chatSupport: 'Live Support',
+    chatMessage: 'Hello! How can we help you?',
+    chatClose: 'Close',
+    typeMessage: 'Type your message...',
   }
 };
 
@@ -361,6 +371,8 @@ export default function Home() {
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [selectedConsultant, setSelectedConsultant] = useState<typeof CONSULTANTS[0] | null>(null);
   const [selectedPath, setSelectedPath] = useState<typeof PATHS[0] | null>(null);
+  const [showChatWidget, setShowChatWidget] = useState(false);
+  const [chatMessage, setChatMessage] = useState('');
   const [contactData, setContactData] = useState({
     name: '',
     email: '',
@@ -372,6 +384,13 @@ export default function Home() {
   const t = translations[language];
   const currentCountry = COUNTRIES.find(c => c.code === selectedCountry);
   const isRTL = language === 'ar';
+
+  const handleChatSend = () => {
+    if (chatMessage.trim()) {
+      sendEmailNotification('رسالة دردشة فورية', { message: chatMessage });
+      setChatMessage('');
+    }
+  };
 
   return (
     <div className={`min-h-screen bg-background ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
@@ -458,49 +477,18 @@ export default function Home() {
           </div>
           </div>
         </div>
-
       </header>
-      {/* End of Header */}
 
       <main>
         {/* Hero Section */}
-        <section className="py-16 md:py-24 bg-gradient-to-b from-secondary to-background">
-          <div className="container mx-auto px-4 text-center space-y-6">
-            <img src={LOGO_URL} alt="Sharaka" className="h-48 md:h-56 w-auto mx-auto animate-bounce" style={{ animationDuration: '3s' }} />
-            
-            <div>
-              <p className="text-5xl md:text-6xl font-bold text-accent animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
-                {t.platformName}
-              </p>
-            </div>
-
-            <p className="text-2xl md:text-3xl text-foreground/60 max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200 font-medium">
-              {isRTL ? 'منصة أعمال رقمية متكاملة تجمع الاستشارات، التعهيد وإدارة المشاريع، السوق الإلكتروني، ونظام نقاط وشريك نجاحك' : 'An integrated digital business platform that brings together consultations, outsourcing and project management, e-commerce marketplace, points system and your success partner'}
-            </p>
-            <Button className="btn-primary hover:shadow-lg hover:scale-105 transition-all duration-300 text-xl px-10 py-8">
+        <section className="py-20 md:py-32 bg-gradient-to-b from-secondary to-background">
+          <div className="container mx-auto px-4 text-center">
+            <img src={LOGO_URL} alt="Sharaka" className="h-32 md:h-40 mx-auto mb-8 hover:scale-110 transition-transform duration-300" />
+            <h1 className="text-7xl md:text-8xl font-bold text-accent mb-6">{t.platformName}</h1>
+            <p className="text-3xl md:text-4xl text-foreground/70 mb-8 leading-relaxed">{t.description}</p>
+            <Button className="btn-primary text-lg md:text-2xl px-8 md:px-12 py-4 md:py-6 hover:shadow-lg transition-all duration-300">
               {t.startNow}
             </Button>
-          </div>
-        </section>
-
-        {/* Main Sections Cards */}
-        <section id="sections" className="py-16 md:py-20 container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { icon: Users, title: isRTL ? 'المستشارون' : 'Consultants', desc: isRTL ? 'استشارات متخصصة' : 'Specialized consultations' },
-              { icon: Briefcase, title: isRTL ? 'الخدمات' : 'Services', desc: isRTL ? 'خدمات التعهيد' : 'Outsourcing services' },
-              { icon: ShoppingBag, title: isRTL ? 'السوق' : 'Marketplace', desc: isRTL ? 'متاجر إلكترونية' : 'E-commerce stores' },
-              { icon: Award, title: isRTL ? 'النقاط' : 'Points', desc: isRTL ? 'نظام الحوافز' : 'Rewards system' },
-            ].map((item, idx) => {
-              const Icon = item.icon;
-              return (
-                <div key={idx} className="card p-6 group hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer">
-                  <Icon className="w-12 h-12 text-accent mb-4 group-hover:scale-125 transition-transform duration-300" />
-                  <h3 className="text-3xl font-bold text-primary mb-2">{item.title}</h3>
-                  <p className="text-foreground/70 text-lg">{item.desc}</p>
-                </div>
-              );
-            })}
           </div>
         </section>
 
@@ -653,8 +641,8 @@ export default function Home() {
               <div className="bg-card rounded-lg shadow-2xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom-4 duration-300">
                 <div className="flex justify-between items-center mb-6">
                   <div>
-                    <div className="text-6xl md:text-7xl mb-2">{selectedPath.icon}</div>
-                    <h3 className="text-5xl md:text-6xl font-bold text-primary">{isRTL ? selectedPath.title : selectedPath.titleEn}</h3>
+                    <div className="text-5xl mb-2">{selectedPath.icon}</div>
+                    <h3 className="text-4xl font-bold text-primary">{isRTL ? selectedPath.title : selectedPath.titleEn}</h3>
                   </div>
                   <button 
                     onClick={() => setSelectedPath(null)}
@@ -826,6 +814,74 @@ export default function Home() {
           </div>
         </section>
       </main>
+
+      {/* Chat Widget */}
+      <div className="fixed bottom-6 right-6 z-40">
+        {showChatWidget ? (
+          <div className="bg-card rounded-lg shadow-2xl w-80 md:w-96 max-h-96 flex flex-col animate-in slide-in-from-bottom-4 duration-300">
+            {/* Chat Header */}
+            <div className="bg-primary text-primary-foreground p-4 rounded-t-lg flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <MessageCircle size={24} />
+                <div>
+                  <h3 className="text-lg md:text-xl font-bold">{t.chatSupport}</h3>
+                  <p className="text-xs md:text-sm opacity-80">نحن متاحون الآن</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowChatWidget(false)}
+                className="text-primary-foreground hover:opacity-80 transition-opacity duration-300"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Chat Body */}
+            <div className="flex-1 p-4 bg-secondary overflow-y-auto">
+              <div className="space-y-3">
+                {/* Bot Message */}
+                <div className="flex justify-start">
+                  <div className="bg-primary text-primary-foreground p-3 rounded-lg max-w-xs text-sm md:text-base">
+                    {t.chatMessage}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Chat Footer */}
+            <div className="border-t border-border p-3 bg-card rounded-b-lg">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder={t.typeMessage}
+                  value={chatMessage}
+                  onChange={(e) => setChatMessage(e.target.value)}
+                  className="flex-1 px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300"
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      handleChatSend();
+                    }
+                  }}
+                />
+                <button
+                  onClick={handleChatSend}
+                  className="bg-primary text-primary-foreground px-3 py-2 rounded-lg hover:opacity-90 transition-opacity duration-300"
+                >
+                  <ArrowRight size={18} />
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => setShowChatWidget(true)}
+            className="bg-primary text-primary-foreground rounded-full p-4 shadow-lg hover:shadow-2xl hover:scale-110 transition-all duration-300 animate-bounce"
+            title={t.chatSupport}
+          >
+            <MessageCircle size={28} />
+          </button>
+        )}
+      </div>
 
       {/* Footer */}
       <footer className="bg-primary text-primary-foreground py-12">

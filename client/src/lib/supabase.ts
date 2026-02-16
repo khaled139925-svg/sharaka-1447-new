@@ -3,7 +3,11 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.warn('تحذير: بيانات اعتماد Supabase غير موجودة');
+}
+
+export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
 
 // أنواع البيانات
 export interface Message {
@@ -31,18 +35,26 @@ export const chatService = {
   // إنشاء محادثة جديدة
   async createConversation(data: Omit<Conversation, 'id' | 'created_at' | 'updated_at'>) {
     try {
+      const conversationData = {
+        user_name: data.user_name || 'زائر',
+        user_email: data.user_email || 'visitor@sharaka.com',
+        user_phone: data.user_phone || null,
+        subject: data.subject || 'رسالة من الدردشة الفورية',
+        status: data.status || 'open',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
       const { data: conversation, error } = await supabase
         .from('conversations')
-        .insert([{
-          ...data,
-          status: 'open',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }])
+        .insert([conversationData])
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('خطأ Supabase في createConversation:', error);
+        throw new Error(`فشل إنشاء المحادثة: ${error.message}`);
+      }
       return conversation;
     } catch (error) {
       console.error('خطأ في إنشاء المحادثة:', error);
@@ -86,16 +98,24 @@ export const chatService = {
   // إضافة رسالة جديدة
   async addMessage(message: Message) {
     try {
+      const messageData = {
+        conversation_id: message.conversation_id,
+        sender: message.sender,
+        content: message.content,
+        created_at: new Date().toISOString(),
+        read: false,
+      };
+
       const { data, error } = await supabase
         .from('messages')
-        .insert([{
-          ...message,
-          created_at: new Date().toISOString(),
-        }])
+        .insert([messageData])
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('خطأ Supabase في addMessage:', error);
+        throw new Error(`فشل إضافة الرسالة: ${error.message}`);
+      }
       return data;
     } catch (error) {
       console.error('خطأ في إضافة الرسالة:', error);

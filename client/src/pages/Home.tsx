@@ -422,7 +422,9 @@ export default function Home() {
         await sendEmailNotification('رسالة دردشة فورية', { message: chatMessage });
         setChatMessage('');
       } catch (error) {
-        console.error('خطأ في إرسال الرسالة:', error);
+        const errorMessage = error instanceof Error ? error.message : 'خطأ غير معروف';
+        console.error('خطأ في إرسال الرسالة:', errorMessage);
+        alert(`خطأ: ${errorMessage}`);
       } finally {
         setIsLoadingChat(false);
       }

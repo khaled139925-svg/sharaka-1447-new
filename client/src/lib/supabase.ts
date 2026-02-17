@@ -3,14 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-console.log('Supabase Config:', {
-  url: supabaseUrl ? 'موجودة' : 'غير موجودة',
-  key: supabaseAnonKey ? 'موجودة' : 'غير موجودة',
-  urlValue: supabaseUrl || 'undefined',
-});
-
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('خطأ: بيانات اعتماد Supabase غير موجودة في البيئة');
+  console.warn('تحذير: بيانات اعتماد Supabase غير موجودة');
 }
 
 export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
@@ -41,8 +35,6 @@ export const chatService = {
   // إنشاء محادثة جديدة
   async createConversation(data: Omit<Conversation, 'id' | 'created_at' | 'updated_at'>) {
     try {
-      console.log('محاولة إنشاء محادثة:', data);
-      
       const conversationData = {
         user_name: data.user_name || 'زائر',
         user_email: data.user_email || 'visitor@sharaka.com',
@@ -63,8 +55,6 @@ export const chatService = {
         console.error('خطأ Supabase في createConversation:', error);
         throw new Error(`فشل إنشاء المحادثة: ${error.message}`);
       }
-      
-      console.log('تم إنشاء المحادثة بنجاح:', conversation);
       return conversation;
     } catch (error) {
       console.error('خطأ في إنشاء المحادثة:', error);
@@ -108,8 +98,6 @@ export const chatService = {
   // إضافة رسالة جديدة
   async addMessage(message: Message) {
     try {
-      console.log('محاولة إضافة رسالة:', message);
-      
       const messageData = {
         conversation_id: message.conversation_id,
         sender: message.sender,
@@ -128,8 +116,6 @@ export const chatService = {
         console.error('خطأ Supabase في addMessage:', error);
         throw new Error(`فشل إضافة الرسالة: ${error.message}`);
       }
-      
-      console.log('تم إضافة الرسالة بنجاح:', data);
       return data;
     } catch (error) {
       console.error('خطأ في إضافة الرسالة:', error);

@@ -3,137 +3,431 @@
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import emailjs from '@emailjs/browser';
-import { chatService } from '@/lib/chat-service';
-import { MessageCircle } from 'lucide-react';
+import { chatService } from '@/lib/supabase';
+import { 
+  Users, Briefcase, ShoppingBag, Award, MessageCircle, Info, 
+  ChevronRight, MapPin, TrendingUp, Zap, Mail, Phone, AlertCircle,
+  ExternalLink, ArrowRight, Globe
+} from 'lucide-react';
 
 const LOGO_URL = 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663333045223/nOdruZWcjEkuqgXg.jpeg';
 const USER_EMAIL = 'khaled139925@gmail.com';
 
+// نظام اللغات
 const translations = {
   ar: {
+    selectCountry: 'اختر الدولة',
+    selectLanguage: 'اللغة',
+    tagline: 'شريك نجاحك',
     platformName: 'منصة الخدمات المتكاملة',
     description: 'نربط الخبرات بالفرص، نوفر الاستشارات، سوق إلكتروني، خدمات تعهيد وعمل عن بعد',
+    startNow: 'ابدأ الآن',
+    consultants: 'المستشارون والاستشارات',
+    consultantsDesc: 'استشارات متخصصة من الخبراء',
+    bookAppointment: 'حجز موعد',
+    services: 'خدمات التعهيد والإدارة',
+    servicesDesc: 'حلول متكاملة لإدارة موارد شركتك',
+    marketplace: 'السوق الإلكتروني',
+    marketplaceDesc: 'منصة متكاملة تجمع أفضل المتاجر والعروض',
+    enterStore: 'دخول المتجر',
+    paths: 'المسارات المتاحة',
+    pathsDesc: 'اختر المسار المناسب لك',
+    points: 'نظام النقاط والرصيد المالي',
+    pointsDesc: 'نظام حوافز ذكي يحول عمليات الشراء إلى رصيد مالي حقيقي',
+    earnPoints: '1. اكسب النقاط',
+    earnPointsDesc: 'من كل عملية شراء',
+    collectBalance: '2. تجميع الرصيد',
+    collectBalanceDesc: 'رصيد مالي حقيقي',
+    useBalance: '3. استخدم الرصيد',
+    useBalanceDesc: 'في أي متجر',
+    contact: 'تواصل معنا',
+    contactDesc: 'نحن هنا للإجابة على جميع أسئلتك',
+    email: 'البريد الإلكتروني',
+    phoneLabel: 'الهاتف',
+    address: 'العنوان',
+    about: 'من نحن',
+    vision: 'رؤية منصة شراكة',
+    visionText: 'منصة شراكة هي منصة أعمال رقمية متكاملة تهدف إلى ربط الأفراد والشركات والمستشارين والمتاجر في بيئة واحدة آمنة وموثوقة.',
+    commitment: 'التزام منصة شراكة',
+    commitmentText: 'تلتزم منصة شراكة بدفع راتب شهر كامل من كل 12 شهر للموظف الذي يعمل لدى العميل ضمن عقد التعهيد.',
+    name: 'اسمك',
+    emailPlaceholder: 'بريدك الإلكتروني',
+    phoneInput: 'رقم الهاتف',
+    subject: 'الموضوع',
+    message: 'رسالتك',
+    send: 'إرسال الرسالة',
+    confirm: 'تأكيد',
+    cancel: 'إلغاء',
+    quickLinks: 'روابط سريعة',
+    legal: 'قانوني',
+    privacy: 'سياسة الخصوصية',
+    terms: 'الشروط والأحكام',
+    allRights: 'جميع الحقوق محفوظة',
+    hiring: 'التوظيف والاستقطاب',
+    hiringDesc: 'نساعدك في البحث عن أفضل الكوادر المتخصصة',
+    staffManagement: 'إدارة الموظفين',
+    staffManagementDesc: 'إدارة متكاملة لموارد بشرية احترافية',
+    projectManagement: 'إدارة المشاريع',
+    projectManagementDesc: 'تخطيط وتنفيذ المشاريع بكفاءة عالية',
     chatSupport: 'دعم فوري',
     chatMessage: 'مرحبا! كيف يمكننا مساعدتك؟',
-    chatClose: 'إغلاق',
     typeMessage: 'اكتب رسالتك...',
-    allRights: 'جميع الحقوق محفوظة',
   },
   en: {
+    selectCountry: 'Select Country',
+    selectLanguage: 'Language',
+    tagline: 'Your Success Partner',
     platformName: 'Integrated Services Platform',
     description: 'We connect expertise with opportunities, provide consultations, e-commerce marketplace, outsourcing services and remote work',
+    startNow: 'Start Now',
+    consultants: 'Consultants & Consultations',
+    consultantsDesc: 'Specialized consultations from experts',
+    bookAppointment: 'Book Appointment',
+    services: 'Outsourcing & Management Services',
+    servicesDesc: 'Integrated solutions for managing your company resources',
+    marketplace: 'E-Commerce Marketplace',
+    marketplaceDesc: 'An integrated platform that brings together the best stores and offers',
+    enterStore: 'Enter Store',
+    paths: 'Available Paths',
+    pathsDesc: 'Choose the right path for you',
+    points: 'Points & Financial Balance System',
+    pointsDesc: 'A smart rewards system that converts purchases into real financial credit',
+    earnPoints: '1. Earn Points',
+    earnPointsDesc: 'From every purchase',
+    collectBalance: '2. Collect Balance',
+    collectBalanceDesc: 'Real financial credit',
+    useBalance: '3. Use Balance',
+    useBalanceDesc: 'In any store',
+    contact: 'Contact Us',
+    contactDesc: 'We are here to answer all your questions',
+    email: 'Email',
+    phoneLabel: 'Phone',
+    address: 'Address',
+    about: 'About Us',
+    vision: 'Sharaka Platform Vision',
+    visionText: 'Sharaka is an integrated digital business platform that aims to connect individuals, companies, consultants and stores in one safe and reliable environment.',
+    commitment: 'Sharaka Platform Commitment',
+    commitmentText: 'Sharaka commits to paying one full month salary for every 12 months for employees working with clients under outsourcing contracts.',
+    name: 'Your Name',
+    emailPlaceholder: 'Your Email',
+    phoneInput: 'Phone Number',
+    subject: 'Subject',
+    message: 'Your Message',
+    send: 'Send Message',
+    confirm: 'Confirm',
+    cancel: 'Cancel',
+    quickLinks: 'Quick Links',
+    legal: 'Legal',
+    privacy: 'Privacy Policy',
+    terms: 'Terms & Conditions',
+    allRights: 'All rights reserved',
+    hiring: 'Recruitment & Hiring',
+    hiringDesc: 'We help you find the best specialized talent',
+    staffManagement: 'Staff Management',
+    staffManagementDesc: 'Integrated professional human resources management',
+    projectManagement: 'Project Management',
+    projectManagementDesc: 'Planning and executing projects with high efficiency',
     chatSupport: 'Live Support',
     chatMessage: 'Hello! How can we help you?',
-    chatClose: 'Close',
     typeMessage: 'Type your message...',
-    allRights: 'All rights reserved',
   }
 };
 
+// قائمة الدول المحدثة
+const COUNTRIES = [
+  // دول الخليج
+  { code: 'SA', name: 'السعودية', nameEn: 'Saudi Arabia', flag: '🇸🇦', region: 'gulf' },
+  { code: 'AE', name: 'الإمارات', nameEn: 'UAE', flag: '🇦🇪', region: 'gulf' },
+  { code: 'KW', name: 'الكويت', nameEn: 'Kuwait', flag: '🇰🇼', region: 'gulf' },
+  { code: 'QA', name: 'قطر', nameEn: 'Qatar', flag: '🇶🇦', region: 'gulf' },
+  { code: 'BH', name: 'البحرين', nameEn: 'Bahrain', flag: '🇧🇭', region: 'gulf' },
+  { code: 'OM', name: 'عمان', nameEn: 'Oman', flag: '🇴🇲', region: 'gulf' },
+  { code: 'YE', name: 'اليمن', nameEn: 'Yemen', flag: '🇾🇪', region: 'gulf' },
+  // العالم العربي
+  { code: 'EG', name: 'مصر', nameEn: 'Egypt', flag: '🇪🇬', region: 'arab' },
+  { code: 'JO', name: 'الأردن', nameEn: 'Jordan', flag: '🇯🇴', region: 'arab' },
+  { code: 'LB', name: 'لبنان', nameEn: 'Lebanon', flag: '🇱🇧', region: 'arab' },
+  { code: 'SY', name: 'سوريا', nameEn: 'Syria', flag: '🇸🇾', region: 'arab' },
+  { code: 'IQ', name: 'العراق', nameEn: 'Iraq', flag: '🇮🇶', region: 'arab' },
+  { code: 'MA', name: 'المغرب', nameEn: 'Morocco', flag: '🇲🇦', region: 'arab' },
+  { code: 'TN', name: 'تونس', nameEn: 'Tunisia', flag: '🇹🇳', region: 'arab' },
+  { code: 'DZ', name: 'الجزائر', nameEn: 'Algeria', flag: '🇩🇿', region: 'arab' },
+  { code: 'SD', name: 'السودان', nameEn: 'Sudan', flag: '🇸🇩', region: 'arab' },
+  // باكستان
+  { code: 'PK', name: 'باكستان', nameEn: 'Pakistan', flag: '🇵🇰', region: 'asia' },
+  // أوروبا
+  { code: 'GB', name: 'بريطانيا', nameEn: 'United Kingdom', flag: '🇬🇧', region: 'europe' },
+  { code: 'DE', name: 'ألمانيا', nameEn: 'Germany', flag: '🇩🇪', region: 'europe' },
+  { code: 'FR', name: 'فرنسا', nameEn: 'France', flag: '🇫🇷', region: 'europe' },
+  { code: 'IT', name: 'إيطاليا', nameEn: 'Italy', flag: '🇮🇹', region: 'europe' },
+  { code: 'ES', name: 'إسبانيا', nameEn: 'Spain', flag: '🇪🇸', region: 'europe' },
+  { code: 'NL', name: 'هولندا', nameEn: 'Netherlands', flag: '🇳🇱', region: 'europe' },
+  { code: 'SE', name: 'السويد', nameEn: 'Sweden', flag: '🇸🇪', region: 'europe' },
+  { code: 'CH', name: 'سويسرا', nameEn: 'Switzerland', flag: '🇨🇭', region: 'europe' },
+  // أمريكا
+  { code: 'US', name: 'أمريكا', nameEn: 'USA', flag: '🇺🇸', region: 'americas' },
+  { code: 'CA', name: 'كندا', nameEn: 'Canada', flag: '🇨🇦', region: 'americas' },
+  { code: 'MX', name: 'المكسيك', nameEn: 'Mexico', flag: '🇲🇽', region: 'americas' },
+  { code: 'BR', name: 'البرازيل', nameEn: 'Brazil', flag: '🇧🇷', region: 'americas' },
+];
+
+// صور أشخاص وهميين (من Unsplash)
+const CONSULTANTS = [
+  {
+    id: 1,
+    name: 'د. أحمد محمد',
+    nameEn: 'Dr. Ahmed Mohammed',
+    specialty: 'استشارات إدارة الأعمال',
+    specialtyEn: 'Business Management Consultations',
+    bio: 'خبرة 15 سنة في إدارة المشاريع والشركات',
+    bioEn: '15 years of experience in project and company management',
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop',
+    zohoDuration: 60,
+  },
+  {
+    id: 2,
+    name: 'أ. فاطمة علي',
+    nameEn: 'Fatima Ali',
+    specialty: 'التسويق الرقمي',
+    specialtyEn: 'Digital Marketing',
+    bio: 'متخصصة في التسويق الإلكتروني والعلامات التجارية',
+    bioEn: 'Specialized in e-marketing and branding',
+    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop',
+    zohoDuration: 45,
+  },
+  {
+    id: 3,
+    name: 'م. سارة حسن',
+    nameEn: 'Sarah Hassan',
+    specialty: 'تطوير البرمجيات',
+    specialtyEn: 'Software Development',
+    bio: 'مهندسة برمجيات بخبرة 10 سنوات في التطوير',
+    bioEn: '10 years of software engineering experience',
+    image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop',
+    zohoDuration: 90,
+  },
+];
+
+const SERVICES = [
+  {
+    id: 1,
+    title: 'التوظيف والاستقطاب',
+    titleEn: 'Recruitment & Hiring',
+    description: 'نساعدك في البحث عن أفضل الكوادر المتخصصة',
+    descriptionEn: 'We help you find the best specialized talent',
+    icon: Users,
+  },
+  {
+    id: 2,
+    title: 'إدارة الموظفين',
+    titleEn: 'Staff Management',
+    description: 'إدارة متكاملة لموارد بشرية احترافية',
+    descriptionEn: 'Integrated professional human resources management',
+    icon: Briefcase,
+  },
+  {
+    id: 3,
+    title: 'إدارة المشاريع',
+    titleEn: 'Project Management',
+    description: 'تخطيط وتنفيذ المشاريع بكفاءة عالية',
+    descriptionEn: 'Planning and executing projects with high efficiency',
+    icon: Award,
+  },
+];
+
+const STORES = [
+  { id: 1, name: 'متجر التكنولوجيا', nameEn: 'Tech Store', category: 'إلكترونيات', categoryEn: 'Electronics', rating: 4.8, reviews: 234, image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop' },
+  { id: 2, name: 'متجر الملابس', nameEn: 'Fashion Store', category: 'ملابس', categoryEn: 'Clothing', rating: 4.6, reviews: 189, image: 'https://images.unsplash.com/photo-1441984904556-0ac8ce9fdf67?w=400&h=300&fit=crop' },
+  { id: 3, name: 'متجر الديكور', nameEn: 'Decor Store', category: 'ديكور', categoryEn: 'Decor', rating: 4.7, reviews: 156, image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=300&fit=crop' },
+  { id: 4, name: 'متجر الكتب', nameEn: 'Book Store', category: 'كتب', categoryEn: 'Books', rating: 4.9, reviews: 312, image: 'https://images.unsplash.com/photo-1507842217343-583f20270319?w=400&h=300&fit=crop' },
+];
+
+const PATHS = [
+  { 
+    id: 'student', 
+    title: 'المسار الطلابي', 
+    titleEn: 'Student Path',
+    icon: '📚', 
+    desc: 'دورات وتحضير للاختبارات',
+    descEn: 'Courses and exam preparation',
+    courses: [
+      { name: 'دورة الرياضيات المتقدمة', nameEn: 'Advanced Mathematics Course', duration: '12 أسبوع', durationEn: '12 weeks' },
+      { name: 'دورة اللغة الإنجليزية', nameEn: 'English Language Course', duration: '10 أسابيع', durationEn: '10 weeks' },
+      { name: 'دورة العلوم', nameEn: 'Science Course', duration: '14 أسبوع', durationEn: '14 weeks' },
+    ],
+    certificates: ['شهادة الكفاءة', 'شهادة التفوق'],
+    certificatesEn: ['Competency Certificate', 'Excellence Certificate'],
+  },
+  { 
+    id: 'employee', 
+    title: 'مسار الموظف', 
+    titleEn: 'Employee Path',
+    icon: '👔', 
+    desc: 'تطوير مهني وفرص عمل',
+    descEn: 'Professional development and job opportunities',
+    courses: [
+      { name: 'دورة القيادة والإدارة', nameEn: 'Leadership & Management Course', duration: '8 أسابيع', durationEn: '8 weeks' },
+      { name: 'دورة مهارات التواصل', nameEn: 'Communication Skills Course', duration: '6 أسابيع', durationEn: '6 weeks' },
+      { name: 'دورة التطوير الذاتي', nameEn: 'Self-Development Course', duration: '10 أسابيع', durationEn: '10 weeks' },
+    ],
+    certificates: ['شهادة الموظف المتميز', 'شهادة القيادة'],
+    certificatesEn: ['Outstanding Employee Certificate', 'Leadership Certificate'],
+  },
+  { 
+    id: 'trader', 
+    title: 'مسار التاجر', 
+    titleEn: 'Trader Path',
+    icon: '🛍️', 
+    desc: 'دعم المتاجر الإلكترونية',
+    descEn: 'E-commerce store support',
+    courses: [
+      { name: 'دورة التجارة الإلكترونية', nameEn: 'E-Commerce Course', duration: '12 أسبوع', durationEn: '12 weeks' },
+      { name: 'دورة التسويق الرقمي', nameEn: 'Digital Marketing Course', duration: '10 أسابيع', durationEn: '10 weeks' },
+      { name: 'دورة إدارة المبيعات', nameEn: 'Sales Management Course', duration: '8 أسابيع', durationEn: '8 weeks' },
+    ],
+    certificates: ['شهادة التاجر الإلكتروني', 'شهادة المبيعات'],
+    certificatesEn: ['E-Commerce Trader Certificate', 'Sales Certificate'],
+  },
+  { 
+    id: 'entrepreneur', 
+    title: 'رائد الأعمال', 
+    titleEn: 'Entrepreneur',
+    icon: '🚀', 
+    desc: 'استشارات وتمويل',
+    descEn: 'Consultations and financing',
+    courses: [
+      { name: 'دورة بدء المشروع', nameEn: 'Project Startup Course', duration: '16 أسبوع', durationEn: '16 weeks' },
+      { name: 'دورة التمويل والاستثمار', nameEn: 'Financing & Investment Course', duration: '12 أسبوع', durationEn: '12 weeks' },
+      { name: 'دورة التخطيط الاستراتيجي', nameEn: 'Strategic Planning Course', duration: '14 أسبوع', durationEn: '14 weeks' },
+    ],
+    certificates: ['شهادة رائد الأعمال', 'شهادة الابتكار'],
+    certificatesEn: ['Entrepreneur Certificate', 'Innovation Certificate'],
+  },
+  { 
+    id: 'jobseeker', 
+    title: 'الباحث عن عمل', 
+    titleEn: 'Job Seeker',
+    icon: '🎯', 
+    desc: 'فرص عمل وتطوير مهارات',
+    descEn: 'Job opportunities and skill development',
+    courses: [
+      { name: 'دورة إعداد السيرة الذاتية', nameEn: 'CV Preparation Course', duration: '4 أسابيع', durationEn: '4 weeks' },
+      { name: 'دورة مهارات المقابلة', nameEn: 'Interview Skills Course', duration: '6 أسابيع', durationEn: '6 weeks' },
+      { name: 'دورة تطوير المهارات المهنية', nameEn: 'Professional Skills Development', duration: '10 أسابيع', durationEn: '10 weeks' },
+    ],
+    certificates: ['شهادة الكفاءة المهنية', 'شهادة النجاح'],
+    certificatesEn: ['Professional Competency Certificate', 'Success Certificate'],
+  },
+  { 
+    id: 'researcher', 
+    title: 'الباحث', 
+    titleEn: 'Researcher',
+    icon: '🔬', 
+    desc: 'موارد بحثية وتعاون',
+    descEn: 'Research resources and collaboration',
+    courses: [
+      { name: 'دورة البحث العلمي', nameEn: 'Scientific Research Course', duration: '14 أسبوع', durationEn: '14 weeks' },
+      { name: 'دورة كتابة الأوراق البحثية', nameEn: 'Research Paper Writing Course', duration: '10 أسابيع', durationEn: '10 weeks' },
+      { name: 'دورة المنهجية البحثية', nameEn: 'Research Methodology Course', duration: '12 أسبوع', durationEn: '12 weeks' },
+    ],
+    certificates: ['شهادة الباحث المتقدم', 'شهادة النشر العلمي'],
+    certificatesEn: ['Advanced Researcher Certificate', 'Scientific Publication Certificate'],
+  },
+];
+
 const sendEmailNotification = async (subject: string, data: any) => {
   try {
-    console.log('محاولة إرسال البريد الإلكتروني...', {
-      service: import.meta.env.VITE_EMAILJS_SERVICE_ID,
-      template: import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
-    });
-
     const templateParams = {
       to_email: USER_EMAIL,
       subject: subject,
-      message: data.message || JSON.stringify(data),
+      message: JSON.stringify(data, null, 2),
       timestamp: new Date().toLocaleString('ar-SA'),
     };
 
     const response = await emailjs.send(
       import.meta.env.VITE_EMAILJS_SERVICE_ID,
       import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
-      templateParams
+      templateParams,
+      import.meta.env.VITE_EMAILJS_PUBLIC_KEY
     );
 
     if (response.status === 200) {
-      console.log(`✅ تم إرسال البريد بنجاح إلى ${USER_EMAIL}`);
+      alert(`✅ تم إرسال البيانات بنجاح إلى ${USER_EMAIL}`);
       return true;
     } else {
-      console.error('❌ فشل إرسال البريد');
+      alert('❌ حدث خطأ في الإرسال. يرجى المحاولة لاحقاً');
       return false;
     }
   } catch (error) {
-    console.error('خطأ في إرسال البريد:', error);
+    console.error('خطأ في الإرسال:', error);
+    alert('❌ خطأ في الاتصال. تأكد من اتصالك بالإنترنت');
     return false;
   }
 };
 
 export default function Home() {
-  const [language, setLanguage] = useState<'ar' | 'en'>('ar');
-  const [showChatWidget, setShowChatWidget] = useState(false);
-  const [chatMessage, setChatMessage] = useState('');
-  const [chatMessages, setChatMessages] = useState<any[]>([]);
-  const [isLoadingChat, setIsLoadingChat] = useState(false);
-  const [conversationId, setConversationId] = useState<string | null>(null);
-
-  const t = translations[language];
-  const isRTL = language === 'ar';
-
-  // تهيئة EmailJS
   useEffect(() => {
-    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
-    console.log('تهيئة EmailJS...', { publicKey: publicKey ? 'موجود' : 'غير موجود' });
-    if (publicKey) {
-      emailjs.init(publicKey);
-      console.log('✅ تم تهيئة EmailJS بنجاح');
-    } else {
-      console.error('❌ مفتاح EmailJS العام غير موجود');
-    }
+    emailjs.init(import.meta.env.VITE_EMAILJS_PUBLIC_KEY);
   }, []);
 
-  // تحميل الرسائل السابقة عند فتح الدردشة
-  useEffect(() => {
-    if (showChatWidget) {
-      const currentSession = chatService.getCurrentSession();
-      if (currentSession) {
-        setChatMessages(currentSession.messages);
-        setConversationId(currentSession.id);
-      }
-    }
-  }, [showChatWidget]);
+  const [language, setLanguage] = useState<'ar' | 'en'>('ar');
+  const [selectedCountry, setSelectedCountry] = useState('SA');
+  const [showCountryMenu, setShowCountryMenu] = useState(false);
+  const [showLanguageMenu, setShowLanguageMenu] = useState(false);
+  const [selectedConsultant, setSelectedConsultant] = useState<typeof CONSULTANTS[0] | null>(null);
+  const [selectedPath, setSelectedPath] = useState<typeof PATHS[0] | null>(null);
+  const [showChatWidget, setShowChatWidget] = useState(false);
+  const [chatMessage, setChatMessage] = useState('');
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
+  const [isLoadingChat, setIsLoadingChat] = useState(false);
+  const [contactData, setContactData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    subject: '',
+    message: '',
+  });
+
+  const t = translations[language];
+  const currentCountry = COUNTRIES.find(c => c.code === selectedCountry);
+  const isRTL = language === 'ar';
 
   const handleChatSend = async () => {
-    if (!chatMessage.trim()) return;
-
-    try {
-      setIsLoadingChat(true);
-
-      // إذا لم تكن هناك جلسة، أنشئ واحدة جديدة
-      if (!conversationId) {
-        const newSession = chatService.createSession({
-          userName: 'زائر',
-          userEmail: 'visitor@sharaka.com',
-          subject: 'رسالة من الدردشة الفورية',
-        });
-        setConversationId(newSession.id);
+    if (chatMessage.trim()) {
+      try {
+        setIsLoadingChat(true);
+        if (!conversationId) {
+          const newConversation = await chatService.createConversation({
+            user_name: 'زائر',
+            user_email: 'visitor@sharaka.com',
+            subject: 'رسالة من الدردشة الفورية',
+            status: 'open',
+          });
+          setConversationId(newConversation.id);
+          const newMessage = await chatService.addMessage({
+            conversation_id: newConversation.id,
+            sender: 'user',
+            content: chatMessage,
+          });
+          setChatMessages([newMessage]);
+        } else {
+          const newMessage = await chatService.addMessage({
+            conversation_id: conversationId,
+            sender: 'user',
+            content: chatMessage,
+          });
+          setChatMessages([...chatMessages, newMessage]);
+        }
+        await sendEmailNotification('رسالة دردشة فورية', { message: chatMessage });
+        setChatMessage('');
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'خطأ غير معروف';
+        console.error('خطأ في إرسال الرسالة:', errorMessage);
+        alert(`خطأ: ${errorMessage}`);
+      } finally {
+        setIsLoadingChat(false);
       }
-
-      // أضف الرسالة إلى الجلسة المحلية
-      const newMessage = chatService.addMessage(chatMessage, 'user');
-      setChatMessages(prev => [...prev, newMessage]);
-
-      // أرسل البريد الإلكتروني
-      const emailSent = await sendEmailNotification('رسالة دردشة فورية', {
-        message: chatMessage,
-        timestamp: new Date().toLocaleString('ar-SA')
-      });
-
-      if (!emailSent) {
-        console.warn('⚠️ لم يتم إرسال البريد الإلكتروني');
-      }
-
-      setChatMessage('');
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'خطأ غير معروف';
-      console.error('خطأ في إرسال الرسالة:', errorMessage);
-      alert(`خطأ: ${errorMessage}`);
-    } finally {
-      setIsLoadingChat(false);
     }
   };
 
@@ -143,115 +437,560 @@ export default function Home() {
       <header className="sticky top-0 z-50 bg-card shadow-md border-b border-border">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center justify-between w-full">
-            {/* Logo */}
-            <div className="flex items-center gap-2">
-              <img src={LOGO_URL} alt="Sharaka" className="h-16 w-auto object-contain" />
-            </div>
-
-            {/* Controls */}
-            <div className="flex items-center gap-3">
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setLanguage('ar')}
-                  className={language === 'ar' ? 'bg-accent text-accent-foreground' : ''}
-                >
-                  العربية
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setLanguage('en')}
-                  className={language === 'en' ? 'bg-accent text-accent-foreground' : ''}
-                >
-                  English
-                </Button>
-              </div>
+          {/* Logo */}
+          <div className="flex items-center gap-2">
+            <img src={LOGO_URL} alt="Sharaka" className="h-16 w-auto object-contain hover:scale-110 transition-transform duration-300" />
+            <div className="hidden md:block">
+              <p className="text-sm font-bold text-accent">منصة الخدمات المتكاملة</p>
+              <p className="text-xs text-foreground/60">Integrated Services Platform</p>
             </div>
           </div>
-        </div>
-      </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-12">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-foreground mb-4">{t.platformName}</h1>
-          <p className="text-lg text-foreground/70">{t.description}</p>
-        </div>
-      </main>
+          {/* Controls - Right side */}
+          <div className="flex items-center gap-3 relative">
+            {/* Language Selector */}
+            <div className="relative">
+              <button
+                onClick={() => setShowLanguageMenu(!showLanguageMenu)}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary border border-border hover:bg-secondary/80 transition-all duration-300 hover:shadow-md"
+              >
+                <Globe size={16} className="text-primary" />
+                <span className="text-sm font-semibold text-primary">{language === 'ar' ? 'العربية' : 'English'}</span>
+                <ChevronRight size={14} className={`transition-transform duration-300 ${showLanguageMenu ? 'rotate-90' : ''}`} />
+              </button>
 
-      {/* Chat Widget */}
-      {showChatWidget && (
-        <div className="fixed bottom-20 right-4 w-80 bg-card border border-border rounded-lg shadow-lg z-40">
-          <div className="bg-primary text-primary-foreground p-4 rounded-t-lg flex justify-between items-center">
-            <h3 className="font-bold">{t.chatSupport}</h3>
-            <button
-              onClick={() => setShowChatWidget(false)}
-              className="text-primary-foreground hover:opacity-80"
-            >
-              ✕
-            </button>
-          </div>
-
-          <div className="h-96 overflow-y-auto p-4 bg-background">
-            {chatMessages.length === 0 ? (
-              <p className="text-center text-foreground/50 py-8">{t.chatMessage}</p>
-            ) : (
-              <div className="space-y-2">
-                {chatMessages.map(msg => (
-                  <div
-                    key={msg.id}
-                    className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`max-w-xs px-3 py-2 rounded-lg ${
-                        msg.sender === 'user'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted text-foreground'
+              {showLanguageMenu && (
+                <div className="absolute top-full right-0 mt-2 bg-card rounded-lg shadow-lg border border-border z-50 min-w-[140px] animate-in fade-in slide-in-from-top-2 duration-300">
+                  {[
+                    { code: 'ar', label: 'العربية' },
+                    { code: 'en', label: 'English' },
+                  ].map((lang: any) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => {
+                        setLanguage(lang.code);
+                        setShowLanguageMenu(false);
+                      }}
+                      className={`w-full px-4 py-2 text-right hover:bg-secondary transition-all duration-300 ${
+                        language === lang.code ? 'bg-secondary text-primary font-semibold' : ''
                       }`}
                     >
-                      <p className="text-sm">{msg.content}</p>
+                      {lang.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Country Selector */}
+            <div className="relative">
+              <button
+                onClick={() => setShowCountryMenu(!showCountryMenu)}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary border border-border hover:bg-secondary/80 transition-all duration-300 hover:shadow-md"
+              >
+                <span className="text-lg">{currentCountry?.flag}</span>
+                <span className="text-sm font-semibold text-primary hidden sm:inline">{isRTL ? currentCountry?.name : currentCountry?.nameEn}</span>
+                <ChevronRight size={14} className={`transition-transform duration-300 ${showCountryMenu ? 'rotate-90' : ''}`} />
+              </button>
+
+              {showCountryMenu && (
+                <div className="absolute top-full right-0 mt-2 bg-card rounded-lg shadow-lg border border-border z-50 max-h-96 overflow-y-auto min-w-[200px] animate-in fade-in slide-in-from-top-2 duration-300">
+                  {COUNTRIES.map(country => (
+                    <button
+                      key={country.code}
+                      onClick={() => {
+                        setSelectedCountry(country.code);
+                        setShowCountryMenu(false);
+                      }}
+                      className={`w-full px-4 py-2 text-right flex items-center gap-2 hover:bg-secondary transition-all duration-300 ${
+                        selectedCountry === country.code ? 'bg-secondary text-primary font-semibold' : ''
+                      }`}
+                    >
+                      <span className="text-lg">{country.flag}</span>
+                      <span>{isRTL ? country.name : country.nameEn}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+          </div>
+        </div>
+
+      </header>
+      {/* End of Header */}
+
+      <main>
+        {/* Hero Section */}
+        <section className="py-16 md:py-24 bg-gradient-to-b from-secondary to-background">
+          <div className="container mx-auto px-4 text-center space-y-6">
+            <img src={LOGO_URL} alt="Sharaka" className="h-48 md:h-56 w-auto mx-auto animate-bounce" style={{ animationDuration: '3s' }} />
+            
+            <div>
+              <p className="text-5xl md:text-6xl font-bold text-accent animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
+                {t.platformName}
+              </p>
+            </div>
+
+            <p className="text-2xl md:text-3xl text-foreground/60 max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200 font-medium">
+              {isRTL ? 'منصة أعمال رقمية متكاملة تجمع الاستشارات، التعهيد وإدارة المشاريع، السوق الإلكتروني، ونظام نقاط وشريك نجاحك' : 'An integrated digital business platform that brings together consultations, outsourcing and project management, e-commerce marketplace, points system and your success partner'}
+            </p>
+            <Button className="btn-primary hover:shadow-lg hover:scale-105 transition-all duration-300 text-xl px-10 py-8">
+              {t.startNow}
+            </Button>
+          </div>
+        </section>
+
+        {/* Main Sections Cards */}
+        <section id="sections" className="py-16 md:py-20 container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { icon: Users, title: isRTL ? 'المستشارون' : 'Consultants', desc: isRTL ? 'استشارات متخصصة' : 'Specialized consultations' },
+              { icon: Briefcase, title: isRTL ? 'الخدمات' : 'Services', desc: isRTL ? 'خدمات التعهيد' : 'Outsourcing services' },
+              { icon: ShoppingBag, title: isRTL ? 'السوق' : 'Marketplace', desc: isRTL ? 'متاجر إلكترونية' : 'E-commerce stores' },
+              { icon: Award, title: isRTL ? 'النقاط' : 'Points', desc: isRTL ? 'نظام الحوافز' : 'Rewards system' },
+            ].map((item, idx) => {
+              const Icon = item.icon;
+              return (
+                <div key={idx} className="card p-6 group hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer">
+                  <Icon className="w-6 h-6 text-accent mb-4 group-hover:scale-125 transition-transform duration-300" />
+                  <h3 className="text-3xl font-bold text-primary mb-2">{item.title}</h3>
+                  <p className="text-foreground/70 text-lg">{item.desc}</p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Consultants Section */}
+        <section id="consultants" className="py-16 md:py-20 bg-secondary">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-7xl md:text-8xl font-bold text-primary mb-4">{t.consultants}</h2>
+              <p className="text-3xl md:text-4xl text-foreground/70">{t.consultantsDesc}</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {CONSULTANTS.map(consultant => (
+                <div key={consultant.id} className="card p-8 group hover:shadow-2xl hover:-translate-y-3 transition-all duration-300">
+                  <img 
+                    src={consultant.image} 
+                    alt={consultant.name} 
+                    className="w-full h-48 object-cover rounded-lg mb-4 group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <h3 className="text-4xl md:text-5xl font-bold text-primary mb-2">{isRTL ? consultant.name : consultant.nameEn}</h3>
+                  <p className="text-accent font-semibold text-2xl md:text-3xl mb-3">{isRTL ? consultant.specialty : consultant.specialtyEn}</p>
+                  <p className="text-foreground/70 text-xl md:text-2xl mb-6">{isRTL ? consultant.bio : consultant.bioEn}</p>
+                  <Button 
+                    onClick={() => setSelectedConsultant(consultant)}
+                    className="w-full btn-primary justify-center hover:shadow-lg transition-all duration-300"
+                  >
+                    <ArrowRight size={18} className={isRTL ? 'ml-2' : 'mr-2'} />
+                    {t.bookAppointment}
+                  </Button>
+                </div>
+              ))}
+            </div>
+
+            {selectedConsultant && (
+              <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+                <div className="bg-card rounded-lg shadow-2xl max-w-md w-full p-8 animate-in slide-in-from-bottom-4 duration-300">
+                  <h3 className="text-2xl font-bold text-primary mb-4">{t.bookAppointment} - {isRTL ? selectedConsultant.name : selectedConsultant.nameEn}</h3>
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    sendEmailNotification('حجز موعد جديد', { consultant: selectedConsultant.name, country: currentCountry?.name });
+                    setSelectedConsultant(null);
+                  }} className="space-y-4">
+                    <input type="text" placeholder={t.name} className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300" required />
+                    <input type="email" placeholder={t.emailPlaceholder} className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300" required />
+                    <input type="tel" placeholder={t.phoneInput} className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300" required />
+                    <textarea placeholder={t.message} rows={3} className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300" />
+                    <div className="flex gap-4">
+                      <Button type="submit" className="flex-1 btn-primary justify-center hover:shadow-lg transition-all duration-300">{t.confirm}</Button>
+                      <Button onClick={() => setSelectedConsultant(null)} className="flex-1 btn-outline">{t.cancel}</Button>
                     </div>
-                  </div>
-                ))}
+                  </form>
+                </div>
               </div>
             )}
           </div>
+        </section>
 
-          <div className="border-t border-border p-4 flex gap-2">
-            <input
-              type="text"
-              value={chatMessage}
-              onChange={e => setChatMessage(e.target.value)}
-              onKeyPress={e => e.key === 'Enter' && handleChatSend()}
-              placeholder={t.typeMessage}
-              className="flex-1 px-3 py-2 border border-border rounded-lg bg-background text-foreground"
-              disabled={isLoadingChat}
-            />
-            <Button
-              onClick={handleChatSend}
-              disabled={isLoadingChat || !chatMessage.trim()}
-              size="sm"
-            >
-              {isLoadingChat ? '...' : '→'}
-            </Button>
+        {/* Services Section */}
+        <section id="services" className="py-16 md:py-20 container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-7xl md:text-8xl font-bold text-primary mb-4">{t.services}</h2>
+            <p className="text-3xl md:text-4xl text-foreground/70">{t.servicesDesc}</p>
           </div>
-        </div>
-      )}
 
-      {/* Chat Button */}
-      <button
-        onClick={() => setShowChatWidget(!showChatWidget)}
-        className="fixed bottom-4 right-4 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center z-40"
-      >
-        <MessageCircle size={24} />
-      </button>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            {SERVICES.map(service => {
+              const Icon = service.icon;
+              return (
+                <div key={service.id} className="card p-8 group hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+                  <Icon className="w-6 h-6 text-accent mb-4 group-hover:scale-125 transition-transform duration-300" />
+                  <h3 className="text-3xl md:text-4xl font-bold text-primary mb-3">{isRTL ? service.title : service.titleEn}</h3>
+                  <p className="text-xl md:text-2xl text-foreground/70">{isRTL ? service.description : service.descriptionEn}</p>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="bg-blue-50 border-r-4 border-primary rounded-lg p-8 hover:shadow-lg transition-all duration-300">
+            <div className="flex gap-4">
+              <AlertCircle className="text-primary flex-shrink-0" size={32} />
+              <div>
+                <h4 className="text-3xl md:text-4xl font-bold text-primary mb-2">{t.commitment}</h4>
+                <p className="text-xl md:text-2xl text-foreground/80">{t.commitmentText}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Marketplace Section */}
+        <section id="marketplace" className="py-16 md:py-20 bg-secondary">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-7xl md:text-8xl font-bold text-primary mb-4">{t.marketplace}</h2>
+              <p className="text-3xl md:text-4xl text-foreground/70">{t.marketplaceDesc}</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {STORES.map(store => (
+                <div key={store.id} className="card p-6 group hover:scale-110 hover:shadow-2xl transition-all duration-300">
+                  <img 
+                    src={store.image} 
+                    alt={store.name} 
+                    className="w-full h-16 object-cover rounded-lg mb-4 group-hover:scale-110 transition-transform duration-300"
+                  />
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h3 className="text-2xl md:text-3xl font-bold text-primary">{isRTL ? store.name : store.nameEn}</h3>
+                      <p className="text-accent text-lg md:text-xl font-semibold">{isRTL ? store.category : store.categoryEn}</p>
+                    </div>
+                    <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded">
+                      <span className="text-yellow-500">★</span>
+                      <span className="font-semibold text-lg text-primary">{store.rating}</span>
+                    </div>
+                  </div>
+                  <p className="text-foreground/70 text-lg md:text-xl mb-4">{store.reviews} {isRTL ? 'تقييم' : 'reviews'}</p>
+                  <Button className="w-full btn-secondary justify-center hover:shadow-lg transition-all duration-300">
+                    <ShoppingBag size={18} />
+                    {t.enterStore}
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Paths Section */}
+        <section id="paths" className="py-16 md:py-20 container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-7xl md:text-8xl font-bold text-primary mb-4">{t.paths}</h2>
+            <p className="text-3xl md:text-4xl text-foreground/70">{t.pathsDesc}</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {PATHS.map(path => (
+              <div 
+                key={path.id} 
+                onClick={() => setSelectedPath(path)}
+                className="card p-8 group hover:shadow-2xl hover:-translate-y-3 transition-all duration-300 cursor-pointer"
+              >
+                <div className="text-5xl mb-4 group-hover:scale-125 transition-transform duration-300">{path.icon}</div>
+                <h3 className="text-3xl md:text-4xl font-bold text-primary mb-2">{isRTL ? path.title : path.titleEn}</h3>
+                <p className="text-foreground/70 text-xl md:text-2xl mb-4">{isRTL ? path.desc : path.descEn}</p>
+                <ArrowRight className="text-accent group-hover:translate-x-2 transition-transform duration-300" size={20} />
+              </div>
+            ))}
+          </div>
+
+          {selectedPath && (
+            <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+              <div className="bg-card rounded-lg shadow-2xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom-4 duration-300">
+                <div className="flex justify-between items-center mb-6">
+                  <div>
+                    <div className="text-6xl md:text-7xl mb-2">{selectedPath.icon}</div>
+                    <h3 className="text-5xl md:text-6xl font-bold text-primary">{isRTL ? selectedPath.title : selectedPath.titleEn}</h3>
+                  </div>
+                  <button 
+                    onClick={() => setSelectedPath(null)}
+                    className="text-3xl text-foreground/50 hover:text-foreground transition-colors duration-300"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="space-y-6">
+                  <div>
+                    <h4 className="text-3xl md:text-4xl font-bold text-primary mb-4">{isRTL ? 'الدورات المتاحة:' : 'Available Courses:'}</h4>
+                    <div className="space-y-3">
+                      {selectedPath.courses.map((course, idx) => (
+                        <div key={idx} className="p-4 bg-secondary rounded-lg hover:shadow-md transition-all duration-300">
+                          <p className="font-semibold text-primary text-lg md:text-xl">{isRTL ? course.name : course.nameEn}</p>
+                          <p className="text-base md:text-lg text-foreground/70">{isRTL ? 'المدة:' : 'Duration:'} {isRTL ? course.duration : course.durationEn}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="text-3xl md:text-4xl font-bold text-primary mb-4">{isRTL ? 'الشهادات:' : 'Certificates:'}</h4>
+                    <div className="space-y-2">
+                      {selectedPath.certificates.map((cert, idx) => (
+                        <div key={idx} className="flex items-center gap-2 p-3 bg-secondary rounded-lg">
+                          <Award className="text-accent" size={24} />
+                          <span className="text-primary font-semibold text-lg md:text-xl">{isRTL ? cert : selectedPath.certificatesEn[idx]}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <Button 
+                    onClick={() => setSelectedPath(null)}
+                    className="w-full btn-primary justify-center hover:shadow-lg transition-all duration-300"
+                  >
+                    {isRTL ? 'إغلاق' : 'Close'}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* Points System */}
+        <section id="points" className="py-16 md:py-20 bg-primary text-primary-foreground">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-7xl md:text-8xl font-bold mb-4">{t.points}</h2>
+              <p className="text-3xl md:text-4xl opacity-90">{t.pointsDesc}</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+              {[
+                { icon: TrendingUp, title: t.earnPoints, desc: t.earnPointsDesc },
+                { icon: Award, title: t.collectBalance, desc: t.collectBalanceDesc },
+                { icon: Zap, title: t.useBalance, desc: t.useBalanceDesc },
+              ].map((step, idx) => {
+                const Icon = step.icon;
+                return (
+                  <div key={idx} className="text-center hover:scale-105 transition-transform duration-300">
+                    <Icon className="w-16 h-16 mx-auto mb-4 opacity-80 hover:opacity-100 transition-opacity duration-300" />
+                    <h4 className="text-3xl md:text-4xl font-bold mb-2">{step.title}</h4>
+                    <p className="text-xl md:text-2xl opacity-80">{step.desc}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* Contact Section */}
+        <section id="contact" className="py-16 md:py-20 bg-secondary">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-7xl md:text-8xl font-bold text-primary mb-4">{t.contact}</h2>
+              <p className="text-3xl md:text-4xl text-foreground/70">{t.contactDesc}</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+              {[
+                { icon: Mail, title: t.email, value: USER_EMAIL },
+                { icon: Phone, title: t.phoneLabel, value: '+966 11 2345 6789' },
+                { icon: MapPin, title: t.address, value: isRTL ? 'الرياض، السعودية' : 'Riyadh, Saudi Arabia' },
+              ].map((contact, idx) => {
+                const Icon = contact.icon;
+                return (
+                  <div key={idx} className="card p-8 text-center hover:shadow-lg hover:-translate-y-2 transition-all duration-300">
+                    <Icon className="w-16 h-16 text-accent mx-auto mb-4 hover:scale-125 transition-transform duration-300" />
+                    <h4 className="text-2xl md:text-3xl font-bold text-primary mb-2">{contact.title}</h4>
+                    <p className="text-xl md:text-2xl text-foreground/70">{contact.value}</p>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="max-w-2xl mx-auto card p-8 hover:shadow-lg transition-all duration-300">
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                sendEmailNotification('رسالة تواصل جديدة', contactData);
+                setContactData({ name: '', email: '', phone: '', subject: '', message: '' });
+              }} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input
+                    type="text"
+                    placeholder={t.name}
+                    value={contactData.name}
+                    onChange={(e) => setContactData({ ...contactData, name: e.target.value })}
+                    className="px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300"
+                    required
+                  />
+                  <input
+                    type="email"
+                    placeholder={t.emailPlaceholder}
+                    value={contactData.email}
+                    onChange={(e) => setContactData({ ...contactData, email: e.target.value })}
+                    className="px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300"
+                    required
+                  />
+                </div>
+                <input
+                  type="tel"
+                  placeholder={t.phoneInput}
+                  value={contactData.phone}
+                  onChange={(e) => setContactData({ ...contactData, phone: e.target.value })}
+                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300"
+                />
+                <input
+                  type="text"
+                  placeholder={t.subject}
+                  value={contactData.subject}
+                  onChange={(e) => setContactData({ ...contactData, subject: e.target.value })}
+                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300"
+                  required
+                />
+                <textarea
+                  placeholder={t.message}
+                  value={contactData.message}
+                  onChange={(e) => setContactData({ ...contactData, message: e.target.value })}
+                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300"
+                  rows={5}
+                  required
+                />
+                <Button type="submit" className="w-full btn-primary justify-center hover:shadow-lg transition-all duration-300">
+                  <MessageCircle size={20} />
+                  {t.send}
+                </Button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        {/* About Section */}
+        <section id="about" className="py-16 md:py-20 container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-6xl md:text-7xl font-bold text-primary mb-4">{t.about}</h2>
+          </div>
+
+          <div className="card max-w-3xl mx-auto p-8 hover:shadow-lg transition-all duration-300">
+            <div className="flex gap-4 mb-4">
+              <Info className="w-12 h-12 text-accent flex-shrink-0" />
+              <div>
+                <h3 className="text-3xl md:text-4xl font-bold text-primary mb-4">{t.vision}</h3>
+                <p className="text-lg md:text-xl text-foreground/70 leading-relaxed">{t.visionText}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+        {/* Chat Widget */}
+        <div className="fixed bottom-6 right-6 z-40">
+          {showChatWidget ? (
+            <div className="bg-card rounded-lg shadow-2xl w-80 md:w-96 max-h-96 flex flex-col animate-in slide-in-from-bottom-4 duration-300">
+              {/* Chat Header */}
+              <div className="bg-primary text-primary-foreground p-4 rounded-t-lg flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <MessageCircle size={24} />
+                  <div>
+                    <h3 className="text-lg md:text-xl font-bold">{t.chatSupport}</h3>
+                    <p className="text-xs md:text-sm opacity-80">نحن متاحون الآن</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowChatWidget(false)}
+                  className="text-primary-foreground hover:opacity-80 transition-opacity duration-300"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Chat Body */}
+              <div className="flex-1 p-4 bg-secondary overflow-y-auto">
+                <div className="space-y-3">
+                  {/* Bot Message */}
+                  <div className="flex justify-start">
+                    <div className="bg-primary text-primary-foreground p-3 rounded-lg max-w-xs text-sm md:text-base">
+                      {t.chatMessage}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Chat Footer */}
+              <div className="border-t border-border p-3 bg-card rounded-b-lg">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder={t.typeMessage}
+                    value={chatMessage}
+                    onChange={(e) => setChatMessage(e.target.value)}
+                    className="flex-1 px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        handleChatSend();
+                      }
+                    }}
+                  />
+                  <button
+                    onClick={handleChatSend}
+                    className="bg-primary text-primary-foreground px-3 py-2 rounded-lg hover:opacity-90 transition-opacity duration-300"
+                  >
+                    <ArrowRight size={18} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowChatWidget(true)}
+              className="bg-primary text-primary-foreground rounded-full p-4 shadow-lg hover:shadow-2xl hover:scale-110 transition-all duration-300 animate-bounce"
+              title={t.chatSupport}
+            >
+              <MessageCircle size={28} />
+            </button>
+          )}
+        </div>
+      </main>
 
       {/* Footer */}
-      <footer className="bg-card border-t border-border mt-12 py-8">
-        <div className="container mx-auto px-4 text-center text-foreground/70">
-          <p>{t.allRights} © 2026 {t.platformName}</p>
+      <footer className="bg-primary text-primary-foreground py-12">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <h4 className="font-bold mb-4 text-lg md:text-xl">{t.quickLinks}</h4>
+              <ul className="space-y-2 text-base md:text-lg opacity-80">
+                <li><a href="#consultants" className="hover:text-accent transition-colors duration-300">{t.consultants}</a></li>
+                <li><a href="#services" className="hover:text-accent transition-colors duration-300">{t.services}</a></li>
+                <li><a href="#marketplace" className="hover:text-accent transition-colors duration-300">{t.marketplace}</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold mb-4 text-lg md:text-xl">{t.services}</h4>
+              <ul className="space-y-2 text-base md:text-lg opacity-80">
+                <li><a href="#" className="hover:text-accent transition-colors duration-300">{isRTL ? 'التعهيد' : 'Outsourcing'}</a></li>
+                <li><a href="#" className="hover:text-accent transition-colors duration-300">{t.consultants}</a></li>
+                <li><a href="#" className="hover:text-accent transition-colors duration-300">{t.points}</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold mb-4 text-lg md:text-xl">{t.legal}</h4>
+              <ul className="space-y-2 text-base md:text-lg opacity-80">
+                <li><a href="#" className="hover:text-accent transition-colors duration-300">{t.privacy}</a></li>
+                <li><a href="#" className="hover:text-accent transition-colors duration-300">{t.terms}</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold mb-4 text-lg md:text-xl">{t.contact}</h4>
+              <ul className="space-y-2 text-base md:text-lg opacity-80">
+                <li>{t.email}: {USER_EMAIL}</li>
+                <li>{t.phoneLabel}: +966 11 2345 6789</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="border-t border-primary-foreground/20 pt-8 text-center text-base md:text-lg opacity-80">
+            <p>&copy; 2026 {isRTL ? 'منصة شراكة' : 'Sharaka Platform'}. {t.allRights}.</p>
+          </div>
         </div>
       </footer>
     </div>

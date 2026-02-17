@@ -28,7 +28,7 @@ describe('Supabase Connection Test', () => {
 
     // محاولة جلب البيانات من جدول بسيط للتحقق من الاتصال
     const { error } = await supabase
-      .from('conversations')
+      .from('messages')
       .select('count', { count: 'exact' })
       .limit(1);
 

@@ -405,6 +405,14 @@ export default function Home() {
     if (chatMessage.trim()) {
       try {
         setIsLoadingChat(true);
+        
+        // إنشاء معرف محادثة فريد إذا لم يكن موجوداً
+        let currentConvId = conversationId;
+        if (!currentConvId) {
+          currentConvId = `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+          setConversationId(currentConvId);
+        }
+        
         const newMessage = await messagesService.addMessage(chatMessage, 'visitor');
         setChatMessages([...chatMessages, newMessage]);
         setChatMessage('');
@@ -416,7 +424,7 @@ export default function Home() {
         setIsLoadingChat(false);
       }
     }
-  };
+  }
 
   const handleAdminLogin = () => {
     if (adminPassword === 'tariq') {
@@ -451,6 +459,15 @@ export default function Home() {
         );
         setChatMessages([...chatMessages, adminReply]);
         setAdminReplyText('');
+        
+        // تحديث حالة الرسالة إلى replied
+        if (adminReply.id) {
+          try {
+            await messagesService.updateMessageStatus(adminReply.id, 'replied');
+          } catch (statusError) {
+            console.error('خطأ في تحديث الحالة:', statusError);
+          }
+        }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'خطأ غير معروف';
         console.error('خطأ في إرسال الرد:', errorMessage);
@@ -1059,6 +1076,12 @@ export default function Home() {
 
               {/* Chat Body */}
               <div className="flex-1 p-4 bg-secondary overflow-y-auto">
+                {/* عرض معرف المحادثة */}
+                {conversationId && !isAdminMode && (
+                  <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700 text-center">
+                    معرف محادثتك: <span className="font-mono font-bold">{conversationId}</span>
+                  </div>
+                )}
                 <div className="space-y-3">
                   {chatMessages.length === 0 ? (
                     <div className="flex justify-start">

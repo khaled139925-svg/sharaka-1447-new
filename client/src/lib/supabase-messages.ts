@@ -37,7 +37,6 @@ export const messagesService = {
           message: messageText,
           content: messageText,
           reply: replyType,
-          status: replyType === 'visitor' ? 'pending' : 'replied',
         })
         .select()
         .single();

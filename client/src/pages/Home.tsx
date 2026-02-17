@@ -1098,7 +1098,7 @@ export default function Home() {
                             : 'bg-accent text-white'
                         }`}>
                           <p className="font-semibold text-xs mb-1">{msg.name}</p>
-                          <p>{msg.message || msg.content}</p>
+                          <p>{msg.message}</p>
                         </div>
                       </div>
                     ))

@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import emailjs from '@emailjs/browser';
-import { chatService } from '@/lib/supabase';
+import { messagesService } from '@/lib/supabase-messages';
+import { sendEmailNotification as sendEmail } from '@/lib/chat-utils';
 import { 
   Users, Briefcase, ShoppingBag, Award, MessageCircle, Info, 
   ChevronRight, MapPin, TrendingUp, Zap, Mail, Phone, AlertCircle,
@@ -397,29 +398,16 @@ export default function Home() {
     if (chatMessage.trim()) {
       try {
         setIsLoadingChat(true);
-        if (!conversationId) {
-          const newConversation = await chatService.createConversation({
-            user_name: 'زائر',
-            user_email: 'visitor@sharaka.com',
-            subject: 'رسالة من الدردشة الفورية',
-            status: 'open',
-          });
-          setConversationId(newConversation.id);
-          const newMessage = await chatService.addMessage({
-            conversation_id: newConversation.id,
-            sender: 'user',
-            content: chatMessage,
-          });
-          setChatMessages([newMessage]);
-        } else {
-          const newMessage = await chatService.addMessage({
-            conversation_id: conversationId,
-            sender: 'user',
-            content: chatMessage,
-          });
-          setChatMessages([...chatMessages, newMessage]);
-        }
-        await sendEmailNotification('رسالة دردشة فورية', { message: chatMessage });
+        
+        // إضافة الرسالة إلى Supabase
+        const newMessage = await messagesService.addMessage(chatMessage, 'visitor');
+        
+        // إضافة الرسالة إلى الحالة
+        setChatMessages([...chatMessages, newMessage]);
+        
+        // إرسال البريد الإلكتروني
+        await sendEmail('رسالة دردشة فورية', { message: chatMessage });
+        
         setChatMessage('');
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'خطأ غير معروف';

@@ -1,0 +1,8 @@
+{
+  "query": "SELECT * FROM public.messages LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33ThN2e87bFnq9B.31df10e13f83 --database LPqWsDAqrBRRgfKZkbJUrr --execute SELECT * FROM public.messages LIMIT 1;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1142 (42000) at line 1: SELECT command denied to user '33ThN2e87bFnq9B.31df10e13f83'@'%' for table 'messages'"
+  ]
+}

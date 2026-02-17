@@ -4,177 +4,67 @@ import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import emailjs from '@emailjs/browser';
 import { chatService } from '@/lib/chat-service';
-import { 
-  Users, Briefcase, ShoppingBag, Award, MessageCircle, Info, 
-  ChevronRight, MapPin, TrendingUp, Zap, Mail, Phone, AlertCircle,
-  ExternalLink, ArrowRight, Globe
-} from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 
 const LOGO_URL = 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663333045223/nOdruZWcjEkuqgXg.jpeg';
 const USER_EMAIL = 'khaled139925@gmail.com';
 
-// نظام اللغات
 const translations = {
   ar: {
-    selectCountry: 'اختر الدولة',
-    selectLanguage: 'اللغة',
-    tagline: 'شريك نجاحك',
     platformName: 'منصة الخدمات المتكاملة',
     description: 'نربط الخبرات بالفرص، نوفر الاستشارات، سوق إلكتروني، خدمات تعهيد وعمل عن بعد',
-    startNow: 'ابدأ الآن',
-    consultants: 'المستشارون والاستشارات',
-    consultantsDesc: 'استشارات متخصصة من الخبراء',
-    bookAppointment: 'حجز موعد',
-    services: 'خدمات التعهيد والإدارة',
-    servicesDesc: 'حلول متكاملة لإدارة موارد شركتك',
-    marketplace: 'السوق الإلكتروني',
-    marketplaceDesc: 'منصة متكاملة تجمع أفضل المتاجر والعروض',
-    enterStore: 'دخول المتجر',
-    paths: 'المسارات المتاحة',
-    pathsDesc: 'اختر المسار المناسب لك',
-    points: 'نظام النقاط والرصيد المالي',
-    pointsDesc: 'نظام حوافز ذكي يحول عمليات الشراء إلى رصيد مالي حقيقي',
-    earnPoints: '1. اكسب النقاط',
-    earnPointsDesc: 'من كل عملية شراء',
-    collectBalance: '2. تجميع الرصيد',
-    collectBalanceDesc: 'رصيد مالي حقيقي',
-    useBalance: '3. استخدم الرصيد',
-    useBalanceDesc: 'في أي متجر',
-    contact: 'تواصل معنا',
-    contactDesc: 'نحن هنا للإجابة على جميع أسئلتك',
-    email: 'البريد الإلكتروني',
-    phoneLabel: 'الهاتف',
-    address: 'العنوان',
-    about: 'من نحن',
-    vision: 'رؤية منصة شراكة',
-    visionText: 'منصة شراكة هي منصة أعمال رقمية متكاملة تهدف إلى ربط الأفراد والشركات والمستشارين والمتاجر في بيئة واحدة آمنة وموثوقة.',
-    commitment: 'التزام منصة شراكة',
-    commitmentText: 'تلتزم منصة شراكة بدفع راتب شهر كامل من كل 12 شهر للموظف الذي يعمل لدى العميل ضمن عقد التعهيد.',
-    name: 'اسمك',
-    emailPlaceholder: 'بريدك الإلكتروني',
-    phoneInput: 'رقم الهاتف',
-    subject: 'الموضوع',
-    message: 'رسالتك',
-    send: 'إرسال الرسالة',
-    confirm: 'تأكيد',
-    cancel: 'إلغاء',
-    quickLinks: 'روابط سريعة',
-    legal: 'قانوني',
-    privacy: 'سياسة الخصوصية',
-    terms: 'الشروط والأحكام',
-    allRights: 'جميع الحقوق محفوظة',
-    hiring: 'التوظيف والاستقطاب',
-    hiringDesc: 'نساعدك في البحث عن أفضل الكوادر المتخصصة',
-    staffManagement: 'إدارة الموظفين',
-    staffManagementDesc: 'إدارة متكاملة لموارد بشرية احترافية',
-    projectManagement: 'إدارة المشاريع',
-    projectManagementDesc: 'تخطيط وتنفيذ المشاريع بكفاءة عالية',
     chatSupport: 'دعم فوري',
     chatMessage: 'مرحبا! كيف يمكننا مساعدتك؟',
     chatClose: 'إغلاق',
     typeMessage: 'اكتب رسالتك...',
+    allRights: 'جميع الحقوق محفوظة',
   },
   en: {
-    selectCountry: 'Select Country',
-    selectLanguage: 'Language',
-    tagline: 'Your Success Partner',
     platformName: 'Integrated Services Platform',
     description: 'We connect expertise with opportunities, provide consultations, e-commerce marketplace, outsourcing services and remote work',
-    startNow: 'Start Now',
-    consultants: 'Consultants & Consultations',
-    consultantsDesc: 'Specialized consultations from experts',
-    bookAppointment: 'Book Appointment',
-    services: 'Outsourcing & Management Services',
-    servicesDesc: 'Integrated solutions for managing your company resources',
-    marketplace: 'E-Commerce Marketplace',
-    marketplaceDesc: 'An integrated platform that brings together the best stores and offers',
-    enterStore: 'Enter Store',
-    paths: 'Available Paths',
-    pathsDesc: 'Choose the right path for you',
-    points: 'Points & Financial Balance System',
-    pointsDesc: 'A smart rewards system that converts purchases into real financial credit',
-    earnPoints: '1. Earn Points',
-    earnPointsDesc: 'From every purchase',
-    collectBalance: '2. Collect Balance',
-    collectBalanceDesc: 'Real financial credit',
-    useBalance: '3. Use Balance',
-    useBalanceDesc: 'In any store',
-    contact: 'Contact Us',
-    contactDesc: 'We are here to answer all your questions',
-    email: 'Email',
-    phoneLabel: 'Phone',
-    address: 'Address',
-    about: 'About Us',
-    vision: 'Sharaka Platform Vision',
-    visionText: 'Sharaka is an integrated digital business platform that aims to connect individuals, companies, consultants and stores in one safe and reliable environment.',
-    commitment: 'Sharaka Platform Commitment',
-    commitmentText: 'Sharaka commits to paying one full month salary for every 12 months for employees working with clients under outsourcing contracts.',
-    name: 'Your Name',
-    emailPlaceholder: 'Your Email',
-    phoneInput: 'Phone Number',
-    subject: 'Subject',
-    message: 'Your Message',
-    send: 'Send Message',
-    confirm: 'Confirm',
-    cancel: 'Cancel',
-    quickLinks: 'Quick Links',
-    legal: 'Legal',
-    privacy: 'Privacy Policy',
-    terms: 'Terms & Conditions',
-    allRights: 'All rights reserved',
-    hiring: 'Recruitment & Hiring',
-    hiringDesc: 'We help you find the best specialized talent',
-    staffManagement: 'Staff Management',
-    staffManagementDesc: 'Integrated professional human resources management',
-    projectManagement: 'Project Management',
-    projectManagementDesc: 'Planning and executing projects with high efficiency',
     chatSupport: 'Live Support',
     chatMessage: 'Hello! How can we help you?',
     chatClose: 'Close',
     typeMessage: 'Type your message...',
+    allRights: 'All rights reserved',
   }
 };
 
-const COUNTRIES = [
-  { code: 'SA', name: 'السعودية', nameEn: 'Saudi Arabia', flag: '🇸🇦', region: 'gulf' },
-  { code: 'AE', name: 'الإمارات', nameEn: 'UAE', flag: '🇦🇪', region: 'gulf' },
-  { code: 'EG', name: 'مصر', nameEn: 'Egypt', flag: '🇪🇬', region: 'arab' },
-];
-
 const sendEmailNotification = async (subject: string, data: any) => {
   try {
-    const emailBody = `الموضوع: ${subject}\nالبريد المرسل إليه: ${USER_EMAIL}\nالوقت: ${new Date().toLocaleString('ar-SA')}\n\nالبيانات:\n${JSON.stringify(data, null, 2)}`;
-
-    const response = await fetch('https://formspree.io/f/xyzpqwab', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email: USER_EMAIL,
-        message: emailBody,
-        subject: subject,
-      }),
+    console.log('محاولة إرسال البريد الإلكتروني...', {
+      service: import.meta.env.VITE_EMAILJS_SERVICE_ID,
+      template: import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
     });
 
-    if (response.ok) {
-      console.log(`✅ تم إرسال البيانات بنجاح إلى ${USER_EMAIL}`);
+    const templateParams = {
+      to_email: USER_EMAIL,
+      subject: subject,
+      message: data.message || JSON.stringify(data),
+      timestamp: new Date().toLocaleString('ar-SA'),
+    };
+
+    const response = await emailjs.send(
+      import.meta.env.VITE_EMAILJS_SERVICE_ID,
+      import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+      templateParams
+    );
+
+    if (response.status === 200) {
+      console.log(`✅ تم إرسال البريد بنجاح إلى ${USER_EMAIL}`);
       return true;
     } else {
-      console.error('❌ حدث خطأ في الإرسال');
+      console.error('❌ فشل إرسال البريد');
       return false;
     }
   } catch (error) {
-    console.error('خطأ في الإرسال:', error);
+    console.error('خطأ في إرسال البريد:', error);
     return false;
   }
 };
 
 export default function Home() {
   const [language, setLanguage] = useState<'ar' | 'en'>('ar');
-  const [selectedCountry, setSelectedCountry] = useState('SA');
-  const [showCountryMenu, setShowCountryMenu] = useState(false);
-  const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [showChatWidget, setShowChatWidget] = useState(false);
   const [chatMessage, setChatMessage] = useState('');
   const [chatMessages, setChatMessages] = useState<any[]>([]);
@@ -182,12 +72,18 @@ export default function Home() {
   const [conversationId, setConversationId] = useState<string | null>(null);
 
   const t = translations[language];
-  const currentCountry = COUNTRIES.find(c => c.code === selectedCountry);
   const isRTL = language === 'ar';
 
   // تهيئة EmailJS
   useEffect(() => {
-    emailjs.init(import.meta.env.VITE_EMAILJS_PUBLIC_KEY);
+    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+    console.log('تهيئة EmailJS...', { publicKey: publicKey ? 'موجود' : 'غير موجود' });
+    if (publicKey) {
+      emailjs.init(publicKey);
+      console.log('✅ تم تهيئة EmailJS بنجاح');
+    } else {
+      console.error('❌ مفتاح EmailJS العام غير موجود');
+    }
   }, []);
 
   // تحميل الرسائل السابقة عند فتح الدردشة
@@ -222,10 +118,14 @@ export default function Home() {
       setChatMessages(prev => [...prev, newMessage]);
 
       // أرسل البريد الإلكتروني
-      await sendEmailNotification('رسالة دردشة فورية', {
+      const emailSent = await sendEmailNotification('رسالة دردشة فورية', {
         message: chatMessage,
         timestamp: new Date().toLocaleString('ar-SA')
       });
+
+      if (!emailSent) {
+        console.warn('⚠️ لم يتم إرسال البريد الإلكتروني');
+      }
 
       setChatMessage('');
     } catch (error) {

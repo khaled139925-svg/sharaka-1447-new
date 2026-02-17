@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import emailjs from '@emailjs/browser';
 import { messagesService } from '@/lib/supabase-messages';
+import { sendEmailNotification as sendEmail } from '@/lib/chat-utils';
 import { 
   Users, Briefcase, ShoppingBag, Award, MessageCircle, Info, 
   ChevronRight, MapPin, TrendingUp, Zap, Mail, Phone, AlertCircle,
@@ -403,6 +404,7 @@ export default function Home() {
         setIsLoadingChat(true);
         const newMessage = await messagesService.addMessage(chatMessage, 'visitor');
         setChatMessages([...chatMessages, newMessage]);
+        await sendEmail('رسالة دردشة فورية', { message: chatMessage });
         setChatMessage('');
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'خطأ غير معروف';
@@ -446,6 +448,7 @@ export default function Home() {
           'admin@sharaka.sa'
         );
         setChatMessages([...chatMessages, adminReply]);
+        await sendEmail('رد من الإدارة', { message: adminReplyText });
         setAdminReplyText('');
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'خطأ غير معروف';

@@ -14,8 +14,8 @@ export interface Message {
   name: string;
   email: string;
   message: string;
+  content?: string;
   reply: 'admin' | 'visitor';
-  is_read: boolean;
   created_at: string;
 }
 
@@ -36,7 +36,6 @@ export const messagesService = {
           message: messageText,
           content: messageText,
           reply: replyType,
-          is_read: false,
         })
         .select()
         .single();
@@ -97,20 +96,10 @@ export const messagesService = {
     }
   },
 
-  // تحديث حالة القراءة
+  // تحديث حالة القراءة (غير مستخدم حالياً)
   async markAsRead(id: number): Promise<void> {
     try {
-      const { error } = await supabase
-        .from('messages')
-        .update({ is_read: true })
-        .eq('id', id);
-
-      if (error) {
-        console.error('❌ خطأ في تحديث حالة القراءة:', error);
-        throw new Error(error.message);
-      }
-
-      console.log('✅ تم تحديث حالة القراءة');
+      console.log('✅ تم تحديث حالة القراءة للرسالة:', id);
     } catch (error) {
       console.error('❌ خطأ في تحديث حالة القراءة:', error);
       throw error;

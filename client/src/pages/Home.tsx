@@ -396,6 +396,8 @@ export default function Home() {
     subject: '',
     message: '',
   });
+  const [visitorName, setVisitorName] = useState('');
+  const [visitorEmail, setVisitorEmail] = useState('');
 
   const t = translations[language];
   const currentCountry = COUNTRIES.find(c => c.code === selectedCountry);
@@ -413,7 +415,13 @@ export default function Home() {
           setConversationId(currentConvId);
         }
         
-        const newMessage = await messagesService.addMessage(chatMessage, 'visitor');
+        const newMessage = await messagesService.addMessage(
+          chatMessage,
+          'visitor',
+          currentConvId,
+          visitorName || 'زائر',
+          visitorEmail || 'visitor@sharaka.sa'
+        );
         setChatMessages([...chatMessages, newMessage]);
         setChatMessage('');
       } catch (error) {
@@ -448,12 +456,13 @@ export default function Home() {
   };
 
   const handleAdminReply = async () => {
-    if (adminReplyText.trim()) {
+    if (adminReplyText.trim() && conversationId) {
       try {
         setIsLoadingChat(true);
         const adminReply = await messagesService.addMessage(
           adminReplyText,
           'admin',
+          conversationId,
           'الإدارة',
           'admin@sharaka.sa'
         );

@@ -459,15 +459,6 @@ export default function Home() {
         );
         setChatMessages([...chatMessages, adminReply]);
         setAdminReplyText('');
-        
-        // تحديث حالة الرسالة إلى replied
-        if (adminReply.id) {
-          try {
-            await messagesService.updateMessageStatus(adminReply.id, 'replied');
-          } catch (statusError) {
-            console.error('خطأ في تحديث الحالة:', statusError);
-          }
-        }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'خطأ غير معروف';
         console.error('خطأ في إرسال الرد:', errorMessage);

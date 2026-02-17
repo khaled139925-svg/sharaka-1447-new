@@ -34,6 +34,7 @@ export const messagesService = {
           name,
           email,
           message: messageText,
+          content: messageText,
           reply: replyType,
           is_read: false,
         })

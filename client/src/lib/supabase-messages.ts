@@ -4,82 +4,137 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
-  throw new Error('Missing Supabase credentials');
+  console.error('❌ بيانات Supabase غير موجودة');
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(supabaseUrl || '', supabaseKey || '');
 
 export interface Message {
   id: number;
-  content: string;
-  reply: 'visitor' | 'admin';
-  timestamp: string;
-  conversation_id?: string;
+  name: string;
+  email: string;
+  message: string;
+  reply: 'admin' | 'visitor';
+  is_read: boolean;
+  created_at: string;
 }
 
 export const messagesService = {
   // إضافة رسالة جديدة
-  async addMessage(content: string, reply: 'visitor' | 'admin'): Promise<Message> {
-    const { data, error } = await supabase
-      .from('messages')
-      .insert([
-        {
-          content,
-          reply,
-          timestamp: new Date().toISOString(),
-        },
-      ])
-      .select()
-      .single();
+  async addMessage(
+    messageText: string,
+    replyType: 'admin' | 'visitor',
+    name: string = 'زائر',
+    email: string = 'visitor@sharaka.sa'
+  ): Promise<Message> {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .insert({
+          name,
+          email,
+          message: messageText,
+          reply: replyType,
+          is_read: false,
+        })
+        .select()
+        .single();
 
-    if (error) {
-      console.error('خطأ في إضافة الرسالة:', error);
-      throw new Error(`فشل إضافة الرسالة: ${error.message}`);
+      if (error) {
+        console.error('❌ خطأ في إضافة الرسالة:', error);
+        throw new Error(error.message);
+      }
+
+      console.log('✅ تم إضافة الرسالة بنجاح:', data);
+      return data;
+    } catch (error) {
+      console.error('❌ خطأ في إضافة الرسالة:', error);
+      throw error;
     }
-
-    return data;
   },
 
   // الحصول على جميع الرسائل
   async getMessages(): Promise<Message[]> {
-    const { data, error } = await supabase
-      .from('messages')
-      .select('*')
-      .order('timestamp', { ascending: true });
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('خطأ في جلب الرسائل:', error);
-      throw new Error(`فشل جلب الرسائل: ${error.message}`);
+      if (error) {
+        console.error('❌ خطأ في تحميل الرسائل:', error);
+        throw new Error(error.message);
+      }
+
+      console.log('✅ تم تحميل الرسائل:', data);
+      return data || [];
+    } catch (error) {
+      console.error('❌ خطأ في تحميل الرسائل:', error);
+      throw error;
     }
-
-    return data || [];
   },
 
-  // الاستماع للرسائل الجديدة (Realtime)
-  subscribeToMessages(callback: (message: Message) => void) {
-    const subscription = supabase
-      .channel('messages')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'messages' },
-        (payload: any) => {
-          callback(payload.new as Message);
-        }
-      )
-      .subscribe();
+  // الحصول على الرسائل الواردة من الزوار فقط
+  async getVisitorMessages(): Promise<Message[]> {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('reply', 'visitor')
+        .order('created_at', { ascending: false });
 
-    return subscription;
+      if (error) {
+        console.error('❌ خطأ في تحميل رسائل الزوار:', error);
+        throw new Error(error.message);
+      }
+
+      console.log('✅ تم تحميل رسائل الزوار:', data);
+      return data || [];
+    } catch (error) {
+      console.error('❌ خطأ في تحميل رسائل الزوار:', error);
+      throw error;
+    }
   },
 
-  // حذف رسالة (للإدارة فقط)
+  // تحديث حالة القراءة
+  async markAsRead(id: number): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .update({ is_read: true })
+        .eq('id', id);
+
+      if (error) {
+        console.error('❌ خطأ في تحديث حالة القراءة:', error);
+        throw new Error(error.message);
+      }
+
+      console.log('✅ تم تحديث حالة القراءة');
+    } catch (error) {
+      console.error('❌ خطأ في تحديث حالة القراءة:', error);
+      throw error;
+    }
+  },
+
+  // حذف رسالة
   async deleteMessage(id: number): Promise<void> {
-    const { error } = await supabase
-      .from('messages')
-      .delete()
-      .eq('id', id);
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .delete()
+        .eq('id', id);
 
-    if (error) {
-      throw new Error(`فشل حذف الرسالة: ${error.message}`);
+      if (error) {
+        console.error('❌ خطأ في حذف الرسالة:', error);
+        throw new Error(error.message);
+      }
+
+      console.log('✅ تم حذف الرسالة');
+    } catch (error) {
+      console.error('❌ خطأ في حذف الرسالة:', error);
+      throw error;
     }
   },
+
+
 };

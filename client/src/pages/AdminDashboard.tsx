@@ -43,7 +43,7 @@ export default function AdminDashboard() {
 
     try {
       setIsLoading(true);
-      await messagesService.addMessage(replyText, 'admin');
+      await messagesService.addMessage(replyText, 'admin', 'الإدارة', 'admin@sharaka.sa');
       
       // إرسال بريد إلكتروني
       await sendEmailNotification('رد من الإدارة', { message: replyText });
@@ -161,10 +161,10 @@ export default function AdminDashboard() {
                           {msg.reply === 'visitor' ? '👤 زائر' : '👨‍💼 إدارة'}
                         </span>
                         <span className="text-xs text-gray-500">
-                          {new Date(msg.timestamp).toLocaleString('ar-SA')}
+                          {new Date(msg.created_at).toLocaleString('ar-SA')}
                         </span>
                       </div>
-                      <p className="text-gray-800">{msg.content}</p>
+                      <p className="text-gray-800">{msg.message}</p>
                     </div>
                   ))
                 )}
@@ -183,7 +183,7 @@ export default function AdminDashboard() {
                 <>
                   <div className="mb-4 p-3 bg-gray-100 rounded">
                     <p className="text-sm text-gray-700">
-                      {messages.find(m => m.id === selectedMessageId)?.content}
+                      {messages.find(m => m.id === selectedMessageId)?.message}
                     </p>
                   </div>
 

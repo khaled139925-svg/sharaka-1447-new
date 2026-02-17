@@ -382,6 +382,10 @@ export default function Home() {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [isLoadingChat, setIsLoadingChat] = useState(false);
+  const [isAdminMode, setIsAdminMode] = useState(false);
+  const [adminPassword, setAdminPassword] = useState('');
+  const [showPasswordInput, setShowPasswordInput] = useState(false);
+  const [adminReplyText, setAdminReplyText] = useState('');
   const [contactData, setContactData] = useState({
     name: '',
     email: '',
@@ -398,16 +402,9 @@ export default function Home() {
     if (chatMessage.trim()) {
       try {
         setIsLoadingChat(true);
-        
-        // إضافة الرسالة إلى Supabase
         const newMessage = await messagesService.addMessage(chatMessage, 'visitor');
-        
-        // إضافة الرسالة إلى الحالة
         setChatMessages([...chatMessages, newMessage]);
-        
-        // إرسال البريد الإلكتروني
         await sendEmail('رسالة دردشة فورية', { message: chatMessage });
-        
         setChatMessage('');
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'خطأ غير معروف';
@@ -417,6 +414,58 @@ export default function Home() {
         setIsLoadingChat(false);
       }
     }
+  };
+
+  const handleAdminLogin = () => {
+    if (adminPassword === 'tariq') {
+      setIsAdminMode(true);
+      setShowPasswordInput(false);
+      setAdminPassword('');
+      loadAllMessages();
+    } else {
+      alert('كلمة السر غير صحيحة');
+      setAdminPassword('');
+    }
+  };
+
+  const loadAllMessages = async () => {
+    try {
+      const messages = await messagesService.getMessages();
+      setChatMessages(messages);
+    } catch (error) {
+      console.error('خطأ في تحميل الرسائل:', error);
+    }
+  };
+
+  const handleAdminReply = async () => {
+    if (adminReplyText.trim()) {
+      try {
+        setIsLoadingChat(true);
+        const adminReply = await messagesService.addMessage(
+          adminReplyText,
+          'admin',
+          'الإدارة',
+          'admin@sharaka.sa'
+        );
+        setChatMessages([...chatMessages, adminReply]);
+        await sendEmail('رد من الإدارة', { message: adminReplyText });
+        setAdminReplyText('');
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'خطأ غير معروف';
+        console.error('خطأ في إرسال الرد:', errorMessage);
+        alert(`خطأ: ${errorMessage}`);
+      } finally {
+        setIsLoadingChat(false);
+      }
+    }
+  };
+
+  const handleAdminLogout = () => {
+    setIsAdminMode(false);
+    setAdminPassword('');
+    setShowPasswordInput(false);
+    setChatMessages([]);
+    setAdminReplyText('');
   };
 
   return (
@@ -880,27 +929,76 @@ export default function Home() {
                 <div className="flex items-center gap-2">
                   <MessageCircle size={24} />
                   <div>
-                    <h3 className="text-lg md:text-xl font-bold">{t.chatSupport}</h3>
-                    <p className="text-xs md:text-sm opacity-80">نحن متاحون الآن</p>
+                    <h3 className="text-lg md:text-xl font-bold">{isAdminMode ? 'لوحة الإدارة' : t.chatSupport}</h3>
+                    <p className="text-xs md:text-sm opacity-80">{isAdminMode ? 'وضع الإدارة' : 'نحن متاحون الآن'}</p>
                   </div>
                 </div>
-                <button
-                  onClick={() => setShowChatWidget(false)}
-                  className="text-primary-foreground hover:opacity-80 transition-opacity duration-300"
-                >
-                  ✕
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => !isAdminMode ? setShowPasswordInput(!showPasswordInput) : handleAdminLogout()}
+                    className="text-primary-foreground hover:opacity-80 transition-opacity duration-300 text-xs px-2 py-1 bg-primary-foreground/20 rounded"
+                    title={isAdminMode ? 'تسجيل الخروج' : 'دخول الإدارة'}
+                  >
+                    {isAdminMode ? 'خروج' : 'إدارة'}
+                  </button>
+                  <button
+                    onClick={() => setShowChatWidget(false)}
+                    className="text-primary-foreground hover:opacity-80 transition-opacity duration-300"
+                  >
+                    ✕
+                  </button>
+                </div>
               </div>
+
+              {/* Admin Password Input */}
+              {showPasswordInput && !isAdminMode && (
+                <div className="p-3 bg-secondary border-b border-border">
+                  <div className="flex gap-2">
+                    <input
+                      type="password"
+                      placeholder="أدخل كلمة السر"
+                      value={adminPassword}
+                      onChange={(e) => setAdminPassword(e.target.value)}
+                      className="flex-1 px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300"
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          handleAdminLogin();
+                        }
+                      }}
+                    />
+                    <button
+                      onClick={handleAdminLogin}
+                      className="bg-accent text-white px-3 py-2 rounded-lg hover:opacity-90 transition-opacity duration-300 text-sm"
+                    >
+                      دخول
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Chat Body */}
               <div className="flex-1 p-4 bg-secondary overflow-y-auto">
                 <div className="space-y-3">
-                  {/* Bot Message */}
-                  <div className="flex justify-start">
-                    <div className="bg-primary text-primary-foreground p-3 rounded-lg max-w-xs text-sm md:text-base">
-                      {t.chatMessage}
+                  {chatMessages.length === 0 ? (
+                    <div className="flex justify-start">
+                      <div className="bg-primary text-primary-foreground p-3 rounded-lg max-w-xs text-sm md:text-base">
+                        {t.chatMessage}
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    chatMessages.map((msg, idx) => (
+                      <div key={idx} className={`flex ${msg.reply === 'admin' ? 'justify-start' : 'justify-end'}`}>
+                        <div className={`p-3 rounded-lg max-w-xs text-sm md:text-base ${
+                          msg.reply === 'admin'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-accent text-white'
+                        }`}>
+                          <p className="font-semibold text-xs mb-1">{msg.name}</p>
+                          <p>{msg.message || msg.content}</p>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
 
@@ -909,18 +1007,18 @@ export default function Home() {
                 <div className="flex gap-2">
                   <input
                     type="text"
-                    placeholder={t.typeMessage}
-                    value={chatMessage}
-                    onChange={(e) => setChatMessage(e.target.value)}
+                    placeholder={isAdminMode ? 'اكتب ردك...' : t.typeMessage}
+                    value={isAdminMode ? adminReplyText : chatMessage}
+                    onChange={(e) => isAdminMode ? setAdminReplyText(e.target.value) : setChatMessage(e.target.value)}
                     className="flex-1 px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300"
                     onKeyPress={(e) => {
                       if (e.key === 'Enter') {
-                        handleChatSend();
+                        isAdminMode ? handleAdminReply() : handleChatSend();
                       }
                     }}
                   />
                   <button
-                    onClick={handleChatSend}
+                    onClick={isAdminMode ? handleAdminReply : handleChatSend}
                     className="bg-primary text-primary-foreground px-3 py-2 rounded-lg hover:opacity-90 transition-opacity duration-300"
                   >
                     <ArrowRight size={18} />

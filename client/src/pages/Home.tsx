@@ -404,7 +404,6 @@ export default function Home() {
         setIsLoadingChat(true);
         const newMessage = await messagesService.addMessage(chatMessage, 'visitor');
         setChatMessages([...chatMessages, newMessage]);
-        await sendEmail('رسالة دردشة فورية', { message: chatMessage });
         setChatMessage('');
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'خطأ غير معروف';
@@ -448,7 +447,6 @@ export default function Home() {
           'admin@sharaka.sa'
         );
         setChatMessages([...chatMessages, adminReply]);
-        await sendEmail('رد من الإدارة', { message: adminReplyText });
         setAdminReplyText('');
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'خطأ غير معروف';

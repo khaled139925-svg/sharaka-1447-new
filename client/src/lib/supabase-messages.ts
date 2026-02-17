@@ -16,6 +16,7 @@ export interface Message {
   message: string;
   content?: string;
   reply: 'admin' | 'visitor';
+  status: 'pending' | 'replied' | 'closed';
   created_at: string;
 }
 
@@ -36,6 +37,7 @@ export const messagesService = {
           message: messageText,
           content: messageText,
           reply: replyType,
+          status: replyType === 'visitor' ? 'pending' : 'replied',
         })
         .select()
         .single();
@@ -96,6 +98,76 @@ export const messagesService = {
     }
   },
 
+  // تحديث حالة المحادثة
+  async updateMessageStatus(
+    id: number,
+    status: 'pending' | 'replied' | 'closed'
+  ): Promise<Message> {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .update({ status })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('❌ خطأ في تحديث حالة المحادثة:', error);
+        throw new Error(error.message);
+      }
+
+      console.log('✅ تم تحديث حالة المحادثة:', data);
+      return data;
+    } catch (error) {
+      console.error('❌ خطأ في تحديث حالة المحادثة:', error);
+      throw error;
+    }
+  },
+
+  // الحصول على الرسائل حسب الحالة
+  async getMessagesByStatus(status: 'pending' | 'replied' | 'closed'): Promise<Message[]> {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('status', status)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('❌ خطأ في تحميل الرسائل:', error);
+        throw new Error(error.message);
+      }
+
+      console.log('✅ تم تحميل الرسائل:', data);
+      return data || [];
+    } catch (error) {
+      console.error('❌ خطأ في تحميل الرسائل:', error);
+      throw error;
+    }
+  },
+
+  // البحث عن الرسائل
+  async searchMessages(searchText: string): Promise<Message[]> {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .or(`name.ilike.%${searchText}%,message.ilike.%${searchText}%,email.ilike.%${searchText}%`)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('❌ خطأ في البحث عن الرسائل:', error);
+        throw new Error(error.message);
+      }
+
+      console.log('✅ تم البحث عن الرسائل:', data);
+      return data || [];
+    } catch (error) {
+      console.error('❌ خطأ في البحث عن الرسائل:', error);
+      throw error;
+    }
+  },
+
   // تحديث حالة القراءة (غير مستخدم حالياً)
   async markAsRead(id: number): Promise<void> {
     try {
@@ -125,6 +197,4 @@ export const messagesService = {
       throw error;
     }
   },
-
-
 };

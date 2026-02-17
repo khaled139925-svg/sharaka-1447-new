@@ -386,6 +386,9 @@ export default function Home() {
   const [adminPassword, setAdminPassword] = useState('');
   const [showPasswordInput, setShowPasswordInput] = useState(false);
   const [adminReplyText, setAdminReplyText] = useState('');
+  const [searchText, setSearchText] = useState('');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'replied' | 'closed'>('all');
+  const [filteredMessages, setFilteredMessages] = useState<any[]>([]);
   const [contactData, setContactData] = useState({
     name: '',
     email: '',
@@ -464,7 +467,32 @@ export default function Home() {
     setShowPasswordInput(false);
     setChatMessages([]);
     setAdminReplyText('');
+    setSearchText('');
+    setFilterStatus('all');
   };
+
+  const handleSearchAndFilter = () => {
+    let results = [...chatMessages];
+
+    if (searchText.trim()) {
+      results = results.filter(msg =>
+        msg.name.toLowerCase().includes(searchText.toLowerCase()) ||
+        msg.email.toLowerCase().includes(searchText.toLowerCase()) ||
+        msg.message.toLowerCase().includes(searchText.toLowerCase())
+      );
+    }
+
+    if (filterStatus !== 'all') {
+      results = results.filter(msg => msg.status === filterStatus);
+    }
+
+    setFilteredMessages(results);
+  };
+
+  useEffect(() => {
+    handleSearchAndFilter();
+  }, [searchText, filterStatus, chatMessages]);
+
 
   return (
     <div className={`min-h-screen bg-background ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
@@ -974,6 +1002,61 @@ export default function Home() {
                 </div>
               )}
 
+              {/* Admin Search and Filter */}
+              {isAdminMode && (
+                <div className="p-3 bg-secondary border-b border-border space-y-2">
+                  <input
+                    type="text"
+                    placeholder="ابحث عن رسالة..."
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setFilterStatus('all')}
+                      className={`flex-1 px-2 py-1 rounded text-xs font-semibold transition-all duration-300 ${
+                        filterStatus === 'all'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
+                      الكل
+                    </button>
+                    <button
+                      onClick={() => setFilterStatus('pending')}
+                      className={`flex-1 px-2 py-1 rounded text-xs font-semibold transition-all duration-300 ${
+                        filterStatus === 'pending'
+                          ? 'bg-yellow-500 text-white'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
+                      ⏳ معلقة
+                    </button>
+                    <button
+                      onClick={() => setFilterStatus('replied')}
+                      className={`flex-1 px-2 py-1 rounded text-xs font-semibold transition-all duration-300 ${
+                        filterStatus === 'replied'
+                          ? 'bg-green-500 text-white'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
+                      ✓ مجابة
+                    </button>
+                    <button
+                      onClick={() => setFilterStatus('closed')}
+                      className={`flex-1 px-2 py-1 rounded text-xs font-semibold transition-all duration-300 ${
+                        filterStatus === 'closed'
+                          ? 'bg-red-500 text-white'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
+                      ✕ مغلقة
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Chat Body */}
               <div className="flex-1 p-4 bg-secondary overflow-y-auto">
                 <div className="space-y-3">
@@ -984,7 +1067,7 @@ export default function Home() {
                       </div>
                     </div>
                   ) : (
-                    chatMessages.map((msg, idx) => (
+                    (isAdminMode ? filteredMessages : chatMessages).map((msg, idx) => (
                       <div key={idx} className={`flex ${msg.reply === 'admin' ? 'justify-start' : 'justify-end'}`}>
                         <div className={`p-3 rounded-lg max-w-xs text-sm md:text-base ${
                           msg.reply === 'admin'

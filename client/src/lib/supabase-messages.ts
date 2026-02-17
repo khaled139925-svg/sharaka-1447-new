@@ -46,7 +46,6 @@ export const messagesService = {
           name,
           email,
           message: messageText,
-          content: messageText,
           reply: replyType,
           conversation_id: conversationId,
         })

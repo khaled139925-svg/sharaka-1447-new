@@ -107,6 +107,11 @@ export default function AdminDashboard() {
 
   // الحصول على المحادثة المختارة
   const selectedConversation = conversations.find(c => c.id === selectedConversationId);
+  
+  // إذا لم تكن المحادثة موجودة في القائمة لكن لديها معرف، نعرضها في القائمة
+  const displayedConversations = selectedConversation && !conversations.find(c => c.id === selectedConversationId)
+    ? [selectedConversation, ...conversations]
+    : conversations;
 
   if (!isAuthenticated) {
     return (
@@ -180,13 +185,13 @@ export default function AdminDashboard() {
               </h3>
 
               <div className="space-y-3 max-h-[600px] overflow-y-auto">
-                {conversations.length === 0 ? (
+                {displayedConversations.length === 0 ? (
                   <div className="text-center py-12">
                     <MessageCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                     <p className="text-gray-500 text-lg">لا توجد محادثات حالياً</p>
                   </div>
                 ) : (
-                  conversations.map((conv: any) => {
+                  displayedConversations.map((conv: any) => {
                     const lastMsg = conv.lastMessage;
                     return (
                       <div
@@ -226,12 +231,12 @@ export default function AdminDashboard() {
           <div className="lg:col-span-2 order-2">
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-xl font-bold text-[#2C3E68] mb-4">
-                جميع المحادثات ({conversations.length})
+                جميع المحادثات ({displayedConversations.length})
               </h2>
 
-              {selectedConversation ? (
+              {selectedConversation && selectedConversation.messages ? (
                 <>
-                  {/* عرض رسائل المحادثة */}
+                  {/* عرض رسالل المحادثة */}
                   <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200 max-h-[300px] overflow-y-auto">
                     <p className="text-xs text-gray-500 mb-3 font-bold">الرسائل ({selectedConversation.messages.length}):</p>
                     <div className="space-y-2">
@@ -287,10 +292,14 @@ export default function AdminDashboard() {
                     حذف المحادثة
                   </Button>
                 </>
-              ) : (
+                ) : (
                 <div className="text-center py-8">
                   <MessageCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                  <p className="text-gray-500">اختر محادثة من القائمة لكي تتمكن من الرد عليها</p>
+                  <p className="text-gray-500">
+                    {displayedConversations.length === 0 
+                      ? 'لا توجد محادثات حالياً'
+                      : 'اختر محادثة من القائمة لكي تتمكن من الرد عليها'}
+                  </p>
                 </div>
               )}
             </div>

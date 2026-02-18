@@ -1,0 +1,19 @@
+{
+  "query": "SELECT COUNT(*) as conversation_count FROM conversations; SELECT COUNT(*) as message_count FROM messages;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33ThN2e87bFnq9B.31df10e13f83 --database LPqWsDAqrBRRgfKZkbJUrr --execute SELECT COUNT(*) as conversation_count FROM conversations; SELECT COUNT(*) as message_count FROM messages;",
+  "rows": [
+    {
+      "conversation_count": "0"
+    },
+    {
+      "conversation_count": "message_count"
+    },
+    {
+      "conversation_count": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "conversation_count\n0\nmessage_count\n0\n",
+  "stderr": "",
+  "execution_time_ms": 409
+}

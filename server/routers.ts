@@ -112,6 +112,52 @@ export const appRouter = router({
         await db.delete(convsTable).where(eq(convsTable.id, input.conversationId));
         return { success: true };
       }),
+
+    sendContactMessage: publicProcedure
+      .input(z.object({ 
+        name: z.string().min(1),
+        email: z.string().email(),
+        phone: z.string().min(1),
+        subject: z.string().min(1),
+        message: z.string().min(1),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await (await import("./db")).getDb();
+        if (!db) throw new Error("Database not available");
+        
+        const { conversations: convsTable, messages: msgsTable } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+        
+        // إنشاء محادثة جديدة أو الحصول على محادثة موجودة
+        let conversation = await db.select().from(convsTable).where(eq(convsTable.userId, 0)).limit(1);
+        
+        let conversationId: number;
+        if (conversation.length === 0) {
+          // إنشاء محادثة جديدة للرسائل العامة
+          const result = await db.insert(convsTable).values({
+            userId: 0,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          });
+          // الحصول على المحادثة المنشأة للحصول على ID
+          const newConv = await db.select().from(convsTable).where(eq(convsTable.userId, 0)).orderBy((await import("drizzle-orm")).desc(convsTable.id)).limit(1);
+          conversationId = newConv[0]?.id || 0;
+        } else {
+          conversationId = conversation[0].id;
+        }
+        
+        // إضافة الرسالة
+        const messageContent = `الاسم: ${input.name}\nالبريد: ${input.email}\nالهاتف: ${input.phone}\nالموضوع: ${input.subject}\n\nالرسالة:\n${input.message}`;
+        await db.insert(msgsTable).values({
+          conversationId: conversationId,
+          userId: 0,
+          content: messageContent,
+          senderType: "user",
+          createdAt: new Date(),
+        });
+        
+        return { success: true, conversationId };
+      }),
   }),
 });
 

@@ -20,27 +20,27 @@ export const appRouter = router({
   }),
 
   chat: router({
-    getOrCreateConversation: publicProcedure.query(async () => {
-      return { conversationId: 1 }; // For now, use a default conversation
+    getOrCreateConversation: protectedProcedure.query(async ({ ctx }) => {
+      return await createOrGetConversation(ctx.user.id);
     }),
     
-    getMessages: publicProcedure
+    getMessages: protectedProcedure
       .input(z.object({ conversationId: z.number() }))
       .query(async ({ input }) => {
         return await getConversationMessages(input.conversationId);
       }),
     
-    sendMessage: publicProcedure
+    sendMessage: protectedProcedure
       .input(z.object({ conversationId: z.number(), content: z.string().min(1) }))
-      .mutation(async ({ input }) => {
-        return await addMessage(input.conversationId, 0, input.content, "user");
+      .mutation(async ({ input, ctx }) => {
+        return await addMessage(input.conversationId, ctx.user.id, input.content, "user");
       }),
     
-    sendAdminReply: publicProcedure
+    sendAdminReply: protectedProcedure
       .input(z.object({ conversationId: z.number(), content: z.string().min(1) }))
       .mutation(async ({ input, ctx }) => {
         // تحقق من أن المستخدم هو admin
-        if (ctx.user?.role !== "admin") {
+        if (ctx.user.role !== "admin") {
           throw new Error("Only admins can send replies");
         }
         return await addMessage(input.conversationId, ctx.user.id, input.content, "admin");

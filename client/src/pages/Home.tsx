@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { ChatBox } from '@/components/ChatBox';
 import { trpc } from '@/lib/trpc';
 import { 
   Users, Briefcase, ShoppingBag, Award, MessageCircle, Info, 
@@ -195,8 +194,6 @@ const STORES = [
 
 export default function Home() {
   const [language, setLanguage] = useState<'ar' | 'en'>('ar');
-  const [showChat, setShowChat] = useState(false);
-  const [conversationId, setConversationId] = useState<string>('1');
   const [contactData, setContactData] = useState({
     name: '',
     email: '',
@@ -210,9 +207,8 @@ export default function Home() {
 
   // استخدام tRPC لإرسال الرسالة
   const sendContactMessageMutation = trpc.admin.sendContactMessage.useMutation({
-    onSuccess: (data) => {
-      setConversationId(data.conversationId?.toString() || '1');
-      setShowChat(true);
+    onSuccess: () => {
+      alert('✅ تم إرسال رسالتك بنجاح! سنتواصل معك قريباً');
       setContactData({ name: '', email: '', phone: '', subject: '', message: '' });
     },
     onError: (error) => {
@@ -226,14 +222,7 @@ export default function Home() {
       alert('يرجى ملء جميع الحقول');
       return;
     }
-    sendContactMessageMutation.mutate(contactData, {
-      onSuccess: (data: any) => {
-        if (data.conversationId) {
-          setConversationId(data.conversationId.toString());
-          setShowChat(true);
-        }
-      },
-    });
+    sendContactMessageMutation.mutate(contactData);
   };
 
   return (
@@ -341,13 +330,8 @@ export default function Home() {
             </Button>
           </form>
         </div>
-       </section>
-      
-      {/* Chat Box */}
-      {showChat && conversationId && (
-        <ChatBox conversationId={conversationId} onClose={() => setShowChat(false)} />
-      )}
-      
+      </section>
+
       {/* Footer */}
       <footer className="bg-primary text-white py-8 px-4">
         <div className="container mx-auto text-center">

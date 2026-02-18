@@ -16,26 +16,15 @@ export interface Message {
   message: string;
   content?: string;
   reply: 'admin' | 'visitor';
-  conversation_id: string;
+  status: 'pending' | 'replied' | 'closed';
   created_at: string;
 }
 
-export interface Conversation {
-  id: string;
-  name: string;
-  email: string;
-  last_message: string;
-  last_message_time: string;
-  unread_count: number;
-  messages: Message[];
-}
-
 export const messagesService = {
-  // إضافة رسالة جديدة مع conversation_id
+  // إضافة رسالة جديدة
   async addMessage(
     messageText: string,
     replyType: 'admin' | 'visitor',
-    conversationId: string,
     name: string = 'زائر',
     email: string = 'visitor@sharaka.sa'
   ): Promise<Message> {
@@ -46,8 +35,8 @@ export const messagesService = {
           name,
           email,
           message: messageText,
+          content: messageText,
           reply: replyType,
-          conversation_id: conversationId,
         })
         .select()
         .single();
@@ -86,76 +75,6 @@ export const messagesService = {
     }
   },
 
-  // الحصول على رسائل محادثة معينة
-  async getConversationMessages(conversationId: string): Promise<Message[]> {
-    try {
-      const { data, error } = await supabase
-        .from('messages')
-        .select('*')
-        .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: true });
-
-      if (error) {
-        console.error('❌ خطأ في تحميل رسائل المحادثة:', error);
-        throw new Error(error.message);
-      }
-
-      console.log('✅ تم تحميل رسائل المحادثة:', data);
-      return data || [];
-    } catch (error) {
-      console.error('❌ خطأ في تحميل رسائل المحادثة:', error);
-      throw error;
-    }
-  },
-
-  // الحصول على جميع المحادثات المجمعة
-  async getAllConversations(): Promise<Conversation[]> {
-    try {
-      const { data, error } = await supabase
-        .from('messages')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('❌ خطأ في تحميل المحادثات:', error);
-        throw new Error(error.message);
-      }
-
-      // تجميع الرسائل حسب conversation_id
-      const conversationsMap = new Map<string, Message[]>();
-      data?.forEach((message: Message) => {
-        if (!conversationsMap.has(message.conversation_id)) {
-          conversationsMap.set(message.conversation_id, []);
-        }
-        conversationsMap.get(message.conversation_id)!.push(message);
-      });
-
-      // تحويل الخريطة إلى قائمة المحادثات
-      const conversations: Conversation[] = Array.from(conversationsMap.entries()).map(
-        ([conversationId, messages]) => {
-          const lastMessage = messages[messages.length - 1];
-          const unreadCount = messages.filter(m => m.reply === 'visitor').length;
-
-          return {
-            id: conversationId,
-            name: lastMessage.name,
-            email: lastMessage.email,
-            last_message: lastMessage.message,
-            last_message_time: lastMessage.created_at,
-            unread_count: unreadCount,
-            messages: messages,
-          };
-        }
-      );
-
-      console.log('✅ تم تحميل المحادثات:', conversations);
-      return conversations;
-    } catch (error) {
-      console.error('❌ خطأ في تحميل المحادثات:', error);
-      throw error;
-    }
-  },
-
   // الحصول على الرسائل الواردة من الزوار فقط
   async getVisitorMessages(): Promise<Message[]> {
     try {
@@ -174,6 +93,54 @@ export const messagesService = {
       return data || [];
     } catch (error) {
       console.error('❌ خطأ في تحميل رسائل الزوار:', error);
+      throw error;
+    }
+  },
+
+  // تحديث حالة المحادثة
+  async updateMessageStatus(
+    id: number,
+    status: 'pending' | 'replied' | 'closed'
+  ): Promise<Message> {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .update({ status })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('❌ خطأ في تحديث حالة المحادثة:', error);
+        throw new Error(error.message);
+      }
+
+      console.log('✅ تم تحديث حالة المحادثة:', data);
+      return data;
+    } catch (error) {
+      console.error('❌ خطأ في تحديث حالة المحادثة:', error);
+      throw error;
+    }
+  },
+
+  // الحصول على الرسائل حسب الحالة
+  async getMessagesByStatus(status: 'pending' | 'replied' | 'closed'): Promise<Message[]> {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('status', status)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('❌ خطأ في تحميل الرسائل:', error);
+        throw new Error(error.message);
+      }
+
+      console.log('✅ تم تحميل الرسائل:', data);
+      return data || [];
+    } catch (error) {
+      console.error('❌ خطأ في تحميل الرسائل:', error);
       throw error;
     }
   },
@@ -200,6 +167,16 @@ export const messagesService = {
     }
   },
 
+  // تحديث حالة القراءة (غير مستخدم حالياً)
+  async markAsRead(id: number): Promise<void> {
+    try {
+      console.log('✅ تم تحديث حالة القراءة للرسالة:', id);
+    } catch (error) {
+      console.error('❌ خطأ في تحديث حالة القراءة:', error);
+      throw error;
+    }
+  },
+
   // حذف رسالة
   async deleteMessage(id: number): Promise<void> {
     try {
@@ -216,33 +193,6 @@ export const messagesService = {
       console.log('✅ تم حذف الرسالة');
     } catch (error) {
       console.error('❌ خطأ في حذف الرسالة:', error);
-      throw error;
-    }
-  },
-
-  // الاستماع للتحديثات الحية
-  subscribeToMessages(conversationId: string, callback: (message: Message) => void) {
-    try {
-      const subscription = supabase
-        .channel(`messages:${conversationId}`)
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'messages',
-            filter: `conversation_id=eq.${conversationId}`,
-          },
-          (payload) => {
-            console.log('✅ رسالة جديدة:', payload.new);
-            callback(payload.new as Message);
-          }
-        )
-        .subscribe();
-
-      return subscription;
-    } catch (error) {
-      console.error('❌ خطأ في الاستماع للرسائل:', error);
       throw error;
     }
   },

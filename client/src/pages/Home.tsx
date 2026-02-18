@@ -396,8 +396,6 @@ export default function Home() {
     subject: '',
     message: '',
   });
-  const [visitorName, setVisitorName] = useState('');
-  const [visitorEmail, setVisitorEmail] = useState('');
 
   const t = translations[language];
   const currentCountry = COUNTRIES.find(c => c.code === selectedCountry);
@@ -408,25 +406,14 @@ export default function Home() {
       try {
         setIsLoadingChat(true);
         
-        // إنشاء معرف محادثة UUID فريد إذا لم يكن موجوداً
+        // إنشاء معرف محادثة فريد إذا لم يكن موجوداً
         let currentConvId = conversationId;
         if (!currentConvId) {
-          // إنشاء UUID v4
-          currentConvId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-            const r = Math.random() * 16 | 0;
-            const v = c === 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-          });
+          currentConvId = `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
           setConversationId(currentConvId);
         }
         
-        const newMessage = await messagesService.addMessage(
-          chatMessage,
-          'visitor',
-          currentConvId,
-          visitorName || 'زائر',
-          visitorEmail || 'visitor@sharaka.sa'
-        );
+        const newMessage = await messagesService.addMessage(chatMessage, 'visitor');
         setChatMessages([...chatMessages, newMessage]);
         setChatMessage('');
       } catch (error) {
@@ -461,13 +448,12 @@ export default function Home() {
   };
 
   const handleAdminReply = async () => {
-    if (adminReplyText.trim() && conversationId) {
+    if (adminReplyText.trim()) {
       try {
         setIsLoadingChat(true);
         const adminReply = await messagesService.addMessage(
           adminReplyText,
           'admin',
-          conversationId,
           'الإدارة',
           'admin@sharaka.sa'
         );
@@ -1103,7 +1089,7 @@ export default function Home() {
                             : 'bg-accent text-white'
                         }`}>
                           <p className="font-semibold text-xs mb-1">{msg.name}</p>
-                          <p>{msg.message}</p>
+                          <p>{msg.message || msg.content}</p>
                         </div>
                       </div>
                     ))

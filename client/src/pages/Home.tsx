@@ -68,6 +68,7 @@ const translations = {
     staffManagementDesc: 'إدارة متكاملة لموارد بشرية احترافية',
     projectManagement: 'إدارة المشاريع',
     projectManagementDesc: 'تخطيط وتنفيذ المشاريع بكفاءة عالية',
+    chatSupport: 'دعم فوري',
   },
   en: {
     selectCountry: 'Select Country',
@@ -123,6 +124,7 @@ const translations = {
     staffManagementDesc: 'Integrated professional human resources management',
     projectManagement: 'Project Management',
     projectManagementDesc: 'Planning and executing projects with high efficiency',
+    chatSupport: 'Live Support',
   }
 };
 
@@ -193,10 +195,17 @@ const STORES = [
   { id: 4, name: 'متجر الكتب', nameEn: 'Book Store', category: 'كتب', categoryEn: 'Books', rating: 4.9, reviews: 312, image: 'https://images.unsplash.com/photo-1507842217343-583f20270319?w=400&h=300&fit=crop' },
 ];
 
+const PATHS = [
+  { id: 'student', title: 'المسار الطلابي', titleEn: 'Student Path', icon: '📚', desc: 'دورات وتحضير للاختبارات', descEn: 'Courses and exam preparation' },
+  { id: 'employee', title: 'مسار الموظف', titleEn: 'Employee Path', icon: '👔', desc: 'تطوير مهني وفرص عمل', descEn: 'Professional development and job opportunities' },
+  { id: 'trader', title: 'مسار التاجر', titleEn: 'Trader Path', icon: '🛍️', desc: 'دعم المتاجر الإلكترونية', descEn: 'E-commerce store support' },
+  { id: 'entrepreneur', title: 'رائد الأعمال', titleEn: 'Entrepreneur', icon: '🚀', desc: 'استشارات وتمويل', descEn: 'Consultations and financing' },
+];
+
 export default function Home() {
   const [language, setLanguage] = useState<'ar' | 'en'>('ar');
   const [showChat, setShowChat] = useState(false);
-  const [conversationId, setConversationId] = useState<string>('1');
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const [contactData, setContactData] = useState({
     name: '',
     email: '',
@@ -285,6 +294,89 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Consultants Section */}
+      <section className="py-20 px-4">
+        <div className="container mx-auto">
+          <h2 className="text-3xl font-bold text-center text-primary mb-12">{t.consultants}</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {CONSULTANTS.map((consultant) => (
+              <div key={consultant.id} className="bg-card p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow text-center">
+                <img src={consultant.image} alt={consultant.name} className="w-24 h-24 rounded-full mx-auto mb-4 object-cover" />
+                <h3 className="text-xl font-bold text-primary mb-2">{language === 'ar' ? consultant.name : consultant.nameEn}</h3>
+                <p className="text-accent font-semibold mb-2">{language === 'ar' ? consultant.specialty : consultant.specialtyEn}</p>
+                <p className="text-foreground/70 mb-4">{language === 'ar' ? consultant.bio : consultant.bioEn}</p>
+                <Button className="bg-primary hover:bg-primary/90 text-white">{t.bookAppointment}</Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Marketplace Section */}
+      <section className="py-20 px-4 bg-gray-50">
+        <div className="container mx-auto">
+          <h2 className="text-3xl font-bold text-center text-primary mb-12">{t.marketplace}</h2>
+          <p className="text-center text-foreground/70 mb-12">{t.marketplaceDesc}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {STORES.map((store) => (
+              <div key={store.id} className="bg-card rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+                <img src={store.image} alt={store.name} className="w-full h-48 object-cover" />
+                <div className="p-4">
+                  <h3 className="text-lg font-bold text-primary mb-2">{language === 'ar' ? store.name : store.nameEn}</h3>
+                  <p className="text-sm text-foreground/70 mb-2">{language === 'ar' ? store.category : store.categoryEn}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-yellow-500">⭐ {store.rating}</span>
+                    <span className="text-foreground/70 text-sm">({store.reviews} {language === 'ar' ? 'تقييم' : 'reviews'})</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Paths Section */}
+      <section className="py-20 px-4">
+        <div className="container mx-auto">
+          <h2 className="text-3xl font-bold text-center text-primary mb-12">{t.paths}</h2>
+          <p className="text-center text-foreground/70 mb-12">{t.pathsDesc}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {PATHS.map((path) => (
+              <div key={path.id} className="bg-card p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow text-center">
+                <div className="text-5xl mb-4">{path.icon}</div>
+                <h3 className="text-xl font-bold text-primary mb-2">{language === 'ar' ? path.title : path.titleEn}</h3>
+                <p className="text-foreground/70">{language === 'ar' ? path.desc : path.descEn}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Points System Section */}
+      <section className="py-20 px-4 bg-gradient-to-r from-accent/10 to-primary/10">
+        <div className="container mx-auto max-w-3xl">
+          <h2 className="text-3xl font-bold text-center text-primary mb-4">{t.points}</h2>
+          <p className="text-center text-foreground/70 mb-12">{t.pointsDesc}</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-card p-6 rounded-lg shadow-md text-center">
+              <div className="text-4xl mb-4">1🌟</div>
+              <h3 className="text-lg font-bold text-primary mb-2">{t.earnPoints}</h3>
+              <p className="text-foreground/70">{t.earnPointsDesc}</p>
+            </div>
+            <div className="bg-card p-6 rounded-lg shadow-md text-center">
+              <div className="text-4xl mb-4">2💵</div>
+              <h3 className="text-lg font-bold text-primary mb-2">{t.collectBalance}</h3>
+              <p className="text-foreground/70">{t.collectBalanceDesc}</p>
+            </div>
+            <div className="bg-card p-6 rounded-lg shadow-md text-center">
+              <div className="text-4xl mb-4">3💳</div>
+              <h3 className="text-lg font-bold text-primary mb-2">{t.useBalance}</h3>
+              <p className="text-foreground/70">{t.useBalanceDesc}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Contact Section */}
       <section className="py-20 px-4 bg-gray-50">
         <div className="container mx-auto max-w-2xl">
@@ -343,8 +435,17 @@ export default function Home() {
         </div>
        </section>
       
+      {/* Chat Button */}
+      <button
+        onClick={() => setShowChat(true)}
+        className="fixed bottom-6 right-6 w-16 h-16 bg-primary text-white rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all flex items-center justify-center text-2xl z-40"
+        title={t.chatSupport || 'دعم فوري'}
+      >
+        💬
+      </button>
+
       {/* Chat Box */}
-      {showChat && conversationId && (
+      {showChat && conversationId !== null && (
         <ChatBox conversationId={conversationId} onClose={() => setShowChat(false)} />
       )}
       

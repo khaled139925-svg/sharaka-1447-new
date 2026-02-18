@@ -1,311 +1,167 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { ChatBox } from '@/components/ChatBox';
 import { trpc } from '@/lib/trpc';
-import { 
-  Users, Briefcase, ShoppingBag, Award, MessageCircle, Info, 
-  ChevronRight, MapPin, TrendingUp, Zap, Mail, Phone, AlertCircle,
-  ExternalLink, ArrowRight, Globe
-} from 'lucide-react';
-
-const LOGO_URL = 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663333045223/nOdruZWcjEkuqgXg.jpeg';
-
-// نظام اللغات
-const translations = {
-  ar: {
-    selectCountry: 'اختر الدولة',
-    selectLanguage: 'اللغة',
-    tagline: 'شريك نجاحك',
-    platformName: 'منصة الخدمات المتكاملة',
-    description: 'نربط الخبرات بالفرص، نوفر الاستشارات، سوق إلكتروني، خدمات تعهيد وعمل عن بعد',
-    startNow: 'ابدأ الآن',
-    consultants: 'المستشارون والاستشارات',
-    consultantsDesc: 'استشارات متخصصة من الخبراء',
-    bookAppointment: 'حجز موعد',
-    services: 'خدمات التعهيد والإدارة',
-    servicesDesc: 'حلول متكاملة لإدارة موارد شركتك',
-    marketplace: 'السوق الإلكتروني',
-    marketplaceDesc: 'منصة متكاملة تجمع أفضل المتاجر والعروض',
-    enterStore: 'دخول المتجر',
-    paths: 'المسارات المتاحة',
-    pathsDesc: 'اختر المسار المناسب لك',
-    points: 'نظام النقاط والرصيد المالي',
-    pointsDesc: 'نظام حوافز ذكي يحول عمليات الشراء إلى رصيد مالي حقيقي',
-    earnPoints: '1. اكسب النقاط',
-    earnPointsDesc: 'من كل عملية شراء',
-    collectBalance: '2. تجميع الرصيد',
-    collectBalanceDesc: 'رصيد مالي حقيقي',
-    useBalance: '3. استخدم الرصيد',
-    useBalanceDesc: 'في أي متجر',
-    contact: 'تواصل معنا',
-    contactDesc: 'نحن هنا للإجابة على جميع أسئلتك',
-    email: 'البريد الإلكتروني',
-    phoneLabel: 'الهاتف',
-    address: 'العنوان',
-    about: 'من نحن',
-    vision: 'رؤية منصة شراكة',
-    visionText: 'منصة شراكة هي منصة أعمال رقمية متكاملة تهدف إلى ربط الأفراد والشركات والمستشارين والمتاجر في بيئة واحدة آمنة وموثوقة.',
-    commitment: 'التزام منصة شراكة',
-    commitmentText: 'تلتزم منصة شراكة بدفع راتب شهر كامل من كل 12 شهر للموظف الذي يعمل لدى العميل ضمن عقد التعهيد.',
-    name: 'اسمك',
-    emailPlaceholder: 'بريدك الإلكتروني',
-    phoneInput: 'رقم الهاتف',
-    subject: 'الموضوع',
-    message: 'رسالتك',
-    send: 'إرسال الرسالة',
-    confirm: 'تأكيد',
-    cancel: 'إلغاء',
-    quickLinks: 'روابط سريعة',
-    legal: 'قانوني',
-    privacy: 'سياسة الخصوصية',
-    terms: 'الشروط والأحكام',
-    allRights: 'جميع الحقوق محفوظة',
-    hiring: 'التوظيف والاستقطاب',
-    hiringDesc: 'نساعدك في البحث عن أفضل الكوادر المتخصصة',
-    staffManagement: 'إدارة الموظفين',
-    staffManagementDesc: 'إدارة متكاملة لموارد بشرية احترافية',
-    projectManagement: 'إدارة المشاريع',
-    projectManagementDesc: 'تخطيط وتنفيذ المشاريع بكفاءة عالية',
-    chatSupport: 'دعم فوري',
-  },
-  en: {
-    selectCountry: 'Select Country',
-    selectLanguage: 'Language',
-    tagline: 'Your Success Partner',
-    platformName: 'Integrated Services Platform',
-    description: 'We connect expertise with opportunities, provide consultations, e-commerce marketplace, outsourcing services and remote work',
-    startNow: 'Start Now',
-    consultants: 'Consultants & Consultations',
-    consultantsDesc: 'Specialized consultations from experts',
-    bookAppointment: 'Book Appointment',
-    services: 'Outsourcing & Management Services',
-    servicesDesc: 'Integrated solutions for managing your company resources',
-    marketplace: 'E-Commerce Marketplace',
-    marketplaceDesc: 'An integrated platform that brings together the best stores and offers',
-    enterStore: 'Enter Store',
-    paths: 'Available Paths',
-    pathsDesc: 'Choose the right path for you',
-    points: 'Points & Financial Balance System',
-    pointsDesc: 'A smart rewards system that converts purchases into real financial credit',
-    earnPoints: '1. Earn Points',
-    earnPointsDesc: 'From every purchase',
-    collectBalance: '2. Collect Balance',
-    collectBalanceDesc: 'Real financial credit',
-    useBalance: '3. Use Balance',
-    useBalanceDesc: 'In any store',
-    contact: 'Contact Us',
-    contactDesc: 'We are here to answer all your questions',
-    email: 'Email',
-    phoneLabel: 'Phone',
-    address: 'Address',
-    about: 'About Us',
-    vision: 'Sharaka Platform Vision',
-    visionText: 'Sharaka is an integrated digital business platform that aims to connect individuals, companies, consultants and stores in one safe and reliable environment.',
-    commitment: 'Sharaka Platform Commitment',
-    commitmentText: 'Sharaka commits to paying one full month salary for every 12 months for employees working with clients under outsourcing contracts.',
-    name: 'Your Name',
-    emailPlaceholder: 'Your Email',
-    phoneInput: 'Phone Number',
-    subject: 'Subject',
-    message: 'Your Message',
-    send: 'Send Message',
-    confirm: 'Confirm',
-    cancel: 'Cancel',
-    quickLinks: 'Quick Links',
-    legal: 'Legal',
-    privacy: 'Privacy Policy',
-    terms: 'Terms & Conditions',
-    allRights: 'All rights reserved',
-    hiring: 'Recruitment & Hiring',
-    hiringDesc: 'We help you find the best specialized talent',
-    staffManagement: 'Staff Management',
-    staffManagementDesc: 'Integrated professional human resources management',
-    projectManagement: 'Project Management',
-    projectManagementDesc: 'Planning and executing projects with high efficiency',
-    chatSupport: 'Live Support',
-  }
-};
-
-const CONSULTANTS = [
-  {
-    id: 1,
-    name: 'د. أحمد محمد',
-    nameEn: 'Dr. Ahmed Mohammed',
-    specialty: 'استشارات إدارة الأعمال',
-    specialtyEn: 'Business Management Consultations',
-    bio: 'خبرة 15 سنة في إدارة المشاريع والشركات',
-    bioEn: '15 years of experience in project and company management',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop',
-  },
-  {
-    id: 2,
-    name: 'أ. فاطمة علي',
-    nameEn: 'Fatima Ali',
-    specialty: 'التسويق الرقمي',
-    specialtyEn: 'Digital Marketing',
-    bio: 'متخصصة في التسويق الإلكتروني والعلامات التجارية',
-    bioEn: 'Specialized in e-marketing and branding',
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop',
-  },
-  {
-    id: 3,
-    name: 'م. سارة حسن',
-    nameEn: 'Sarah Hassan',
-    specialty: 'تطوير البرمجيات',
-    specialtyEn: 'Software Development',
-    bio: 'مهندسة برمجيات بخبرة 10 سنوات في التطوير',
-    bioEn: '10 years of software engineering experience',
-    image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop',
-  },
-];
-
-const SERVICES = [
-  {
-    id: 1,
-    title: 'التوظيف والاستقطاب',
-    titleEn: 'Recruitment & Hiring',
-    description: 'نساعدك في البحث عن أفضل الكوادر المتخصصة',
-    descriptionEn: 'We help you find the best specialized talent',
-    icon: Users,
-  },
-  {
-    id: 2,
-    title: 'إدارة الموظفين',
-    titleEn: 'Staff Management',
-    description: 'إدارة متكاملة لموارد بشرية احترافية',
-    descriptionEn: 'Integrated professional human resources management',
-    icon: Briefcase,
-  },
-  {
-    id: 3,
-    title: 'إدارة المشاريع',
-    titleEn: 'Project Management',
-    description: 'تخطيط وتنفيذ المشاريع بكفاءة عالية',
-    descriptionEn: 'Planning and executing projects with high efficiency',
-    icon: Award,
-  },
-];
-
-const STORES = [
-  { id: 1, name: 'متجر التكنولوجيا', nameEn: 'Tech Store', category: 'إلكترونيات', categoryEn: 'Electronics', rating: 4.8, reviews: 234, image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop' },
-  { id: 2, name: 'متجر الملابس', nameEn: 'Fashion Store', category: 'ملابس', categoryEn: 'Clothing', rating: 4.6, reviews: 189, image: 'https://images.unsplash.com/photo-1441984904556-0ac8ce9fdf67?w=400&h=300&fit=crop' },
-  { id: 3, name: 'متجر الديكور', nameEn: 'Decor Store', category: 'ديكور', categoryEn: 'Decor', rating: 4.7, reviews: 156, image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=300&fit=crop' },
-  { id: 4, name: 'متجر الكتب', nameEn: 'Book Store', category: 'كتب', categoryEn: 'Books', rating: 4.9, reviews: 312, image: 'https://images.unsplash.com/photo-1507842217343-583f20270319?w=400&h=300&fit=crop' },
-];
-
-const PATHS = [
-  { id: 'student', title: 'المسار الطلابي', titleEn: 'Student Path', icon: '📚', desc: 'دورات وتحضير للاختبارات', descEn: 'Courses and exam preparation' },
-  { id: 'employee', title: 'مسار الموظف', titleEn: 'Employee Path', icon: '👔', desc: 'تطوير مهني وفرص عمل', descEn: 'Professional development and job opportunities' },
-  { id: 'trader', title: 'مسار التاجر', titleEn: 'Trader Path', icon: '🛍️', desc: 'دعم المتاجر الإلكترونية', descEn: 'E-commerce store support' },
-  { id: 'entrepreneur', title: 'رائد الأعمال', titleEn: 'Entrepreneur', icon: '🚀', desc: 'استشارات وتمويل', descEn: 'Consultations and financing' },
-];
 
 export default function Home() {
-  const [language, setLanguage] = useState<'ar' | 'en'>('ar');
-  const [showChat, setShowChat] = useState(false);
-  const [conversationId, setConversationId] = useState<string | null>(null);
-  const [contactData, setContactData] = useState({
+  const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     subject: '',
-    message: '',
+    message: ''
   });
 
-  const t = translations[language];
+  const [language, setLanguage] = useState<'ar' | 'en'>('ar');
   const isRTL = language === 'ar';
 
-  // استخدام tRPC لإرسال الرسالة
-  const sendContactMessageMutation = trpc.admin.sendContactMessage.useMutation({
-    onSuccess: (data) => {
-      setConversationId(data.conversationId?.toString() || '1');
-      setShowChat(true);
-      setContactData({ name: '', email: '', phone: '', subject: '', message: '' });
-    },
-    onError: (error) => {
-      alert(`❌ خطأ: ${error.message}`);
-    },
-  });
+  const t = language === 'ar' ? {
+    platformName: 'منصة الخدمات المتكاملة',
+    description: 'منصة أعمال رقمية متكاملة تجمع الاستشارات، التعهيد وإدارة المشاريع، السوق الإلكتروني، ونظام نقاط وشريك نجاحك',
+    startNow: 'ابدأ الآن',
+    consultants: 'المستشارون والاستشارات',
+    services: 'خدمات التعهيد والإدارة',
+    marketplace: 'السوق الإلكتروني',
+    points: 'نظام النقاط والرصيد المالي',
+    bookAppointment: 'حجز موعد',
+    enterStore: 'دخول المتجر',
+    paths: 'المسارات المتاحة',
+    contact: 'تواصل معنا',
+    send: 'إرسال الرسالة',
+    name: 'اسمك',
+    email: 'بريدك الإلكتروني',
+    phone: 'رقم الهاتف',
+    subject: 'الموضوع',
+    message: 'رسالتك',
+    about: 'من نحن',
+    vision: 'رؤية منصة شراكة',
+    visionText: 'منصة شراكة هي منصة أعمال رقمية متكاملة تهدف إلى ربط الأفراد والشركات والمستشارين والمتاجر في بيئة واحدة آمنة وموثوقة.',
+  } : {
+    platformName: 'Integrated Services Platform',
+    description: 'An integrated digital business platform that brings together consultations, outsourcing and project management, e-commerce marketplace, and points system',
+    startNow: 'Start Now',
+    consultants: 'Consultants & Consultations',
+    services: 'Outsourcing & Management Services',
+    marketplace: 'E-Commerce Marketplace',
+    points: 'Points & Financial Balance System',
+    bookAppointment: 'Book Appointment',
+    enterStore: 'Enter Store',
+    paths: 'Available Paths',
+    contact: 'Contact Us',
+    send: 'Send Message',
+    name: 'Your Name',
+    email: 'Your Email',
+    phone: 'Phone Number',
+    subject: 'Subject',
+    message: 'Your Message',
+    about: 'About Us',
+    vision: 'Sharaka Platform Vision',
+    visionText: 'Sharaka is an integrated digital business platform that aims to connect individuals, companies, consultants and stores in one safe and reliable environment.',
+  };
 
-  const handleContactSubmit = (e: React.FormEvent) => {
+  const sendContactMutation = trpc.admin.sendContactMessage.useMutation();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!contactData.name || !contactData.email || !contactData.phone || !contactData.subject || !contactData.message) {
-      alert('يرجى ملء جميع الحقول');
-      return;
+    try {
+      await sendContactMutation.mutateAsync(formData);
+      alert('تم إرسال رسالتك بنجاح!');
+      setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+    } catch (error) {
+      alert('حدث خطأ في الإرسال');
+      console.error(error);
     }
-    sendContactMessageMutation.mutate(contactData, {
-      onSuccess: (data: any) => {
-        if (data.conversationId) {
-          setConversationId(data.conversationId.toString());
-          setShowChat(true);
-        }
-      },
-    });
   };
 
   return (
-    <div className={`min-h-screen bg-background ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className={`min-h-screen bg-gradient-to-b from-green-100 to-white ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-card shadow-md border-b border-border">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <img src={LOGO_URL} alt="Sharaka" className="h-16 w-auto object-contain" />
-          </div>
-          <div className="flex items-center gap-3">
-            <a href="/admin" className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
-              🔐 إدارة
-            </a>
-            <button onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')} className="px-3 py-2 bg-gray-200 rounded-lg">
-              {language === 'ar' ? 'English' : 'العربية'}
+      <header className="bg-white shadow-sm">
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <button onClick={() => setLanguage('ar')} className={`px-3 py-1 rounded ${language === 'ar' ? 'bg-blue-600 text-white' : 'text-gray-600'}`}>
+              العربية
+            </button>
+            <button onClick={() => setLanguage('en')} className={`px-3 py-1 rounded ${language === 'en' ? 'bg-blue-600 text-white' : 'text-gray-600'}`}>
+              English
             </button>
           </div>
+          <h1 className="text-2xl font-bold text-blue-600">{t.platformName}</h1>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-accent/10 to-primary/10 py-20 px-4">
-        <div className="container mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-primary mb-4">{t.platformName}</h1>
-          <p className="text-xl text-foreground/70 mb-8">{t.description}</p>
-          <Button className="bg-primary hover:bg-primary/90 text-white px-8 py-6 text-lg">
+      <section className="py-20 text-center">
+        <div className="container mx-auto px-4">
+          <div className="w-32 h-32 mx-auto mb-8 bg-green-400 rounded-lg flex items-center justify-center">
+            <span className="text-6xl">🇸🇦</span>
+          </div>
+          <h2 className="text-4xl font-bold text-orange-500 mb-4">{t.platformName}</h2>
+          <p className="text-gray-600 mb-8 max-w-2xl mx-auto">{t.description}</p>
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg">
             {t.startNow}
           </Button>
         </div>
       </section>
 
-      {/* Services Section */}
-      <section className="py-20 px-4">
-        <div className="container mx-auto">
-          <h2 className="text-3xl font-bold text-center text-primary mb-12">{t.services}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {SERVICES.map((service) => {
-              const Icon = service.icon;
-              return (
-                <div key={service.id} className="bg-card p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                  <Icon className="w-12 h-12 text-accent mb-4" />
-                  <h3 className="text-xl font-bold text-primary mb-2">{language === 'ar' ? service.title : service.titleEn}</h3>
-                  <p className="text-foreground/70">{language === 'ar' ? service.description : service.descriptionEn}</p>
-                </div>
-              );
-            })}
+      {/* Navigation Cards */}
+      <section className="py-12 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-4 gap-6">
+            <div className="text-center p-6">
+              <div className="text-4xl mb-2">👨‍💼</div>
+              <h3 className="font-bold text-blue-600">{t.consultants}</h3>
+              <p className="text-sm text-gray-600">استشارات متخصصة</p>
+            </div>
+            <div className="text-center p-6">
+              <div className="text-4xl mb-2">💼</div>
+              <h3 className="font-bold text-blue-600">{t.services}</h3>
+              <p className="text-sm text-gray-600">خدمات التعهيد</p>
+            </div>
+            <div className="text-center p-6">
+              <div className="text-4xl mb-2">🛒</div>
+              <h3 className="font-bold text-blue-600">{t.marketplace}</h3>
+              <p className="text-sm text-gray-600">متاجر إلكترونية</p>
+            </div>
+            <div className="text-center p-6">
+              <div className="text-4xl mb-2">⭐</div>
+              <h3 className="font-bold text-blue-600">{t.points}</h3>
+              <p className="text-sm text-gray-600">نظام الحوافز</p>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Consultants Section */}
-      <section className="py-20 px-4">
-        <div className="container mx-auto">
-          <h2 className="text-3xl font-bold text-center text-primary mb-12">{t.consultants}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {CONSULTANTS.map((consultant) => (
-              <div key={consultant.id} className="bg-card p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow text-center">
-                <img src={consultant.image} alt={consultant.name} className="w-24 h-24 rounded-full mx-auto mb-4 object-cover" />
-                <h3 className="text-xl font-bold text-primary mb-2">{language === 'ar' ? consultant.name : consultant.nameEn}</h3>
-                <p className="text-accent font-semibold mb-2">{language === 'ar' ? consultant.specialty : consultant.specialtyEn}</p>
-                <p className="text-foreground/70 mb-4">{language === 'ar' ? consultant.bio : consultant.bioEn}</p>
-                <Button className="bg-primary hover:bg-primary/90 text-white">{t.bookAppointment}</Button>
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-12 text-blue-600">{t.consultants}</h2>
+          <div className="grid grid-cols-3 gap-8">
+            {['د. أحمد محمد', 'أ. فاطمة علي', 'م. سارة حسن'].map((name, i) => (
+              <div key={i} className="bg-white rounded-lg shadow p-6 text-center">
+                <div className="w-24 h-24 mx-auto bg-gray-300 rounded-full mb-4"></div>
+                <h3 className="font-bold mb-2">{name}</h3>
+                <p className="text-sm text-gray-600 mb-4">متخصص في المجال</p>
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white w-full">
+                  {t.bookAppointment}
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Services Section */}
+      <section className="py-12 bg-white">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-12 text-blue-600">{t.services}</h2>
+          <div className="grid grid-cols-3 gap-8">
+            {['التوظيف والاستقطاب', 'إدارة الموظفين', 'إدارة المشاريع'].map((service, i) => (
+              <div key={i} className="p-6 text-center">
+                <div className="text-4xl mb-4">📋</div>
+                <h3 className="font-bold mb-2">{service}</h3>
+                <p className="text-sm text-gray-600">خدمة متخصصة</p>
               </div>
             ))}
           </div>
@@ -313,22 +169,18 @@ export default function Home() {
       </section>
 
       {/* Marketplace Section */}
-      <section className="py-20 px-4 bg-gray-50">
-        <div className="container mx-auto">
-          <h2 className="text-3xl font-bold text-center text-primary mb-12">{t.marketplace}</h2>
-          <p className="text-center text-foreground/70 mb-12">{t.marketplaceDesc}</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {STORES.map((store) => (
-              <div key={store.id} className="bg-card rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-                <img src={store.image} alt={store.name} className="w-full h-48 object-cover" />
-                <div className="p-4">
-                  <h3 className="text-lg font-bold text-primary mb-2">{language === 'ar' ? store.name : store.nameEn}</h3>
-                  <p className="text-sm text-foreground/70 mb-2">{language === 'ar' ? store.category : store.categoryEn}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-yellow-500">⭐ {store.rating}</span>
-                    <span className="text-foreground/70 text-sm">({store.reviews} {language === 'ar' ? 'تقييم' : 'reviews'})</span>
-                  </div>
-                </div>
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-12 text-blue-600">{t.marketplace}</h2>
+          <div className="grid grid-cols-4 gap-6">
+            {['متجر التكنولوجيا', 'متجر الملابس', 'متجر الديكور', 'متجر الكتب'].map((store, i) => (
+              <div key={i} className="bg-white rounded-lg shadow p-6 text-center">
+                <div className="w-full h-32 bg-gray-300 rounded mb-4"></div>
+                <h3 className="font-bold mb-2">{store}</h3>
+                <p className="text-sm text-yellow-500 mb-4">⭐ 4.8 (234 تقييم)</p>
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white w-full">
+                  {t.enterStore}
+                </Button>
               </div>
             ))}
           </div>
@@ -336,125 +188,109 @@ export default function Home() {
       </section>
 
       {/* Paths Section */}
-      <section className="py-20 px-4">
-        <div className="container mx-auto">
-          <h2 className="text-3xl font-bold text-center text-primary mb-12">{t.paths}</h2>
-          <p className="text-center text-foreground/70 mb-12">{t.pathsDesc}</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {PATHS.map((path) => (
-              <div key={path.id} className="bg-card p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow text-center">
-                <div className="text-5xl mb-4">{path.icon}</div>
-                <h3 className="text-xl font-bold text-primary mb-2">{language === 'ar' ? path.title : path.titleEn}</h3>
-                <p className="text-foreground/70">{language === 'ar' ? path.desc : path.descEn}</p>
+      <section className="py-12 bg-white">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-12 text-blue-600">{t.paths}</h2>
+          <div className="grid grid-cols-6 gap-4">
+            {[
+              { icon: '📚', name: 'المسار الطلابي' },
+              { icon: '👔', name: 'مسار الموظف' },
+              { icon: '🛍️', name: 'مسار التاجر' },
+              { icon: '🚀', name: 'رائد الأعمال' },
+              { icon: '🎯', name: 'الباحث عن عمل' },
+              { icon: '🔬', name: 'الباحث' },
+            ].map((path, i) => (
+              <div key={i} className="text-center p-4">
+                <div className="text-4xl mb-2">{path.icon}</div>
+                <h3 className="font-bold text-sm">{path.name}</h3>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Points System Section */}
-      <section className="py-20 px-4 bg-gradient-to-r from-accent/10 to-primary/10">
-        <div className="container mx-auto max-w-3xl">
-          <h2 className="text-3xl font-bold text-center text-primary mb-4">{t.points}</h2>
-          <p className="text-center text-foreground/70 mb-12">{t.pointsDesc}</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-card p-6 rounded-lg shadow-md text-center">
-              <div className="text-4xl mb-4">1🌟</div>
-              <h3 className="text-lg font-bold text-primary mb-2">{t.earnPoints}</h3>
-              <p className="text-foreground/70">{t.earnPointsDesc}</p>
-            </div>
-            <div className="bg-card p-6 rounded-lg shadow-md text-center">
-              <div className="text-4xl mb-4">2💵</div>
-              <h3 className="text-lg font-bold text-primary mb-2">{t.collectBalance}</h3>
-              <p className="text-foreground/70">{t.collectBalanceDesc}</p>
-            </div>
-            <div className="bg-card p-6 rounded-lg shadow-md text-center">
-              <div className="text-4xl mb-4">3💳</div>
-              <h3 className="text-lg font-bold text-primary mb-2">{t.useBalance}</h3>
-              <p className="text-foreground/70">{t.useBalanceDesc}</p>
-            </div>
+      {/* Points Section */}
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-12 text-blue-600">{t.points}</h2>
+          <div className="grid grid-cols-3 gap-8">
+            {[
+              { num: '1', icon: '⭐', title: 'اكسب النقاط' },
+              { num: '2', icon: '💵', title: 'تجميع الرصيد' },
+              { num: '3', icon: '💳', title: 'استخدم الرصيد' },
+            ].map((step, i) => (
+              <div key={i} className="bg-white rounded-lg shadow p-8 text-center">
+                <div className="text-4xl mb-4">{step.icon}</div>
+                <h3 className="font-bold text-blue-600">{step.num}. {step.title}</h3>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Contact Section */}
-      <section className="py-20 px-4 bg-gray-50">
-        <div className="container mx-auto max-w-2xl">
-          <h2 className="text-3xl font-bold text-center text-primary mb-12">{t.contact}</h2>
-          <form onSubmit={handleContactSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Contact Form Section */}
+      <section className="py-12 bg-white">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-12 text-blue-600">{t.contact}</h2>
+          <div className="max-w-2xl mx-auto bg-gradient-to-b from-orange-50 to-white rounded-lg p-8 border-2 border-dashed border-orange-300">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <input
                 type="text"
                 placeholder={t.name}
-                value={contactData.name}
-                onChange={(e) => setContactData({ ...contactData, name: e.target.value })}
-                className="px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                required
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded"
               />
               <input
                 type="email"
-                placeholder={t.emailPlaceholder}
-                value={contactData.email}
-                onChange={(e) => setContactData({ ...contactData, email: e.target.value })}
-                className="px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                required
+                placeholder={t.email}
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded"
               />
-            </div>
-            <input
-              type="tel"
-              placeholder={t.phoneInput}
-              value={contactData.phone}
-              onChange={(e) => setContactData({ ...contactData, phone: e.target.value })}
-              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            />
-            <input
-              type="text"
-              placeholder={t.subject}
-              value={contactData.subject}
-              onChange={(e) => setContactData({ ...contactData, subject: e.target.value })}
-              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            />
-            <textarea
-              placeholder={t.message}
-              value={contactData.message}
-              onChange={(e) => setContactData({ ...contactData, message: e.target.value })}
-              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-              rows={5}
-              required
-            />
-            <Button
-              type="submit"
-              disabled={sendContactMessageMutation.isPending}
-              className="w-full bg-primary hover:bg-primary/90 text-white py-3"
-            >
-              {sendContactMessageMutation.isPending ? 'جاري الإرسال...' : t.send}
-            </Button>
-          </form>
+              <input
+                type="tel"
+                placeholder={t.phone}
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded"
+              />
+              <input
+                type="text"
+                placeholder={t.subject}
+                value={formData.subject}
+                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded"
+              />
+              <textarea
+                placeholder={t.message}
+                value={formData.message}
+                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded h-32"
+              />
+              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded">
+                {t.send}
+              </Button>
+            </form>
+          </div>
         </div>
-       </section>
-      
+      </section>
+
+      {/* About Section */}
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-8 text-blue-600">{t.about}</h2>
+          <div className="max-w-2xl mx-auto text-center">
+            <h3 className="text-xl font-bold mb-4">{t.vision}</h3>
+            <p className="text-gray-600">{t.visionText}</p>
+          </div>
+        </div>
+      </section>
+
       {/* Chat Button */}
-      <button
-        onClick={() => setShowChat(true)}
-        className="fixed bottom-6 right-6 w-16 h-16 bg-primary text-white rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all flex items-center justify-center text-2xl z-40"
-        title={t.chatSupport || 'دعم فوري'}
-      >
+      <button className="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white rounded-full w-16 h-16 flex items-center justify-center text-2xl shadow-lg">
         💬
       </button>
-
-      {/* Chat Box */}
-      {showChat && conversationId !== null && (
-        <ChatBox conversationId={conversationId} onClose={() => setShowChat(false)} />
-      )}
-      
-      {/* Footer */}
-      <footer className="bg-primary text-white py-8 px-4">
-        <div className="container mx-auto text-center">
-          <p>&copy; 2026 {t.platformName}. {t.allRights}</p>
-        </div>
-      </footer>
     </div>
   );
 }

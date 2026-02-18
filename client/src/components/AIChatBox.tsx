@@ -52,7 +52,7 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Markdown } from "@/components/Markdown";
+
 import { cn } from "@/lib/utils";
 import { Loader2, Send, Sparkles } from "lucide-react";
 import { useState, useRef, useEffect, ReactNode } from "react";
@@ -245,9 +245,7 @@ function MessageBubble({
             }
             return (
               <div key={i} className="prose prose-sm dark:prose-invert max-w-none">
-                <Markdown mode={isStreaming ? "typewriter" : "static"} typewriterSpeed={50}>
-                  {part.text}
-                </Markdown>
+                <p className="text-sm text-foreground whitespace-pre-wrap">{part.text}</p>
               </div>
             );
           }

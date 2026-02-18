@@ -46,6 +46,73 @@ export const appRouter = router({
         return await addMessage(input.conversationId, ctx.user.id, input.content, "admin");
       }),
   }),
+
+  admin: router({
+    getAllConversations: publicProcedure.query(async ({ ctx }) => {
+      const db = await (await import("./db")).getDb();
+      if (!db) throw new Error("Database not available");
+      
+      const { conversations: convsTable, messages: msgsTable } = await import("../drizzle/schema");
+      const { desc } = await import("drizzle-orm");
+      
+      // الحصول على جميع المحادثات مع آخر رسالة
+      const allConversations = await db.select().from(convsTable).orderBy(desc(convsTable.updatedAt));
+      
+      const result = await Promise.all(
+        allConversations.map(async (conv) => {
+          const msgs = await db.select().from(msgsTable).where((await import("drizzle-orm")).eq(msgsTable.conversationId, conv.id)).orderBy(desc(msgsTable.createdAt));
+          return {
+            ...conv,
+            messages: msgs,
+            lastMessage: msgs[0] || null,
+          };
+        })
+      );
+      
+      return result;
+    }),
+
+    getConversationMessages: publicProcedure
+      .input(z.object({ conversationId: z.number() }))
+      .query(async ({ input }) => {
+        return await getConversationMessages(input.conversationId);
+      }),
+
+    sendAdminReply: publicProcedure
+      .input(z.object({ conversationId: z.number(), content: z.string().min(1), userId: z.number() }))
+      .mutation(async ({ input }) => {
+        return await addMessage(input.conversationId, input.userId, input.content, "admin");
+      }),
+
+    deleteMessage: publicProcedure
+      .input(z.object({ messageId: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await (await import("./db")).getDb();
+        if (!db) throw new Error("Database not available");
+        
+        const { messages: msgsTable } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+        
+        await db.delete(msgsTable).where(eq(msgsTable.id, input.messageId));
+        return { success: true };
+      }),
+
+    deleteConversation: publicProcedure
+      .input(z.object({ conversationId: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await (await import("./db")).getDb();
+        if (!db) throw new Error("Database not available");
+        
+        const { conversations: convsTable, messages: msgsTable } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+        
+        // حذف جميع الرسائل أولاً
+        await db.delete(msgsTable).where(eq(msgsTable.conversationId, input.conversationId));
+        // ثم حذف المحادثة
+        await db.delete(convsTable).where(eq(convsTable.id, input.conversationId));
+        return { success: true };
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

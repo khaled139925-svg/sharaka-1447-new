@@ -1,126 +1,112 @@
-import { useState, useEffect } from 'react';
+'use client';
+
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Send, Lock, LogOut, MessageCircle, Trash2, RefreshCw } from 'lucide-react';
-import { messagesService, Message } from '@/lib/supabase-messages';
+import { trpc } from '@/lib/trpc';
+
+interface Conversation {
+  id: number;
+  userId: number;
+  createdAt: Date;
+  updatedAt: Date;
+  messages: any[];
+  lastMessage: any;
+}
 
 export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [selectedConversationId, setSelectedConversationId] = useState<number | null>(null);
   const [replyText, setReplyText] = useState('');
-  const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const ADMIN_PASSWORD = 'tariq';
+
+  // استخدام useQuery للحصول على المحادثات
+  const { data: conversations = [], isLoading, refetch } = trpc.admin.getAllConversations.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
 
   // التحقق من كلمة السر
   const handleLogin = () => {
     if (password === ADMIN_PASSWORD) {
       setIsAuthenticated(true);
       setPassword('');
-      loadMessages();
     } else {
       alert('كلمة السر غير صحيحة');
     }
   };
 
-  // تحميل الرسائل
-  const loadMessages = async () => {
-    try {
-      setIsRefreshing(true);
-      const data = await messagesService.getMessages();
-      setMessages(data);
-      console.log('✅ تم تحميل الرسائل:', data);
-    } catch (error) {
-      console.error('خطأ في تحميل الرسائل:', error);
-      alert('فشل تحميل الرسائل. تأكد من اتصالك بـ Supabase');
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
+  // الرد على محادثة
+  const sendReplyMutation = trpc.admin.sendAdminReply.useMutation({
+    onSuccess: () => {
+      setReplyText('');
+      refetch();
+      alert('✅ تم إرسال الرد بنجاح');
+    },
+    onError: (error) => {
+      alert(`❌ خطأ: ${error.message}`);
+    },
+  });
 
-  // تحديث تلقائي للرسائل كل 5 ثوانٍ
-  useEffect(() => {
-    if (!isAuthenticated) return;
-
-    const interval = setInterval(() => {
-      loadMessages();
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [isAuthenticated]);
-
-  // الرد على رسالة
   const handleReply = async () => {
-    if (!replyText.trim() || selectedMessageId === null) {
+    if (!replyText.trim() || selectedConversationId === null) {
       alert('يرجى كتابة رد قبل الإرسال');
       return;
     }
 
-    try {
-      setIsLoading(true);
-      
-      // إضافة الرد كرسالة جديدة
-      await messagesService.addMessage(
-        replyText,
-        'admin',
-        'الإدارة',
-        'admin@sharaka.sa'
-      );
-
-      console.log('✅ تم إرسال الرد بنجاح');
-      
-      // تنظيف الحقول
-      setReplyText('');
-      setSelectedMessageId(null);
-      
-      // تحديث قائمة الرسائل
-      await loadMessages();
-      
-      alert('✅ تم إرسال الرد بنجاح');
-    } catch (error) {
-      console.error('خطأ في الرد:', error);
-      alert('❌ فشل إرسال الرد. حاول مرة أخرى');
-    } finally {
-      setIsLoading(false);
-    }
+    sendReplyMutation.mutate({
+      conversationId: selectedConversationId,
+      content: replyText,
+      userId: 0,
+    });
   };
 
   // حذف رسالة
-  const handleDelete = async (id: number | null) => {
-    if (id === null) return;
-    if (!confirm('هل تريد حذف هذه الرسالة؟')) return;
-
-    try {
-      await messagesService.deleteMessage(id);
-      console.log('✅ تم حذف الرسالة');
-      
-      if (selectedMessageId === id) {
-        setSelectedMessageId(null);
-        setReplyText('');
-      }
-      
-      await loadMessages();
+  const deleteMessageMutation = trpc.admin.deleteMessage.useMutation({
+    onSuccess: () => {
+      refetch();
       alert('✅ تم حذف الرسالة بنجاح');
-    } catch (error) {
-      console.error('خطأ في حذف الرسالة:', error);
-      alert('❌ فشل حذف الرسالة');
-    }
+    },
+    onError: (error) => {
+      alert(`❌ خطأ: ${error.message}`);
+    },
+  });
+
+  const handleDeleteMessage = async (messageId: number) => {
+    if (!confirm('هل تريد حذف هذه الرسالة؟')) return;
+    deleteMessageMutation.mutate({ messageId });
+  };
+
+  // حذف محادثة كاملة
+  const deleteConversationMutation = trpc.admin.deleteConversation.useMutation({
+    onSuccess: () => {
+      setSelectedConversationId(null);
+      setReplyText('');
+      refetch();
+      alert('✅ تم حذف المحادثة بنجاح');
+    },
+    onError: (error) => {
+      alert(`❌ خطأ: ${error.message}`);
+    },
+  });
+
+  const handleDeleteConversation = async (conversationId: number) => {
+    if (!confirm('هل تريد حذف هذه المحادثة بالكامل؟')) return;
+    deleteConversationMutation.mutate({ conversationId });
   };
 
   // تسجيل الخروج
   const handleLogout = () => {
     setIsAuthenticated(false);
-    setMessages([]);
-    setSelectedMessageId(null);
+    setSelectedConversationId(null);
     setReplyText('');
   };
 
-  // الحصول على الرسالة المختارة
-  const selectedMessage = messages.find(m => m.id === selectedMessageId);
+  // الحصول على المحادثة المختارة
+  const selectedConversation = conversations.find(c => c.id === selectedConversationId);
 
   if (!isAuthenticated) {
     return (
@@ -166,12 +152,12 @@ export default function AdminDashboard() {
           </div>
           <div className="flex gap-2">
             <Button
-              onClick={loadMessages}
-              disabled={isRefreshing}
+              onClick={() => refetch()}
+              disabled={isLoading}
               variant="outline"
               className="gap-2"
             >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
               تحديث
             </Button>
             <Button
@@ -186,50 +172,51 @@ export default function AdminDashboard() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* قائمة الرسائل */}
+          {/* قائمة المحادثات */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-xl font-bold text-[#2C3E68] mb-4">
-                جميع الرسائل ({messages.length})
+                جميع المحادثات ({conversations.length})
               </h2>
 
               <div className="space-y-3 max-h-[600px] overflow-y-auto">
-                {messages.length === 0 ? (
+                {conversations.length === 0 ? (
                   <div className="text-center py-12">
                     <MessageCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                    <p className="text-gray-500 text-lg">لا توجد رسائل حالياً</p>
-                    <p className="text-gray-400 text-sm mt-2">سيتم تحديث الرسائل تلقائياً كل 5 ثوانٍ</p>
+                    <p className="text-gray-500 text-lg">لا توجد محادثات حالياً</p>
                   </div>
                 ) : (
-                  messages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      onClick={() => setSelectedMessageId(msg.id)}
-                      className={`p-4 rounded-lg border-2 cursor-pointer transition ${
-                        selectedMessageId === msg.id
-                          ? 'border-[#F46F2A] bg-[#F46F2A]/5'
-                          : 'border-gray-200 hover:border-[#F46F2A]/50'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className={`text-sm font-bold px-2 py-1 rounded ${
-                            msg.reply === 'visitor'
-                              ? 'bg-blue-100 text-blue-700'
-                              : 'bg-green-100 text-green-700'
-                          }`}>
-                            {msg.reply === 'visitor' ? '👤 زائر' : '👨‍💼 إدارة'}
+                  conversations.map((conv: any) => {
+                    const lastMsg = conv.lastMessage;
+                    return (
+                      <div
+                        key={conv.id}
+                        onClick={() => setSelectedConversationId(conv.id)}
+                        className={`p-4 rounded-lg border-2 cursor-pointer transition ${
+                          selectedConversationId === conv.id
+                            ? 'border-[#F46F2A] bg-[#F46F2A]/5'
+                            : 'border-gray-200 hover:border-[#F46F2A]/50'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div className="flex items-center gap-2">
+                            <span className={`text-sm font-bold px-2 py-1 rounded ${
+                              lastMsg?.senderType === 'user'
+                                ? 'bg-blue-100 text-blue-700'
+                                : 'bg-green-100 text-green-700'
+                            }`}>
+                              {lastMsg?.senderType === 'user' ? '👤 زائر' : '👨‍💼 إدارة'}
+                            </span>
+                          </div>
+                          <span className="text-xs text-gray-500">
+                            {new Date(conv.updatedAt).toLocaleString('ar-SA')}
                           </span>
-                          <span className="text-sm font-semibold text-gray-800">{msg.name}</span>
                         </div>
-                        <span className="text-xs text-gray-500">
-                          {new Date(msg.created_at).toLocaleString('ar-SA')}
-                        </span>
+                        <p className="text-gray-800 mt-2 line-clamp-2">{lastMsg?.content || 'لا توجد رسائل'}</p>
+                        <p className="text-xs text-gray-500 mt-1">عدد الرسائل: {conv.messages.length}</p>
                       </div>
-                      <p className="text-gray-700 text-sm">{msg.email}</p>
-                      <p className="text-gray-800 mt-2 line-clamp-2">{msg.message}</p>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </div>
@@ -239,19 +226,34 @@ export default function AdminDashboard() {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow p-6 sticky top-4">
               <h3 className="text-lg font-bold text-[#2C3E68] mb-4">
-                {selectedMessage ? 'الرد على الرسالة' : 'اختر رسالة للرد'}
+                {selectedConversation ? 'الرد على المحادثة' : 'اختر محادثة للرد'}
               </h3>
 
-              {selectedMessage ? (
+              {selectedConversation ? (
                 <>
-                  {/* عرض الرسالة الأصلية */}
-                  <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <p className="text-xs text-gray-500 mb-2">من: {selectedMessage.name}</p>
-                    <p className="text-xs text-gray-500 mb-2">البريد: {selectedMessage.email}</p>
-                    <p className="text-sm text-gray-700 font-semibold mb-2">الرسالة:</p>
-                    <p className="text-sm text-gray-800 bg-white p-2 rounded">
-                      {selectedMessage.message}
-                    </p>
+                  {/* عرض رسائل المحادثة */}
+                  <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200 max-h-[300px] overflow-y-auto">
+                    <p className="text-xs text-gray-500 mb-3 font-bold">الرسائل ({selectedConversation.messages.length}):</p>
+                    <div className="space-y-2">
+                      {selectedConversation.messages.map((msg: any) => (
+                        <div key={msg.id} className="bg-white p-2 rounded border border-gray-200 text-xs">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className={`font-bold ${msg.senderType === 'user' ? 'text-blue-600' : 'text-green-600'}`}>
+                              {msg.senderType === 'user' ? '👤 زائر' : '👨‍💼 إدارة'}
+                            </span>
+                            <button
+                              onClick={() => handleDeleteMessage(msg.id)}
+                              className="text-red-500 hover:text-red-700 text-xs"
+                              title="حذف الرسالة"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                          <p className="text-gray-800">{msg.content}</p>
+                          <p className="text-gray-400 text-xs mt-1">{new Date(msg.createdAt).toLocaleTimeString('ar-SA')}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
                   {/* حقل الرد */}
@@ -260,34 +262,35 @@ export default function AdminDashboard() {
                     value={replyText}
                     onChange={(e) => setReplyText(e.target.value)}
                     className="mb-4 resize-none border-2 focus:border-[#F46F2A]"
-                    rows={5}
+                    rows={4}
                     dir="rtl"
                   />
 
                   {/* زر الإرسال */}
                   <Button
                     onClick={handleReply}
-                    disabled={!replyText.trim() || isLoading}
+                    disabled={!replyText.trim() || sendReplyMutation.isPending}
                     className="w-full bg-[#F46F2A] hover:bg-[#e55a1a] gap-2 mb-2"
                   >
                     <Send className="w-4 h-4" />
-                    {isLoading ? 'جاري الإرسال...' : 'إرسال الرد'}
+                    {sendReplyMutation.isPending ? 'جاري الإرسال...' : 'إرسال الرد'}
                   </Button>
 
-                  {/* زر الحذف */}
+                  {/* زر حذف المحادثة */}
                   <Button
-                    onClick={() => handleDelete(selectedMessageId)}
+                    onClick={() => handleDeleteConversation(selectedConversationId!)}
+                    disabled={deleteConversationMutation.isPending}
                     variant="destructive"
                     className="w-full gap-2"
                   >
                     <Trash2 className="w-4 h-4" />
-                    حذف الرسالة
+                    حذف المحادثة
                   </Button>
                 </>
               ) : (
                 <div className="text-center py-8">
                   <MessageCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                  <p className="text-gray-500">اختر رسالة من القائمة لكي تتمكن من الرد عليها</p>
+                  <p className="text-gray-500">اختر محادثة من القائمة لكي تتمكن من الرد عليها</p>
                 </div>
               )}
             </div>

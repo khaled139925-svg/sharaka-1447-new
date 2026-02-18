@@ -193,7 +193,11 @@ const STORES = [
 ];
 
 export default function Home() {
+  const [showChat, setShowChat] = useState(false);
+  const [chatMessages, setChatMessages] = useState<Array<{ id: number; text: string; sender: 'user' | 'admin'; timestamp: string }>>([]);
+  const [chatInput, setChatInput] = useState('');
   const [language, setLanguage] = useState<'ar' | 'en'>('ar');
+  const [conversationId, setConversationId] = useState<number | null>(null);
   const [contactData, setContactData] = useState({
     name: '',
     email: '',
@@ -202,16 +206,45 @@ export default function Home() {
     message: '',
   });
 
+  // استخدام useQuery لجلب الرسائل
+  const { data: messagesData, refetch: refetchMessages } = (trpc.admin.getConversationMessages as any).useQuery(
+    { conversationId: conversationId || 0 },
+    { enabled: !!conversationId }
+  );
+
+  // تحديث الرسائل عند تغير البيانات
+  useEffect(() => {
+    if (messagesData) {
+      const formattedMessages = messagesData.map((msg: any) => ({
+        id: msg.id,
+        text: msg.content || msg.message,
+        sender: (msg.senderType === 'admin' ? 'admin' : 'user') as 'user' | 'admin',
+        timestamp: new Date(msg.createdAt).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })
+      }));
+      setChatMessages(formattedMessages);
+    }
+  }, [messagesData]);
+
+  // تحديث الرسائل كل ثانية عند فتح الدردشة
+  useEffect(() => {
+    if (showChat && conversationId) {
+      const interval = setInterval(() => {
+        refetchMessages();
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [showChat, conversationId, refetchMessages]);
+
   const t = translations[language];
   const isRTL = language === 'ar';
 
   // استخدام tRPC لإرسال الرسالة
-  const sendContactMessageMutation = trpc.admin.sendContactMessage.useMutation({
+  const sendContactMessageMutation = (trpc.admin.sendContactMessage as any).useMutation({
     onSuccess: () => {
       alert('✅ تم إرسال رسالتك بنجاح! سنتواصل معك قريباً');
       setContactData({ name: '', email: '', phone: '', subject: '', message: '' });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       alert(`❌ خطأ: ${error.message}`);
     },
   });
@@ -222,7 +255,43 @@ export default function Home() {
       alert('يرجى ملء جميع الحقول');
       return;
     }
-    sendContactMessageMutation.mutate(contactData);
+    sendContactMessageMutation.mutate(contactData, {
+      onSuccess: (data: any) => {
+        setConversationId(data.conversationId);
+        setShowChat(true);
+        // إعادة تحميل الرسائل بعد إنشاء المحادثة
+        setTimeout(() => {
+          refetchMessages();
+        }, 500);
+      }
+    });
+  };
+
+  const handleChatSend = () => {
+    if (chatInput.trim() && conversationId) {
+      const messageText = chatInput;
+      setChatInput('');
+      
+      // إرسال الرسالة إلى الخادم
+      sendContactMessageMutation.mutate({
+        name: contactData.name,
+        email: contactData.email,
+        phone: contactData.phone,
+        subject: messageText.substring(0, 50),
+        message: messageText,
+      }, {
+        onSuccess: () => {
+          // جلب الرسائل المحدثة
+          setTimeout(() => {
+            refetchMessages();
+          }, 300);
+        },
+        onError: (error: any) => {
+          console.error('خطأ في إرسال الرسالة:', error);
+          alert('حدث خطأ في إرسال الرسالة');
+        }
+      });
+    }
   };
 
   return (
@@ -331,6 +400,75 @@ export default function Home() {
           </form>
         </div>
       </section>
+
+      {/* Chat Window */}
+      {showChat && (
+        <div className="fixed bottom-4 right-4 w-80 h-96 bg-white rounded-lg shadow-2xl flex flex-col z-50 border border-border">
+          {/* Chat Header */}
+          <div className="bg-primary text-white p-4 rounded-t-lg flex justify-between items-center">
+            <h3 className="font-bold">💬 الدردشة</h3>
+            <button onClick={() => setShowChat(false)} className="text-white hover:bg-primary/80 p-1 rounded">
+              ✕
+            </button>
+          </div>
+
+          {/* Chat Messages */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            {chatMessages.length === 0 ? (
+              <div className="text-center text-gray-400 py-8">
+                <p>مرحباً! كيف يمكننا مساعدتك؟</p>
+              </div>
+            ) : (
+              chatMessages.map((msg) => (
+                <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-xs px-3 py-2 rounded-lg ${
+                    msg.sender === 'user'
+                      ? 'bg-primary text-white rounded-br-none'
+                      : 'bg-gray-200 text-gray-800 rounded-bl-none'
+                  }`}>
+                    <p className="text-sm">{msg.text}</p>
+                    <p className="text-xs opacity-70 mt-1">{msg.timestamp}</p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Chat Input */}
+          <div className="border-t border-border p-3 flex gap-2">
+            <input
+              type="text"
+              placeholder="اكتب رسالتك..."
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleChatSend()}
+              className="flex-1 px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+            />
+            <button
+              onClick={handleChatSend}
+              className="bg-primary text-white px-3 py-2 rounded-lg hover:bg-primary/90 transition-colors"
+            >
+              ➤
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Chat Button */}
+      {!showChat && (
+        <button
+          onClick={() => {
+            setShowChat(true);
+            if (conversationId) {
+              refetchMessages();
+            }
+          }}
+          className="fixed bottom-4 right-4 w-14 h-14 bg-primary text-white rounded-full shadow-lg hover:bg-primary/90 transition-all flex items-center justify-center text-2xl z-40 hover:scale-110"
+          title="فتح الدردشة"
+        >
+          💬
+        </button>
+      )}
 
       {/* Footer */}
       <footer className="bg-primary text-white py-8 px-4">

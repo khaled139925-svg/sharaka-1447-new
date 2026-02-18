@@ -1129,15 +1129,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
-          ) : (
-            <button
-              onClick={() => setShowChatWidget(true)}
-              className="bg-primary text-primary-foreground rounded-full p-4 shadow-lg hover:shadow-2xl hover:scale-110 transition-all duration-300 animate-bounce"
-              title={t.chatSupport}
-            >
-              <MessageCircle size={28} />
-            </button>
-          )}
+          ) : null}
         </div>
       </main>
 

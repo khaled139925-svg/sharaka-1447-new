@@ -519,6 +519,14 @@ export default function Home() {
 
           {/* Controls - Right side */}
           <div className="flex items-center gap-3 relative">
+            {/* Admin Dashboard Link */}
+            <a
+              href="/admin"
+              className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition-all duration-300 hover:shadow-md"
+              title="لوحة التحكم الإدارية"
+            >
+              🔐 إدارة
+            </a>
             {/* Language Selector */}
             <div className="relative">
               <button

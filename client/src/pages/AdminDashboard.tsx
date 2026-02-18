@@ -14,7 +14,7 @@ export default function AdminDashboard() {
   const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const ADMIN_PASSWORD = '1234';
+  const ADMIN_PASSWORD = 'tariq';
 
   // التحقق من كلمة السر
   const handleLogin = () => {

@@ -172,12 +172,12 @@ export default function AdminDashboard() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* قائمة المحادثات */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-bold text-[#2C3E68] mb-4">
-                جميع المحادثات ({conversations.length})
-              </h2>
+          {/* لوحة الرد - على اليسار */}
+          <div className="lg:col-span-1 order-1">
+            <div className="bg-white rounded-lg shadow p-6 sticky top-4">
+              <h3 className="text-lg font-bold text-[#2C3E68] mb-4">
+                {selectedConversation ? 'الرد على المحادثة' : 'اختر محادثة للرد'}
+              </h3>
 
               <div className="space-y-3 max-h-[600px] overflow-y-auto">
                 {conversations.length === 0 ? (
@@ -222,12 +222,12 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* لوحة الرد */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow p-6 sticky top-4">
-              <h3 className="text-lg font-bold text-[#2C3E68] mb-4">
-                {selectedConversation ? 'الرد على المحادثة' : 'اختر محادثة للرد'}
-              </h3>
+          {/* قائمة المحادثات - على اليمين */}
+          <div className="lg:col-span-2 order-2">
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-bold text-[#2C3E68] mb-4">
+                جميع المحادثات ({conversations.length})
+              </h2>
 
               {selectedConversation ? (
                 <>

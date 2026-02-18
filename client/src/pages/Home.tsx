@@ -469,6 +469,9 @@ export default function Home() {
             <img src={LOGO_URL} alt="Sharaka" className="h-48 md:h-56 w-auto mx-auto animate-bounce" style={{ animationDuration: '3s' }} />
             
             <div>
+              <h1 className="text-6xl md:text-8xl font-bold text-primary mb-2 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                {t.tagline}
+              </h1>
               <p className="text-3xl md:text-4xl font-bold text-accent animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
                 {t.platformName}
               </p>

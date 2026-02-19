@@ -524,9 +524,46 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="bg-card border-t border-border py-8">
+      <footer className="bg-blue-600 text-white py-12">
         <div className="container mx-auto px-4">
-          <div className="border-t border-primary-foreground/20 pt-8 text-center text-sm opacity-80">
+          <div className="grid grid-cols-4 gap-8 mb-8">
+            {/* Quick Links */}
+            <div>
+              <h4 className="font-bold text-lg mb-4">روابط سريعة</h4>
+              <ul className="space-y-2 text-sm">
+                <li><a href="#consultants" className="hover:opacity-80">المستشارون والاستشارات</a></li>
+                <li><a href="#services" className="hover:opacity-80">خدمات التعهيد والإدارة</a></li>
+                <li><a href="#marketplace" className="hover:opacity-80">السوق الإلكتروني</a></li>
+                <li><a href="#points" className="hover:opacity-80">نظام النقاط والرصيد المالي</a></li>
+              </ul>
+            </div>
+            {/* Legal */}
+            <div>
+              <h4 className="font-bold text-lg mb-4">قانوني</h4>
+              <ul className="space-y-2 text-sm">
+                <li><a href="#privacy" className="hover:opacity-80">سياسة الخصوصية</a></li>
+                <li><a href="#terms" className="hover:opacity-80">الشروط والأحكام</a></li>
+              </ul>
+            </div>
+            {/* Services */}
+            <div>
+              <h4 className="font-bold text-lg mb-4">خدمات التعهيد والإدارة</h4>
+              <ul className="space-y-2 text-sm">
+                <li><a href="#" className="hover:opacity-80">استشارات متخصصة</a></li>
+                <li><a href="#" className="hover:opacity-80">إدارة الموظفين</a></li>
+                <li><a href="#" className="hover:opacity-80">نظام النقاط والرصيد المالي</a></li>
+              </ul>
+            </div>
+            {/* Contact */}
+            <div>
+              <h4 className="font-bold text-lg mb-4">تواصل معنا</h4>
+              <ul className="space-y-2 text-sm">
+                <li><a href="mailto:khaled139925@gmail.com" className="hover:opacity-80">البريد الإلكتروني</a></li>
+                <li><a href="tel:+966112345678" className="hover:opacity-80">الهاتف</a></li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-white/20 pt-8 text-center text-sm opacity-80">
             <p>&copy; 2026 {isRTL ? 'منصة شراكة' : 'Sharaka Platform'}. {t.allRights}.</p>
           </div>
         </div>

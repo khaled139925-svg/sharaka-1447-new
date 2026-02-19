@@ -1,0 +1,112 @@
+[2026-02-18T21:21:11.146Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-02-18T21:21:11.174Z] /bin/sh: 1: tsx: not found
+[2026-02-18T21:21:11.175Z] Dev server exited with code 127
+[2026-02-19T18:31:05.882Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-02-19T18:31:05.912Z] /bin/sh: 1: tsx: not found
+[2026-02-19T18:31:05.913Z] Dev server exited with code 127
+[2026-02-19T18:32:00.925Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-02-19T18:32:00.958Z] /bin/sh: 1: tsx: not found
+[2026-02-19T18:32:00.958Z] Dev server exited with code 127
+[2026-02-19T18:32:18.746Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-02-19T18:32:19.111Z] 
+[2026-02-19T18:32:19.112Z] node:internal/modules/run_main:122
+[2026-02-19T18:32:19.112Z] triggerUncaughtException(
+[2026-02-19T18:32:19.112Z] ^
+[2026-02-19T18:32:19.113Z] Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/home/ubuntu/sharaka-platform/server/_core/index.ts' imported from /home/ubuntu/sharaka-platform/
+[2026-02-19T18:32:19.113Z] at finalizeResolution (node:internal/modules/esm/resolve:275:11)
+[2026-02-19T18:32:19.113Z] at moduleResolve (node:internal/modules/esm/resolve:932:10)
+[2026-02-19T18:32:19.113Z] at defaultResolve (node:internal/modules/esm/resolve:1056:11)
+[2026-02-19T18:32:19.114Z] at nextResolve (node:internal/modules/esm/hooks:748:28)
+[2026-02-19T18:32:19.114Z] at resolveBase (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771525939026:2:3744)
+[2026-02-19T18:32:19.114Z] at resolveDirectory (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771525939026:2:4243)
+[2026-02-19T18:32:19.114Z] at resolveTsPaths (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771525939026:2:4984)
+[2026-02-19T18:32:19.114Z] at resolve (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771525939026:2:5361)
+[2026-02-19T18:32:19.115Z] at nextResolve (node:internal/modules/esm/hooks:748:28)
+[2026-02-19T18:32:19.115Z] at Hooks.resolve (node:internal/modules/esm/hooks:240:30) {
+[2026-02-19T18:32:19.115Z] code: 'ERR_MODULE_NOT_FOUND',
+[2026-02-19T18:32:19.115Z] url: 'file:///home/ubuntu/sharaka-platform/server/_core/index.ts'
+[2026-02-19T18:32:19.115Z] }
+[2026-02-19T18:32:19.116Z] 
+[2026-02-19T18:32:19.116Z] Node.js v22.13.0
+[2026-02-19T18:33:12.582Z] Dev server process group stopped
+[2026-02-19T18:33:12.609Z] Dev server exited with code -15
+[2026-02-19T18:36:04.530Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-02-19T18:36:04.907Z] 
+[2026-02-19T18:36:04.908Z] node:internal/modules/run_main:122
+[2026-02-19T18:36:04.909Z] triggerUncaughtException(
+[2026-02-19T18:36:04.909Z] ^
+[2026-02-19T18:36:04.910Z] Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/home/ubuntu/sharaka-platform/server/_core/index.ts' imported from /home/ubuntu/sharaka-platform/
+[2026-02-19T18:36:04.910Z] at finalizeResolution (node:internal/modules/esm/resolve:275:11)
+[2026-02-19T18:36:04.911Z] at moduleResolve (node:internal/modules/esm/resolve:932:10)
+[2026-02-19T18:36:04.911Z] at defaultResolve (node:internal/modules/esm/resolve:1056:11)
+[2026-02-19T18:36:04.911Z] at nextResolve (node:internal/modules/esm/hooks:748:28)
+[2026-02-19T18:36:04.912Z] at resolveBase (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771526164820:2:3744)
+[2026-02-19T18:36:04.912Z] at resolveDirectory (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771526164820:2:4243)
+[2026-02-19T18:36:04.912Z] at resolveTsPaths (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771526164820:2:4984)
+[2026-02-19T18:36:04.913Z] at resolve (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771526164820:2:5361)
+[2026-02-19T18:36:04.913Z] at nextResolve (node:internal/modules/esm/hooks:748:28)
+[2026-02-19T18:36:04.914Z] at Hooks.resolve (node:internal/modules/esm/hooks:240:30) {
+[2026-02-19T18:36:04.914Z] code: 'ERR_MODULE_NOT_FOUND',
+[2026-02-19T18:36:04.914Z] url: 'file:///home/ubuntu/sharaka-platform/server/_core/index.ts'
+[2026-02-19T18:36:04.914Z] }
+[2026-02-19T18:36:04.915Z] 
+[2026-02-19T18:36:04.916Z] Node.js v22.13.0
+[2026-02-19T18:43:30.047Z] Dev server process group stopped
+[2026-02-19T18:43:30.052Z] Dev server exited with code -15
+[2026-02-19T18:43:33.052Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-02-19T18:43:33.432Z] 
+[2026-02-19T18:43:33.433Z] node:internal/modules/run_main:122
+[2026-02-19T18:43:33.434Z] triggerUncaughtException(
+[2026-02-19T18:43:33.434Z] ^
+[2026-02-19T18:43:33.434Z] Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'express' imported from /home/ubuntu/sharaka-platform/server/_core/index.ts
+[2026-02-19T18:43:33.434Z] at packageResolve (node:internal/modules/esm/resolve:857:9)
+[2026-02-19T18:43:33.435Z] at moduleResolve (node:internal/modules/esm/resolve:926:18)
+[2026-02-19T18:43:33.435Z] at defaultResolve (node:internal/modules/esm/resolve:1056:11)
+[2026-02-19T18:43:33.435Z] at nextResolve (node:internal/modules/esm/hooks:748:28)
+[2026-02-19T18:43:33.435Z] at resolveBase (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771526613331:2:3744)
+[2026-02-19T18:43:33.435Z] at resolveDirectory (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771526613331:2:4243)
+[2026-02-19T18:43:33.436Z] at resolveTsPaths (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771526613331:2:4984)
+[2026-02-19T18:43:33.436Z] at async resolve (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771526613331:2:5355)
+[2026-02-19T18:43:33.436Z] at async nextResolve (node:internal/modules/esm/hooks:748:22)
+[2026-02-19T18:43:33.436Z] at async Hooks.resolve (node:internal/modules/esm/hooks:240:24) {
+[2026-02-19T18:43:33.436Z] code: 'ERR_MODULE_NOT_FOUND'
+[2026-02-19T18:43:33.437Z] }
+[2026-02-19T18:43:33.437Z] 
+[2026-02-19T18:43:33.437Z] Node.js v22.13.0
+[2026-02-19T18:43:59.227Z] 1:43:59 PM [tsx] change in ./server/_core/index.ts Rerunning...
+[2026-02-19T18:43:59.402Z] cServer initialized
+[2026-02-19T18:44:03.804Z] Dev server process group stopped
+[2026-02-19T18:44:03.809Z] Dev server exited with code -15
+[2026-02-19T18:44:06.809Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-02-19T18:44:07.193Z] Server initialized
+[2026-02-19T18:49:12.262Z] Dev server process group stopped
+[2026-02-19T18:49:12.267Z] Dev server exited with code -15
+[2026-02-19T18:49:15.266Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-02-19T18:49:15.631Z] Server initialized
+[2026-02-19T18:52:17.220Z] 1:52:17 PM [tsx] change in ./server/_core/index.ts Rerunning...
+[2026-02-19T18:52:17.444Z] cServer running on http://localhost:3000/
+[2026-02-19T18:52:22.955Z] Dev server process group stopped
+[2026-02-19T18:52:22.967Z] Dev server exited with code -15
+[2026-02-19T18:52:25.959Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-02-19T18:52:26.347Z] Server running on http://localhost:3000/
+[2026-02-19T18:52:51.178Z] 1:52:51 PM [tsx] unlink in ./server/_core/index.ts Restarting...
+[2026-02-19T18:52:51.373Z] c
+[2026-02-19T18:52:51.374Z] node:internal/modules/run_main:122
+[2026-02-19T18:52:51.374Z] triggerUncaughtException(
+[2026-02-19T18:52:51.375Z] ^
+[2026-02-19T18:52:51.375Z] Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/home/ubuntu/sharaka-platform/server/_core/index.ts' imported from /home/ubuntu/sharaka-platform/
+[2026-02-19T18:52:51.375Z] at finalizeResolution (node:internal/modules/esm/resolve:275:11)
+[2026-02-19T18:52:51.375Z] at moduleResolve (node:internal/modules/esm/resolve:932:10)
+[2026-02-19T18:52:51.375Z] at defaultResolve (node:internal/modules/esm/resolve:1056:11)
+[2026-02-19T18:52:51.376Z] at nextResolve (node:internal/modules/esm/hooks:748:28)
+[2026-02-19T18:52:51.376Z] at resolveBase (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771527171271:2:3744)
+[2026-02-19T18:52:51.376Z] at resolveDirectory (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771527171271:2:4243)
+[2026-02-19T18:52:51.376Z] at resolveTsPaths (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771527171271:2:4984)
+[2026-02-19T18:52:51.377Z] at resolve (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771527171271:2:5361)
+[2026-02-19T18:52:51.377Z] at nextResolve (node:internal/modules/esm/hooks:748:28)
+[2026-02-19T18:52:51.377Z] at Hooks.resolve (node:internal/modules/esm/hooks:240:30) {
+[2026-02-19T18:52:51.377Z] code: 'ERR_MODULE_NOT_FOUND',
+[2026-02-19T18:52:51.377Z] url: 'file:///home/ubuntu/sharaka-platform/server/_core/index.ts'
+[2026-02-19T18:52:51.378Z] }
+[2026-02-19T18:52:51.378Z] 
+[2026-02-19T18:52:51.378Z] Node.js v22.13.0

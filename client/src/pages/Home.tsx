@@ -1,13 +1,15 @@
+'use client';
+
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { 
   Users, Briefcase, ShoppingBag, Award, MessageCircle, Info, 
   ChevronRight, MapPin, TrendingUp, Zap, Mail, Phone, AlertCircle,
-  ExternalLink, ArrowRight, Globe
+  ExternalLink, ArrowRight, Globe, Menu, X
 } from 'lucide-react';
 
-const LOGO_URL = 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663333045223/nOdruZWcjEkuqgXg.jpeg';
-const USER_EMAIL = 'khaled139925@gmail.com';
+const LOGO_URL = 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663333045223/RqiKqWIUsupxHOCa.png';
+const USER_EMAIL = 'khaled1399259@gmail.com';
 
 // نظام اللغات
 const translations = {
@@ -65,6 +67,10 @@ const translations = {
     staffManagementDesc: 'إدارة متكاملة لموارد بشرية احترافية',
     projectManagement: 'إدارة المشاريع',
     projectManagementDesc: 'تخطيط وتنفيذ المشاريع بكفاءة عالية',
+    chatSupport: 'دعم فوري',
+    chatMessage: 'مرحبا! كيف يمكننا مساعدتك؟',
+    chatClose: 'إغلاق',
+    typeMessage: 'اكتب رسالتك...',
   },
   en: {
     selectCountry: 'Select Country',
@@ -120,19 +126,22 @@ const translations = {
     staffManagementDesc: 'Integrated professional human resources management',
     projectManagement: 'Project Management',
     projectManagementDesc: 'Planning and executing projects with high efficiency',
+    chatSupport: 'Live Support',
+    chatMessage: 'Hello! How can we help you?',
+    chatClose: 'Close',
+    typeMessage: 'Type your message...',
   }
 };
 
 // قائمة الدول المحدثة
 const COUNTRIES = [
-  // دول الخليج
   { code: 'SA', name: 'السعودية', nameEn: 'Saudi Arabia', flag: '🇸🇦', region: 'gulf' },
   { code: 'AE', name: 'الإمارات', nameEn: 'UAE', flag: '🇦🇪', region: 'gulf' },
   { code: 'KW', name: 'الكويت', nameEn: 'Kuwait', flag: '🇰🇼', region: 'gulf' },
   { code: 'QA', name: 'قطر', nameEn: 'Qatar', flag: '🇶🇦', region: 'gulf' },
   { code: 'BH', name: 'البحرين', nameEn: 'Bahrain', flag: '🇧🇭', region: 'gulf' },
   { code: 'OM', name: 'عمان', nameEn: 'Oman', flag: '🇴🇲', region: 'gulf' },
-  // العالم العربي
+  { code: 'YE', name: 'اليمن', nameEn: 'Yemen', flag: '🇾🇪', region: 'gulf' },
   { code: 'EG', name: 'مصر', nameEn: 'Egypt', flag: '🇪🇬', region: 'arab' },
   { code: 'JO', name: 'الأردن', nameEn: 'Jordan', flag: '🇯🇴', region: 'arab' },
   { code: 'LB', name: 'لبنان', nameEn: 'Lebanon', flag: '🇱🇧', region: 'arab' },
@@ -142,9 +151,7 @@ const COUNTRIES = [
   { code: 'TN', name: 'تونس', nameEn: 'Tunisia', flag: '🇹🇳', region: 'arab' },
   { code: 'DZ', name: 'الجزائر', nameEn: 'Algeria', flag: '🇩🇿', region: 'arab' },
   { code: 'SD', name: 'السودان', nameEn: 'Sudan', flag: '🇸🇩', region: 'arab' },
-  // باكستان
   { code: 'PK', name: 'باكستان', nameEn: 'Pakistan', flag: '🇵🇰', region: 'asia' },
-  // أوروبا
   { code: 'GB', name: 'بريطانيا', nameEn: 'United Kingdom', flag: '🇬🇧', region: 'europe' },
   { code: 'DE', name: 'ألمانيا', nameEn: 'Germany', flag: '🇩🇪', region: 'europe' },
   { code: 'FR', name: 'فرنسا', nameEn: 'France', flag: '🇫🇷', region: 'europe' },
@@ -153,14 +160,12 @@ const COUNTRIES = [
   { code: 'NL', name: 'هولندا', nameEn: 'Netherlands', flag: '🇳🇱', region: 'europe' },
   { code: 'SE', name: 'السويد', nameEn: 'Sweden', flag: '🇸🇪', region: 'europe' },
   { code: 'CH', name: 'سويسرا', nameEn: 'Switzerland', flag: '🇨🇭', region: 'europe' },
-  // أمريكا
   { code: 'US', name: 'أمريكا', nameEn: 'USA', flag: '🇺🇸', region: 'americas' },
   { code: 'CA', name: 'كندا', nameEn: 'Canada', flag: '🇨🇦', region: 'americas' },
   { code: 'MX', name: 'المكسيك', nameEn: 'Mexico', flag: '🇲🇽', region: 'americas' },
   { code: 'BR', name: 'البرازيل', nameEn: 'Brazil', flag: '🇧🇷', region: 'americas' },
 ];
 
-// صور أشخاص وهميين (من Unsplash)
 const CONSULTANTS = [
   {
     id: 1,
@@ -239,13 +244,6 @@ const PATHS = [
     icon: '📚', 
     desc: 'دورات وتحضير للاختبارات',
     descEn: 'Courses and exam preparation',
-    courses: [
-      { name: 'دورة الرياضيات المتقدمة', nameEn: 'Advanced Mathematics Course', duration: '12 أسبوع', durationEn: '12 weeks' },
-      { name: 'دورة اللغة الإنجليزية', nameEn: 'English Language Course', duration: '10 أسابيع', durationEn: '10 weeks' },
-      { name: 'دورة العلوم', nameEn: 'Science Course', duration: '14 أسبوع', durationEn: '14 weeks' },
-    ],
-    certificates: ['شهادة الكفاءة', 'شهادة التفوق'],
-    certificatesEn: ['Competency Certificate', 'Excellence Certificate'],
   },
   { 
     id: 'employee', 
@@ -254,13 +252,6 @@ const PATHS = [
     icon: '👔', 
     desc: 'تطوير مهني وفرص عمل',
     descEn: 'Professional development and job opportunities',
-    courses: [
-      { name: 'دورة القيادة والإدارة', nameEn: 'Leadership & Management Course', duration: '8 أسابيع', durationEn: '8 weeks' },
-      { name: 'دورة مهارات التواصل', nameEn: 'Communication Skills Course', duration: '6 أسابيع', durationEn: '6 weeks' },
-      { name: 'دورة التطوير الذاتي', nameEn: 'Self-Development Course', duration: '10 أسابيع', durationEn: '10 weeks' },
-    ],
-    certificates: ['شهادة الموظف المتميز', 'شهادة القيادة'],
-    certificatesEn: ['Outstanding Employee Certificate', 'Leadership Certificate'],
   },
   { 
     id: 'trader', 
@@ -269,13 +260,6 @@ const PATHS = [
     icon: '🛍️', 
     desc: 'دعم المتاجر الإلكترونية',
     descEn: 'E-commerce store support',
-    courses: [
-      { name: 'دورة التجارة الإلكترونية', nameEn: 'E-Commerce Course', duration: '12 أسبوع', durationEn: '12 weeks' },
-      { name: 'دورة التسويق الرقمي', nameEn: 'Digital Marketing Course', duration: '10 أسابيع', durationEn: '10 weeks' },
-      { name: 'دورة إدارة المبيعات', nameEn: 'Sales Management Course', duration: '8 أسابيع', durationEn: '8 weeks' },
-    ],
-    certificates: ['شهادة التاجر الإلكتروني', 'شهادة المبيعات'],
-    certificatesEn: ['E-Commerce Trader Certificate', 'Sales Certificate'],
   },
   { 
     id: 'entrepreneur', 
@@ -284,13 +268,6 @@ const PATHS = [
     icon: '🚀', 
     desc: 'استشارات وتمويل',
     descEn: 'Consultations and financing',
-    courses: [
-      { name: 'دورة بدء المشروع', nameEn: 'Project Startup Course', duration: '16 أسبوع', durationEn: '16 weeks' },
-      { name: 'دورة التمويل والاستثمار', nameEn: 'Financing & Investment Course', duration: '12 أسبوع', durationEn: '12 weeks' },
-      { name: 'دورة التخطيط الاستراتيجي', nameEn: 'Strategic Planning Course', duration: '14 أسبوع', durationEn: '14 weeks' },
-    ],
-    certificates: ['شهادة رائد الأعمال', 'شهادة الابتكار'],
-    certificatesEn: ['Entrepreneur Certificate', 'Innovation Certificate'],
   },
   { 
     id: 'jobseeker', 
@@ -299,13 +276,6 @@ const PATHS = [
     icon: '🎯', 
     desc: 'فرص عمل وتطوير مهارات',
     descEn: 'Job opportunities and skill development',
-    courses: [
-      { name: 'دورة إعداد السيرة الذاتية', nameEn: 'CV Preparation Course', duration: '4 أسابيع', durationEn: '4 weeks' },
-      { name: 'دورة مهارات المقابلة', nameEn: 'Interview Skills Course', duration: '6 أسابيع', durationEn: '6 weeks' },
-      { name: 'دورة تطوير المهارات المهنية', nameEn: 'Professional Skills Development', duration: '10 أسابيع', durationEn: '10 weeks' },
-    ],
-    certificates: ['شهادة الكفاءة المهنية', 'شهادة النجاح'],
-    certificatesEn: ['Professional Competency Certificate', 'Success Certificate'],
   },
   { 
     id: 'researcher', 
@@ -314,60 +284,15 @@ const PATHS = [
     icon: '🔬', 
     desc: 'موارد بحثية وتعاون',
     descEn: 'Research resources and collaboration',
-    courses: [
-      { name: 'دورة البحث العلمي', nameEn: 'Scientific Research Course', duration: '14 أسبوع', durationEn: '14 weeks' },
-      { name: 'دورة كتابة الأوراق البحثية', nameEn: 'Research Paper Writing Course', duration: '10 أسابيع', durationEn: '10 weeks' },
-      { name: 'دورة المنهجية البحثية', nameEn: 'Research Methodology Course', duration: '12 أسبوع', durationEn: '12 weeks' },
-    ],
-    certificates: ['شهادة الباحث المتقدم', 'شهادة النشر العلمي'],
-    certificatesEn: ['Advanced Researcher Certificate', 'Scientific Publication Certificate'],
   },
 ];
-
-const sendEmailNotification = async (subject: string, data: any) => {
-  try {
-    const emailBody = `الموضوع: ${subject}\nالبريد المرسل إليه: ${USER_EMAIL}\nالوقت: ${new Date().toLocaleString('ar-SA')}\n\nالبيانات:\n${JSON.stringify(data, null, 2)}`;
-
-    const response = await fetch('https://formspree.io/f/xyzpqwab', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email: USER_EMAIL,
-        message: emailBody,
-        subject: subject,
-      }),
-    });
-
-    if (response.ok) {
-      alert(`✅ تم إرسال البيانات بنجاح إلى ${USER_EMAIL}`);
-      return true;
-    } else {
-      alert('❌ حدث خطأ في الإرسال. يرجى المحاولة لاحقاً');
-      return false;
-    }
-  } catch (error) {
-    console.error('خطأ في الإرسال:', error);
-    alert('❌ خطأ في الاتصال. تأكد من اتصالك بالإنترنت');
-    return false;
-  }
-};
 
 export default function Home() {
   const [language, setLanguage] = useState<'ar' | 'en'>('ar');
   const [selectedCountry, setSelectedCountry] = useState('SA');
   const [showCountryMenu, setShowCountryMenu] = useState(false);
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
-  const [selectedConsultant, setSelectedConsultant] = useState<typeof CONSULTANTS[0] | null>(null);
-  const [selectedPath, setSelectedPath] = useState<typeof PATHS[0] | null>(null);
-  const [contactData, setContactData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    subject: '',
-    message: '',
-  });
+  const [showMenu, setShowMenu] = useState(false);
 
   const t = translations[language];
   const currentCountry = COUNTRIES.find(c => c.code === selectedCountry);
@@ -375,34 +300,33 @@ export default function Home() {
 
   return (
     <div className={`min-h-screen bg-background ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-      {/* Header */}
       <header className="sticky top-0 z-50 bg-card shadow-md border-b border-border">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center justify-between w-full">
-          {/* Logo */}
           <div className="flex items-center gap-2">
-            <img src={LOGO_URL} alt="Sharaka" className="h-16 w-auto object-contain hover:scale-110 transition-transform duration-300" />
-            <div className="hidden md:block">
-              <p className="text-sm font-bold text-accent">منصة الخدمات المتكاملة</p>
-              <p className="text-xs text-foreground/60">Integrated Services Platform</p>
-            </div>
+            <img src={LOGO_URL} alt="Sharaka" className="h-16 w-auto object-contain" />
           </div>
 
-          {/* Controls - Right side */}
-          <div className="flex items-center gap-3 relative">
-            {/* Language Selector */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowMenu(!showMenu)}
+              className="flex items-center justify-center p-2 rounded-lg hover:bg-orange-100 transition-all duration-300 md:hidden"
+            >
+              {showMenu ? (
+                <X size={24} className="text-orange-500" />
+              ) : (
+                <Menu size={24} className="text-orange-500" />
+              )}
+            </button>
+
             <div className="relative">
               <button
                 onClick={() => setShowLanguageMenu(!showLanguageMenu)}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary border border-border hover:bg-secondary/80 transition-all duration-300 hover:shadow-md"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-orange-100 border border-orange-300 hover:bg-orange-200 transition-all duration-300"
               >
-                <Globe size={16} className="text-primary" />
-                <span className="text-sm font-semibold text-primary">{language === 'ar' ? 'العربية' : 'English'}</span>
-                <ChevronRight size={14} className={`transition-transform duration-300 ${showLanguageMenu ? 'rotate-90' : ''}`} />
+                <span className="text-sm font-semibold text-orange-500">{language === 'ar' ? 'العربية' : 'English'}</span>
               </button>
-
               {showLanguageMenu && (
-                <div className="absolute top-full right-0 mt-2 bg-card rounded-lg shadow-lg border border-border z-50 min-w-[140px] animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="absolute top-full right-0 mt-2 bg-card rounded-lg shadow-lg border border-border z-50 min-w-[140px]">
                   {[
                     { code: 'ar', label: 'العربية' },
                     { code: 'en', label: 'English' },
@@ -413,9 +337,7 @@ export default function Home() {
                         setLanguage(lang.code);
                         setShowLanguageMenu(false);
                       }}
-                      className={`w-full px-4 py-2 text-right hover:bg-secondary transition-all duration-300 ${
-                        language === lang.code ? 'bg-secondary text-primary font-semibold' : ''
-                      }`}
+                      className="w-full px-4 py-2 text-right hover:bg-blue-50 transition-all duration-300 text-blue-600"
                     >
                       {lang.label}
                     </button>
@@ -424,19 +346,15 @@ export default function Home() {
               )}
             </div>
 
-            {/* Country Selector */}
             <div className="relative">
               <button
                 onClick={() => setShowCountryMenu(!showCountryMenu)}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary border border-border hover:bg-secondary/80 transition-all duration-300 hover:shadow-md"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-orange-100 border border-orange-300 hover:bg-orange-200 transition-all duration-300"
               >
                 <span className="text-lg">{currentCountry?.flag}</span>
-                <span className="text-sm font-semibold text-primary hidden sm:inline">{isRTL ? currentCountry?.name : currentCountry?.nameEn}</span>
-                <ChevronRight size={14} className={`transition-transform duration-300 ${showCountryMenu ? 'rotate-90' : ''}`} />
               </button>
-
               {showCountryMenu && (
-                <div className="absolute top-full right-0 mt-2 bg-card rounded-lg shadow-lg border border-border z-50 max-h-96 overflow-y-auto min-w-[200px] animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="absolute top-full right-0 mt-2 bg-card rounded-lg shadow-lg border border-border z-50 max-h-96 overflow-y-auto min-w-[200px]">
                   {COUNTRIES.map(country => (
                     <button
                       key={country.code}
@@ -444,9 +362,7 @@ export default function Home() {
                         setSelectedCountry(country.code);
                         setShowCountryMenu(false);
                       }}
-                      className={`w-full px-4 py-2 text-right flex items-center gap-2 hover:bg-secondary transition-all duration-300 ${
-                        selectedCountry === country.code ? 'bg-secondary text-primary font-semibold' : ''
-                      }`}
+                      className="w-full px-4 py-2 text-right flex items-center gap-2 hover:bg-blue-50 transition-all duration-300 text-blue-600"
                     >
                       <span className="text-lg">{country.flag}</span>
                       <span>{isRTL ? country.name : country.nameEn}</span>
@@ -456,416 +372,160 @@ export default function Home() {
               )}
             </div>
           </div>
-          </div>
         </div>
 
+        {showMenu && (
+          <div className="bg-card border-t border-border md:hidden">
+            <div className="container mx-auto px-4 py-4 space-y-3">
+              <a href="#consultants" onClick={() => setShowMenu(false)} className="block px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-300 font-semibold">المستشارون</a>
+              <a href="#services" onClick={() => setShowMenu(false)} className="block px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-300 font-semibold">الخدمات</a>
+              <a href="#marketplace" onClick={() => setShowMenu(false)} className="block px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-300 font-semibold">السوق</a>
+              <a href="#paths" onClick={() => setShowMenu(false)} className="block px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-300 font-semibold">المسارات</a>
+              <a href="#points" onClick={() => setShowMenu(false)} className="block px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-300 font-semibold">النقاط</a>
+              <a href="#contact" onClick={() => setShowMenu(false)} className="block px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-300 font-semibold">تواصل</a>
+            </div>
+          </div>
+        )}
       </header>
-      {/* End of Header */}
 
       <main>
-        {/* Hero Section */}
-        <section className="py-16 md:py-24 bg-gradient-to-b from-secondary to-background">
-          <div className="container mx-auto px-4 text-center space-y-6">
-            <img src={LOGO_URL} alt="Sharaka" className="h-48 md:h-56 w-auto mx-auto animate-bounce" style={{ animationDuration: '3s' }} />
-            
-            <div>
-              <h1 className="text-6xl md:text-8xl font-bold text-primary mb-2 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                {t.tagline}
-              </h1>
-              <p className="text-3xl md:text-4xl font-bold text-accent animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
-                {t.platformName}
-              </p>
-            </div>
-
-            <p className="text-lg md:text-xl text-foreground/60 max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200 font-medium">
-              {isRTL ? 'منصة أعمال رقمية متكاملة تجمع الاستشارات، التعهيد وإدارة المشاريع، السوق الإلكتروني، ونظام نقاط وشريك نجاحك' : 'An integrated digital business platform that brings together consultations, outsourcing and project management, e-commerce marketplace, points system and your success partner'}
-            </p>
-            <Button className="btn-primary hover:shadow-lg hover:scale-105 transition-all duration-300 text-xl px-10 py-8">
-              {t.startNow}
-            </Button>
+        <section className="py-12 bg-gradient-to-b from-green-50 to-background">
+          <div className="container mx-auto px-4 text-center space-y-4">
+            <img src={LOGO_URL} alt="Sharaka" className="h-80 md:h-96 w-auto mx-auto" />
+            <h1 className="text-6xl md:text-8xl font-bold text-orange-500">{t.platformName}</h1>
+            <p className="text-lg text-gray-600">{t.description}</p>
           </div>
         </section>
 
-        {/* Main Sections Cards */}
-        <section id="sections" className="py-16 md:py-20 container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { icon: Users, title: isRTL ? 'المستشارون' : 'Consultants', desc: isRTL ? 'استشارات متخصصة' : 'Specialized consultations' },
-              { icon: Briefcase, title: isRTL ? 'الخدمات' : 'Services', desc: isRTL ? 'خدمات التعهيد' : 'Outsourcing services' },
-              { icon: ShoppingBag, title: isRTL ? 'السوق' : 'Marketplace', desc: isRTL ? 'متاجر إلكترونية' : 'E-commerce stores' },
-              { icon: Award, title: isRTL ? 'النقاط' : 'Points', desc: isRTL ? 'نظام الحوافز' : 'Rewards system' },
-            ].map((item, idx) => {
-              const Icon = item.icon;
-              return (
-                <div key={idx} className="card p-6 group hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer">
-                  <Icon className="w-12 h-12 text-accent mb-4 group-hover:scale-125 transition-transform duration-300" />
-                  <h3 className="text-2xl font-bold text-primary mb-2">{item.title}</h3>
-                  <p className="text-foreground/70 text-base">{item.desc}</p>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* Consultants Section */}
-        <section id="consultants" className="py-16 md:py-20 bg-secondary">
+        <section id="consultants" className="py-12 bg-blue-50">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-5xl font-bold text-primary mb-4">{t.consultants}</h2>
-              <p className="text-xl text-foreground/70">{t.consultantsDesc}</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <h2 className="text-4xl font-bold text-orange-500 mb-2">{t.consultants}</h2>
+            <p className="text-lg text-blue-600 mb-8">{t.consultantsDesc}</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {CONSULTANTS.map(consultant => (
-                <div key={consultant.id} className="card p-8 group hover:shadow-2xl hover:-translate-y-3 transition-all duration-300">
-                  <img 
-                    src={consultant.image} 
-                    alt={consultant.name} 
-                    className="w-full h-48 object-cover rounded-lg mb-4 group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <h3 className="text-2xl font-bold text-primary mb-2">{isRTL ? consultant.name : consultant.nameEn}</h3>
-                  <p className="text-accent font-semibold text-base mb-3">{isRTL ? consultant.specialty : consultant.specialtyEn}</p>
-                  <p className="text-foreground/70 text-base mb-6">{isRTL ? consultant.bio : consultant.bioEn}</p>
-                  <Button 
-                    onClick={() => setSelectedConsultant(consultant)}
-                    className="w-full btn-primary justify-center hover:shadow-lg transition-all duration-300"
-                  >
-                    <ArrowRight size={18} className={isRTL ? 'ml-2' : 'mr-2'} />
-                    {t.bookAppointment}
-                  </Button>
+                <div key={consultant.id} className="bg-white rounded-lg shadow-md p-6 border border-blue-200">
+                  <img src={consultant.image} alt={consultant.name} className="w-full h-48 object-cover rounded-lg mb-4" />
+                  <h3 className="text-xl font-bold text-orange-500 mb-1">{isRTL ? consultant.name : consultant.nameEn}</h3>
+                  <p className="text-blue-600 mb-2">{isRTL ? consultant.specialty : consultant.specialtyEn}</p>
+                  <p className="text-gray-600 text-sm">{isRTL ? consultant.bio : consultant.bioEn}</p>
                 </div>
               ))}
             </div>
-
-            {selectedConsultant && (
-              <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
-                <div className="bg-card rounded-lg shadow-2xl max-w-md w-full p-8 animate-in slide-in-from-bottom-4 duration-300">
-                  <h3 className="text-2xl font-bold text-primary mb-4">{t.bookAppointment} - {isRTL ? selectedConsultant.name : selectedConsultant.nameEn}</h3>
-                  <form onSubmit={(e) => {
-                    e.preventDefault();
-                    sendEmailNotification('حجز موعد جديد', { consultant: selectedConsultant.name, country: currentCountry?.name });
-                    setSelectedConsultant(null);
-                  }} className="space-y-4">
-                    <input type="text" placeholder={t.name} className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300" required />
-                    <input type="email" placeholder={t.emailPlaceholder} className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300" required />
-                    <input type="tel" placeholder={t.phoneInput} className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300" required />
-                    <textarea placeholder={t.message} rows={3} className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300" />
-                    <div className="flex gap-4">
-                      <Button type="submit" className="flex-1 btn-primary justify-center hover:shadow-lg transition-all duration-300">{t.confirm}</Button>
-                      <Button onClick={() => setSelectedConsultant(null)} className="flex-1 btn-outline">{t.cancel}</Button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            )}
           </div>
         </section>
 
-        {/* Services Section */}
-        <section id="services" className="py-16 md:py-20 container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-primary mb-4">{t.services}</h2>
-            <p className="text-lg text-foreground/70">{t.servicesDesc}</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            {SERVICES.map(service => {
-              const Icon = service.icon;
-              return (
-                <div key={service.id} className="card p-8 group hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
-                  <Icon className="w-12 h-12 text-accent mb-4 group-hover:scale-125 transition-transform duration-300" />
-                  <h3 className="text-xl font-bold text-primary mb-3">{isRTL ? service.title : service.titleEn}</h3>
-                  <p className="text-foreground/70">{isRTL ? service.description : service.descriptionEn}</p>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="bg-blue-50 border-r-4 border-primary rounded-lg p-8 hover:shadow-lg transition-all duration-300">
-            <div className="flex gap-4">
-              <AlertCircle className="text-primary flex-shrink-0" size={24} />
-              <div>
-                <h4 className="text-xl font-bold text-primary mb-2">{t.commitment}</h4>
-                <p className="text-foreground/80">{t.commitmentText}</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Marketplace Section */}
-        <section id="marketplace" className="py-16 md:py-20 bg-secondary">
+        <section id="services" className="py-12 bg-blue-50">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-primary mb-4">{t.marketplace}</h2>
-              <p className="text-lg text-foreground/70">{t.marketplaceDesc}</p>
+            <h2 className="text-4xl font-bold text-orange-500 mb-2">{t.services}</h2>
+            <p className="text-lg text-blue-600 mb-8">{t.servicesDesc}</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {SERVICES.map(service => {
+                const IconComponent = service.icon;
+                return (
+                  <div key={service.id} className="bg-white rounded-lg shadow-md p-6 border border-blue-200">
+                    <IconComponent size={40} className="text-orange-500 mb-4" />
+                    <h3 className="text-xl font-bold text-orange-500 mb-2">{isRTL ? service.title : service.titleEn}</h3>
+                    <p className="text-blue-600">{isRTL ? service.description : service.descriptionEn}</p>
+                  </div>
+                );
+              })}
             </div>
+          </div>
+        </section>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <section id="marketplace" className="py-12 bg-orange-50">
+          <div className="container mx-auto px-4">
+            <h2 className="text-4xl font-bold text-orange-500 mb-2">{t.marketplace}</h2>
+            <p className="text-lg text-blue-600 mb-8">{t.marketplaceDesc}</p>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               {STORES.map(store => (
-                <div key={store.id} className="card p-6 group hover:scale-110 hover:shadow-2xl transition-all duration-300">
-                  <img 
-                    src={store.image} 
-                    alt={store.name} 
-                    className="w-full h-32 object-cover rounded-lg mb-4 group-hover:scale-110 transition-transform duration-300"
-                  />
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h3 className="text-lg font-bold text-primary">{isRTL ? store.name : store.nameEn}</h3>
-                      <p className="text-accent text-sm font-semibold">{isRTL ? store.category : store.categoryEn}</p>
-                    </div>
-                    <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded">
-                      <span className="text-yellow-500">★</span>
-                      <span className="font-semibold text-sm text-primary">{store.rating}</span>
-                    </div>
+                <div key={store.id} className="bg-white rounded-lg shadow-md overflow-hidden border border-orange-200">
+                  <img src={store.image} alt={store.name} className="w-full h-40 object-cover" />
+                  <div className="p-4">
+                    <h3 className="text-lg font-bold text-orange-500 mb-1">{isRTL ? store.name : store.nameEn}</h3>
+                    <p className="text-blue-600 text-sm mb-2">{isRTL ? store.category : store.categoryEn}</p>
+                    <p className="text-yellow-500">★ {store.rating}</p>
                   </div>
-                  <p className="text-foreground/70 text-sm mb-4">{store.reviews} {isRTL ? 'تقييم' : 'reviews'}</p>
-                  <Button className="w-full btn-secondary justify-center hover:shadow-lg transition-all duration-300">
-                    <ShoppingBag size={18} />
-                    {t.enterStore}
-                  </Button>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Paths Section */}
-        <section id="paths" className="py-16 md:py-20 container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-primary mb-4">{t.paths}</h2>
-            <p className="text-lg text-foreground/70">{t.pathsDesc}</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {PATHS.map(path => (
-              <div 
-                key={path.id} 
-                onClick={() => setSelectedPath(path)}
-                className="card p-8 group hover:shadow-2xl hover:-translate-y-3 transition-all duration-300 cursor-pointer"
-              >
-                <div className="text-5xl mb-4 group-hover:scale-125 transition-transform duration-300">{path.icon}</div>
-                <h3 className="text-xl font-bold text-primary mb-2">{isRTL ? path.title : path.titleEn}</h3>
-                <p className="text-foreground/70 text-sm mb-4">{isRTL ? path.desc : path.descEn}</p>
-                <ArrowRight className="text-accent group-hover:translate-x-2 transition-transform duration-300" size={20} />
-              </div>
-            ))}
-          </div>
-
-          {selectedPath && (
-            <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
-              <div className="bg-card rounded-lg shadow-2xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom-4 duration-300">
-                <div className="flex justify-between items-center mb-6">
-                  <div>
-                    <div className="text-5xl mb-2">{selectedPath.icon}</div>
-                    <h3 className="text-3xl font-bold text-primary">{isRTL ? selectedPath.title : selectedPath.titleEn}</h3>
-                  </div>
-                  <button 
-                    onClick={() => setSelectedPath(null)}
-                    className="text-2xl text-foreground/50 hover:text-foreground transition-colors duration-300"
-                  >
-                    ✕
-                  </button>
-                </div>
-
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="text-xl font-bold text-primary mb-4">{isRTL ? 'الدورات المتاحة:' : 'Available Courses:'}</h4>
-                    <div className="space-y-3">
-                      {selectedPath.courses.map((course, idx) => (
-                        <div key={idx} className="p-4 bg-secondary rounded-lg hover:shadow-md transition-all duration-300">
-                          <p className="font-semibold text-primary">{isRTL ? course.name : course.nameEn}</p>
-                          <p className="text-sm text-foreground/70">{isRTL ? 'المدة:' : 'Duration:'} {isRTL ? course.duration : course.durationEn}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="text-xl font-bold text-primary mb-4">{isRTL ? 'الشهادات:' : 'Certificates:'}</h4>
-                    <div className="space-y-2">
-                      {selectedPath.certificates.map((cert, idx) => (
-                        <div key={idx} className="flex items-center gap-2 p-3 bg-secondary rounded-lg">
-                          <Award className="text-accent" size={20} />
-                          <span className="text-primary font-semibold">{isRTL ? cert : selectedPath.certificatesEn[idx]}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <Button 
-                    onClick={() => setSelectedPath(null)}
-                    className="w-full btn-primary justify-center hover:shadow-lg transition-all duration-300"
-                  >
-                    {isRTL ? 'إغلاق' : 'Close'}
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
-        </section>
-
-        {/* Points System */}
-        <section id="points" className="py-16 md:py-20 bg-primary text-primary-foreground">
+        <section id="paths" className="py-12 bg-blue-50">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold mb-4">{t.points}</h2>
-              <p className="text-lg opacity-90">{t.pointsDesc}</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-              {[
-                { icon: TrendingUp, title: t.earnPoints, desc: t.earnPointsDesc },
-                { icon: Award, title: t.collectBalance, desc: t.collectBalanceDesc },
-                { icon: Zap, title: t.useBalance, desc: t.useBalanceDesc },
-              ].map((step, idx) => {
-                const Icon = step.icon;
-                return (
-                  <div key={idx} className="text-center hover:scale-105 transition-transform duration-300">
-                    <Icon className="w-12 h-12 mx-auto mb-4 opacity-80 hover:opacity-100 transition-opacity duration-300" />
-                    <h4 className="text-xl font-bold mb-2">{step.title}</h4>
-                    <p className="opacity-80">{step.desc}</p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* Contact Section */}
-        <section id="contact" className="py-16 md:py-20 bg-secondary">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-primary mb-4">{t.contact}</h2>
-              <p className="text-lg text-foreground/70">{t.contactDesc}</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-              {[
-                { icon: Mail, title: t.email, value: USER_EMAIL },
-                { icon: Phone, title: t.phoneLabel, value: '+966 11 2345 6789' },
-                { icon: MapPin, title: t.address, value: isRTL ? 'الرياض، السعودية' : 'Riyadh, Saudi Arabia' },
-              ].map((contact, idx) => {
-                const Icon = contact.icon;
-                return (
-                  <div key={idx} className="card p-8 text-center hover:shadow-lg hover:-translate-y-2 transition-all duration-300">
-                    <Icon className="w-12 h-12 text-accent mx-auto mb-4 hover:scale-125 transition-transform duration-300" />
-                    <h4 className="font-bold text-primary mb-2">{contact.title}</h4>
-                    <p className="text-foreground/70">{contact.value}</p>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="max-w-2xl mx-auto card p-8 hover:shadow-lg transition-all duration-300">
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                sendEmailNotification('رسالة تواصل جديدة', contactData);
-                setContactData({ name: '', email: '', phone: '', subject: '', message: '' });
-              }} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <input
-                    type="text"
-                    placeholder={t.name}
-                    value={contactData.name}
-                    onChange={(e) => setContactData({ ...contactData, name: e.target.value })}
-                    className="px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300"
-                    required
-                  />
-                  <input
-                    type="email"
-                    placeholder={t.emailPlaceholder}
-                    value={contactData.email}
-                    onChange={(e) => setContactData({ ...contactData, email: e.target.value })}
-                    className="px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300"
-                    required
-                  />
+            <h2 className="text-4xl font-bold text-orange-500 mb-2">{t.paths}</h2>
+            <p className="text-lg text-blue-600 mb-8">{t.pathsDesc}</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {PATHS.map(path => (
+                <div key={path.id} className="bg-white rounded-lg shadow-md p-6 border border-blue-200">
+                  <div className="text-4xl mb-4">{path.icon}</div>
+                  <h3 className="text-xl font-bold text-orange-500 mb-2">{isRTL ? path.title : path.titleEn}</h3>
+                  <p className="text-blue-600">{isRTL ? path.desc : path.descEn}</p>
                 </div>
-                <input
-                  type="tel"
-                  placeholder={t.phoneInput}
-                  value={contactData.phone}
-                  onChange={(e) => setContactData({ ...contactData, phone: e.target.value })}
-                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300"
-                />
-                <input
-                  type="text"
-                  placeholder={t.subject}
-                  value={contactData.subject}
-                  onChange={(e) => setContactData({ ...contactData, subject: e.target.value })}
-                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300"
-                  required
-                />
-                <textarea
-                  placeholder={t.message}
-                  value={contactData.message}
-                  onChange={(e) => setContactData({ ...contactData, message: e.target.value })}
-                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300"
-                  rows={5}
-                  required
-                />
-                <Button type="submit" className="w-full btn-primary justify-center hover:shadow-lg transition-all duration-300">
-                  <MessageCircle size={20} />
-                  {t.send}
-                </Button>
-              </form>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* About Section */}
-        <section id="about" className="py-16 md:py-20 container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-primary mb-4">{t.about}</h2>
-          </div>
-
-          <div className="card max-w-3xl mx-auto p-8 hover:shadow-lg transition-all duration-300">
-            <div className="flex gap-4 mb-4">
-              <Info className="w-8 h-8 text-accent flex-shrink-0" />
-              <div>
-                <h3 className="text-2xl font-bold text-primary mb-4">{t.vision}</h3>
-                <p className="text-foreground/70 leading-relaxed">{t.visionText}</p>
+        <section id="points" className="py-12 bg-blue-50">
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="text-4xl font-bold text-orange-500 mb-2">{t.points}</h2>
+            <p className="text-lg text-blue-600 mb-8">{t.pointsDesc}</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white rounded-lg shadow-md p-6 border border-blue-200">
+                <div className="text-4xl mb-4">⚡</div>
+                <p className="text-blue-600">{t.earnPoints}</p>
+                <p className="text-gray-600 text-sm">{t.earnPointsDesc}</p>
               </div>
+              <div className="bg-white rounded-lg shadow-md p-6 border border-blue-200">
+                <div className="text-4xl mb-4">🏅</div>
+                <p className="text-blue-600">{t.collectBalance}</p>
+                <p className="text-gray-600 text-sm">{t.collectBalanceDesc}</p>
+              </div>
+              <div className="bg-white rounded-lg shadow-md p-6 border border-blue-200">
+                <div className="text-4xl mb-4">📈</div>
+                <p className="text-blue-600">{t.useBalance}</p>
+                <p className="text-gray-600 text-sm">{t.useBalanceDesc}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="contact" className="py-12 bg-blue-50">
+          <div className="container mx-auto px-4">
+            <h2 className="text-4xl font-bold text-orange-500 mb-2">{t.contact}</h2>
+            <p className="text-lg text-blue-600 mb-8">{t.contactDesc}</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white rounded-lg shadow-md p-6 border border-blue-200">
+                <Mail size={32} className="text-orange-500 mb-4" />
+                <p className="text-orange-500 font-semibold">{USER_EMAIL}</p>
+              </div>
+              <div className="bg-white rounded-lg shadow-md p-6 border border-blue-200">
+                <Phone size={32} className="text-orange-500 mb-4" />
+                <p className="text-orange-500 font-semibold">+966 11 2345 6789</p>
+              </div>
+              <div className="bg-white rounded-lg shadow-md p-6 border border-blue-200">
+                <MapPin size={32} className="text-orange-500 mb-4" />
+                <p className="text-orange-500 font-semibold">الرياض، السعودية</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="about" className="py-12 bg-blue-50">
+          <div className="container mx-auto px-4">
+            <h2 className="text-4xl font-bold text-orange-500 mb-6">{t.about}</h2>
+            <div className="bg-white rounded-lg shadow-md p-8 border border-blue-200">
+              <h3 className="text-2xl font-bold text-orange-500 mb-4">{t.vision}</h3>
+              <p className="text-blue-600 leading-relaxed">{t.visionText}</p>
             </div>
           </div>
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-primary text-primary-foreground py-12">
+      <footer className="bg-card border-t border-border py-8">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <h4 className="font-bold mb-4">{t.quickLinks}</h4>
-              <ul className="space-y-2 text-sm opacity-80">
-                <li><a href="#consultants" className="hover:text-accent transition-colors duration-300">{t.consultants}</a></li>
-                <li><a href="#services" className="hover:text-accent transition-colors duration-300">{t.services}</a></li>
-                <li><a href="#marketplace" className="hover:text-accent transition-colors duration-300">{t.marketplace}</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-bold mb-4">{t.services}</h4>
-              <ul className="space-y-2 text-sm opacity-80">
-                <li><a href="#" className="hover:text-accent transition-colors duration-300">{isRTL ? 'التعهيد' : 'Outsourcing'}</a></li>
-                <li><a href="#" className="hover:text-accent transition-colors duration-300">{t.consultants}</a></li>
-                <li><a href="#" className="hover:text-accent transition-colors duration-300">{t.points}</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-bold mb-4">{t.legal}</h4>
-              <ul className="space-y-2 text-sm opacity-80">
-                <li><a href="#" className="hover:text-accent transition-colors duration-300">{t.privacy}</a></li>
-                <li><a href="#" className="hover:text-accent transition-colors duration-300">{t.terms}</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-bold mb-4">{t.contact}</h4>
-              <ul className="space-y-2 text-sm opacity-80">
-                <li>{t.email}: {USER_EMAIL}</li>
-                <li>{t.phoneLabel}: +966 11 2345 6789</li>
-              </ul>
-            </div>
-          </div>
-
           <div className="border-t border-primary-foreground/20 pt-8 text-center text-sm opacity-80">
             <p>&copy; 2026 {isRTL ? 'منصة شراكة' : 'Sharaka Platform'}. {t.allRights}.</p>
           </div>

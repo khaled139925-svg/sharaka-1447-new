@@ -393,21 +393,21 @@ export default function Home() {
           <div className="container mx-auto px-4 text-center space-y-4">
             <img src={LOGO_URL} alt="Sharaka" className="h-80 md:h-96 w-auto mx-auto animate-bounce" style={{animationDuration: '3s'}} />
             <h1 className="text-6xl md:text-8xl font-bold text-orange-500">{t.platformName}</h1>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">{t.description}</p>
+            <p className="text-2xl text-gray-600 max-w-2xl mx-auto">{t.description}</p>
           </div>
         </section>
 
         <section id="consultants" className="py-12 bg-blue-50">
           <div className="container mx-auto px-4">
-            <h2 className="text-4xl font-bold text-orange-500 mb-2">{t.consultants}</h2>
-            <p className="text-lg text-blue-600 mb-8">{t.consultantsDesc}</p>
+            <h2 className="text-5xl font-bold text-orange-500 mb-2">{t.consultants}</h2>
+            <p className="text-2xl text-blue-600 mb-8">{t.consultantsDesc}</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {CONSULTANTS.map(consultant => (
                 <div key={consultant.id} className="bg-white rounded-lg shadow-md p-6 border border-blue-200">
                   <img src={consultant.image} alt={consultant.name} className="w-full h-48 object-cover rounded-lg mb-4" />
-                  <h3 className="text-xl font-bold text-orange-500 mb-1">{isRTL ? consultant.name : consultant.nameEn}</h3>
-                  <p className="text-blue-600 mb-2">{isRTL ? consultant.specialty : consultant.specialtyEn}</p>
-                  <p className="text-gray-600 text-sm">{isRTL ? consultant.bio : consultant.bioEn}</p>
+                  <h3 className="text-2xl font-bold text-orange-500 mb-1">{isRTL ? consultant.name : consultant.nameEn}</h3>
+                  <p className="text-lg text-blue-600 mb-2">{isRTL ? consultant.specialty : consultant.specialtyEn}</p>
+                  <p className="text-base text-gray-600">{isRTL ? consultant.bio : consultant.bioEn}</p>
                 </div>
               ))}
             </div>
@@ -416,16 +416,16 @@ export default function Home() {
 
         <section id="services" className="py-12 bg-blue-50">
           <div className="container mx-auto px-4">
-            <h2 className="text-4xl font-bold text-orange-500 mb-2">{t.services}</h2>
-            <p className="text-lg text-blue-600 mb-8">{t.servicesDesc}</p>
+            <h2 className="text-5xl font-bold text-orange-500 mb-2">{t.services}</h2>
+            <p className="text-2xl text-blue-600 mb-8">{t.servicesDesc}</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {SERVICES.map(service => {
                 const IconComponent = service.icon;
                 return (
                   <div key={service.id} className="bg-white rounded-lg shadow-md p-6 border border-blue-200">
                     <IconComponent size={40} className="text-orange-500 mb-4" />
-                    <h3 className="text-xl font-bold text-orange-500 mb-2">{isRTL ? service.title : service.titleEn}</h3>
-                    <p className="text-blue-600">{isRTL ? service.description : service.descriptionEn}</p>
+                    <h3 className="text-2xl font-bold text-orange-500 mb-2">{isRTL ? service.title : service.titleEn}</h3>
+                    <p className="text-lg text-blue-600">{isRTL ? service.description : service.descriptionEn}</p>
                   </div>
                 );
               })}
@@ -435,15 +435,15 @@ export default function Home() {
 
         <section id="marketplace" className="py-12 bg-orange-50">
           <div className="container mx-auto px-4">
-            <h2 className="text-4xl font-bold text-orange-500 mb-2">{t.marketplace}</h2>
-            <p className="text-lg text-blue-600 mb-8">{t.marketplaceDesc}</p>
+            <h2 className="text-5xl font-bold text-orange-500 mb-2">{t.marketplace}</h2>
+            <p className="text-2xl text-blue-600 mb-8">{t.marketplaceDesc}</p>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               {STORES.map(store => (
                 <div key={store.id} className="bg-white rounded-lg shadow-md overflow-hidden border border-orange-200">
                   <img src={store.image} alt={store.name} className="w-full h-40 object-cover" />
                   <div className="p-4">
-                    <h3 className="text-lg font-bold text-orange-500 mb-1">{isRTL ? store.name : store.nameEn}</h3>
-                    <p className="text-blue-600 text-sm mb-2">{isRTL ? store.category : store.categoryEn}</p>
+                    <h3 className="text-xl font-bold text-orange-500 mb-1">{isRTL ? store.name : store.nameEn}</h3>
+                    <p className="text-base text-blue-600 mb-2">{isRTL ? store.category : store.categoryEn}</p>
                     <p className="text-yellow-500">★ {store.rating}</p>
                   </div>
                 </div>

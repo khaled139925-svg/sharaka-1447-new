@@ -18,7 +18,7 @@ const translations = {
     selectLanguage: 'اللغة',
     tagline: 'شريك نجاحك',
     platformName: 'منصة الخدمات المتكاملة',
-    description: 'نربط الخبرات بالفرص، نوفر الاستشارات، سوق إلكتروني، خدمات تعهيد وعمل عن بعد',
+    description: 'منصة أعمال رقمية متكاملة تجمع الإستشارات، التعهيد وإدارة المشاريع، السوق الإلكتروني، ونظام نقاط وشريك نجاحك',
     startNow: 'ابدأ الآن',
     consultants: 'المستشارون والاستشارات',
     consultantsDesc: 'استشارات متخصصة من الخبراء',
@@ -77,7 +77,7 @@ const translations = {
     selectLanguage: 'Language',
     tagline: 'Your Success Partner',
     platformName: 'Integrated Services Platform',
-    description: 'We connect expertise with opportunities, provide consultations, e-commerce marketplace, outsourcing services and remote work',
+    description: 'An integrated digital business platform that brings together consultations, outsourcing and project management, e-commerce marketplace, points system and your success partner',
     startNow: 'Start Now',
     consultants: 'Consultants & Consultations',
     consultantsDesc: 'Specialized consultations from experts',
@@ -393,7 +393,7 @@ export default function Home() {
           <div className="container mx-auto px-4 text-center space-y-4">
             <img src={LOGO_URL} alt="Sharaka" className="h-80 md:h-96 w-auto mx-auto animate-bounce" style={{animationDuration: '3s'}} />
             <h1 className="text-6xl md:text-8xl font-bold text-orange-500">{t.platformName}</h1>
-            <p className="text-lg text-gray-600">{t.description}</p>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">{t.description}</p>
           </div>
         </section>
 

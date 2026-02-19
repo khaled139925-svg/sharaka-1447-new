@@ -399,8 +399,8 @@ export default function Home() {
 
         <section id="consultants" className="py-12 bg-blue-50">
           <div className="container mx-auto px-4">
-            <h2 className="text-5xl font-bold text-orange-500 mb-2">{t.consultants}</h2>
-            <p className="text-2xl text-blue-600 mb-8">{t.consultantsDesc}</p>
+            <h2 className="text-5xl font-bold text-orange-500 mb-2 text-center">{t.consultants}</h2>
+            <p className="text-2xl text-blue-600 mb-8 text-center">{t.consultantsDesc}</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {CONSULTANTS.map(consultant => (
                 <div key={consultant.id} className="bg-white rounded-lg shadow-md p-6 border border-blue-200">
@@ -416,8 +416,8 @@ export default function Home() {
 
         <section id="services" className="py-12 bg-blue-50">
           <div className="container mx-auto px-4">
-            <h2 className="text-5xl font-bold text-orange-500 mb-2">{t.services}</h2>
-            <p className="text-2xl text-blue-600 mb-8">{t.servicesDesc}</p>
+            <h2 className="text-5xl font-bold text-orange-500 mb-2 text-center">{t.services}</h2>
+            <p className="text-2xl text-blue-600 mb-8 text-center">{t.servicesDesc}</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {SERVICES.map(service => {
                 const IconComponent = service.icon;
@@ -435,8 +435,8 @@ export default function Home() {
 
         <section id="marketplace" className="py-12 bg-orange-50">
           <div className="container mx-auto px-4">
-            <h2 className="text-5xl font-bold text-orange-500 mb-2">{t.marketplace}</h2>
-            <p className="text-2xl text-blue-600 mb-8">{t.marketplaceDesc}</p>
+            <h2 className="text-5xl font-bold text-orange-500 mb-2 text-center">{t.marketplace}</h2>
+            <p className="text-2xl text-blue-600 mb-8 text-center">{t.marketplaceDesc}</p>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               {STORES.map(store => (
                 <div key={store.id} className="bg-white rounded-lg shadow-md overflow-hidden border border-orange-200">
@@ -454,8 +454,8 @@ export default function Home() {
 
         <section id="paths" className="py-12 bg-blue-50">
           <div className="container mx-auto px-4">
-            <h2 className="text-4xl font-bold text-orange-500 mb-2">{t.paths}</h2>
-            <p className="text-lg text-blue-600 mb-8">{t.pathsDesc}</p>
+            <h2 className="text-4xl font-bold text-orange-500 mb-2 text-center">{t.paths}</h2>
+            <p className="text-lg text-blue-600 mb-8 text-center">{t.pathsDesc}</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {PATHS.map(path => (
                 <div key={path.id} className="bg-white rounded-lg shadow-md p-6 border border-blue-200">
@@ -470,8 +470,8 @@ export default function Home() {
 
         <section id="points" className="py-12 bg-blue-50">
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-4xl font-bold text-orange-500 mb-2">{t.points}</h2>
-            <p className="text-lg text-blue-600 mb-8">{t.pointsDesc}</p>
+            <h2 className="text-4xl font-bold text-orange-500 mb-2 text-center">{t.points}</h2>
+            <p className="text-lg text-blue-600 mb-8 text-center">{t.pointsDesc}</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-white rounded-lg shadow-md p-6 border border-blue-200">
                 <div className="text-4xl mb-4">⚡</div>
@@ -494,8 +494,8 @@ export default function Home() {
 
         <section id="contact" className="py-12 bg-blue-50">
           <div className="container mx-auto px-4">
-            <h2 className="text-4xl font-bold text-orange-500 mb-2">{t.contact}</h2>
-            <p className="text-lg text-blue-600 mb-8">{t.contactDesc}</p>
+            <h2 className="text-4xl font-bold text-orange-500 mb-2 text-center">{t.contact}</h2>
+            <p className="text-lg text-blue-600 mb-8 text-center">{t.contactDesc}</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-white rounded-lg shadow-md p-6 border border-blue-200">
                 <Mail size={32} className="text-orange-500 mb-4" />
@@ -515,9 +515,9 @@ export default function Home() {
 
         <section id="about" className="py-12 bg-blue-50">
           <div className="container mx-auto px-4">
-            <h2 className="text-4xl font-bold text-orange-500 mb-6">{t.about}</h2>
+            <h2 className="text-4xl font-bold text-orange-500 mb-6 text-center">{t.about}</h2>
             <div className="bg-white rounded-lg shadow-md p-8 border border-blue-200">
-              <h3 className="text-2xl font-bold text-orange-500 mb-4">{t.vision}</h3>
+              <h3 className="text-2xl font-bold text-orange-500 mb-4 text-center">{t.vision}</h3>
               <p className="text-blue-600 leading-relaxed">{t.visionText}</p>
             </div>
           </div>

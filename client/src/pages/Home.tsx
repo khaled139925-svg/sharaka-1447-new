@@ -391,7 +391,7 @@ export default function Home() {
       <main>
         <section className="py-12 bg-gradient-to-b from-green-50 to-background">
           <div className="container mx-auto px-4 text-center space-y-4">
-            <img src={LOGO_URL} alt="Sharaka" className="h-80 md:h-96 w-auto mx-auto" />
+            <img src={LOGO_URL} alt="Sharaka" className="h-80 md:h-96 w-auto mx-auto animate-bounce" style={{animationDuration: '3s'}} />
             <h1 className="text-6xl md:text-8xl font-bold text-orange-500">{t.platformName}</h1>
             <p className="text-lg text-gray-600">{t.description}</p>
           </div>

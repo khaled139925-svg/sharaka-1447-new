@@ -327,22 +327,22 @@ export default function Home() {
               onClick={() => setShowLanguageMenu(!showLanguageMenu)}
               className="flex items-center gap-2 px-4 py-3 rounded-md border-2 border-blue-500 bg-blue-50 hover:bg-blue-100 transition-all duration-300"
             >
+                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20H7m6-4h.01M15 12H9" /></svg>
                 <span className="text-sm font-semibold text-blue-600">{language === 'ar' ? 'العربية' : 'English'}</span>
-                <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm6 0a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"></path></svg>
               </button>
               {showLanguageMenu && (
-                <div className="absolute top-full right-0 mt-2 bg-blue-500 rounded-lg shadow-lg border border-blue-600 z-50 min-w-[140px]">
+                <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-lg border border-blue-300 z-50 min-w-[140px]">
                   {[
                     { code: 'ar', label: 'العربية' },
                     { code: 'en', label: 'English' },
-                  ].map((lang: any) => (
+                  ].map(lang => (
                     <button
                       key={lang.code}
                       onClick={() => {
-                        setLanguage(lang.code);
+                        setLanguage(lang.code as 'ar' | 'en');
                         setShowLanguageMenu(false);
                       }}
-                      className="w-full px-4 py-2 text-right hover:bg-blue-600 transition-all duration-300 text-white"
+                      className="block w-full text-left px-4 py-2 text-blue-600 hover:bg-blue-50 transition-colors duration-200 first:rounded-t-lg last:rounded-b-lg"
                     >
                       {lang.label}
                     </button>
@@ -360,7 +360,7 @@ export default function Home() {
                 <span className="text-sm font-semibold text-blue-600">{isRTL ? currentCountry?.name : currentCountry?.nameEn}</span>
               </button>
               {showCountryMenu && (
-                <div className="absolute top-full right-0 mt-2 bg-blue-500 rounded-lg shadow-lg border border-blue-600 z-50 max-h-96 overflow-y-auto min-w-[200px]">
+                <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-lg border border-blue-300 z-50 max-h-96 overflow-y-auto min-w-[200px]">
                   {COUNTRIES.map(country => (
                     <button
                       key={country.code}
@@ -368,10 +368,10 @@ export default function Home() {
                         setSelectedCountry(country.code);
                         setShowCountryMenu(false);
                       }}
-                      className="w-full px-4 py-2 text-right flex items-center gap-2 hover:bg-blue-600 transition-all duration-300 text-white"
+                      className="flex items-center gap-2 w-full text-left px-4 py-2 text-blue-600 hover:bg-blue-50 transition-colors duration-200"
                     >
                       <span className="text-lg">{country.flag}</span>
-                      <span>{isRTL ? country.name : country.nameEn}</span>
+                      <span className="text-sm">{isRTL ? country.name : country.nameEn}</span>
                     </button>
                   ))}
                 </div>

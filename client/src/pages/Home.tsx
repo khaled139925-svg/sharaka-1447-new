@@ -362,7 +362,7 @@ export default function Home() {
                 <svg className="w-4 h-4 text-blue-600 ml-auto" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
               </button>
               {showCountryMenu && (
-                <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-lg border border-blue-300 z-50 max-h-96 overflow-y-auto min-w-[200px]">
+                <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-lg border border-blue-300 z-50 max-h-96 overflow-y-auto w-[180px]">
                   {COUNTRIES.map(country => (
                     <button
                       key={country.code}
@@ -370,10 +370,10 @@ export default function Home() {
                         setSelectedCountry(country.code);
                         setShowCountryMenu(false);
                       }}
-                      className="flex items-center gap-2 w-full text-left px-4 py-2 text-blue-600 hover:bg-blue-50 transition-colors duration-200"
+                      className="flex items-center justify-between w-full text-left px-4 py-2 text-blue-600 hover:bg-blue-50 transition-colors duration-200"
                     >
-                      <span className="text-sm flex-1">{isRTL ? country.name : country.nameEn}</span>
-                      <span className="text-lg">{country.flag}</span>
+                      <span className="text-sm">{isRTL ? country.name : country.nameEn}</span>
+                      <span className="text-lg ml-2">{country.flag}</span>
                     </button>
                   ))}
                 </div>

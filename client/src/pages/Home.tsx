@@ -370,10 +370,10 @@ export default function Home() {
                         setSelectedCountry(country.code);
                         setShowCountryMenu(false);
                       }}
-                      className="flex items-center justify-between gap-3 w-full text-left px-4 py-2 text-blue-600 hover:bg-blue-50 transition-colors duration-200"
+                      className="flex items-center justify-between gap-2 w-full text-left px-4 py-2 text-blue-600 hover:bg-blue-50 transition-colors duration-200"
                     >
                       <span className="text-sm">{isRTL ? country.name : country.nameEn}</span>
-                      <span className="text-xl">{country.flag}</span>
+                      <span className="text-2xl leading-none">{country.flag}</span>
                     </button>
                   ))}
                 </div>

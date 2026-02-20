@@ -300,7 +300,7 @@ export default function Home() {
 
   return (
     <div className={`min-h-screen bg-background ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-      <header style={{ position: 'fixed', top: 0, left: 0, right: 0, width: '100%', zIndex: 50 }} className="">
+      <header style={{ position: 'fixed', top: 0, left: 0, right: 0, width: '100%', zIndex: 50, backgroundColor: 'white', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }} className="">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src={LOGO_URL} alt="Sharaka" className="h-16 w-auto object-contain" />
@@ -323,14 +323,14 @@ export default function Home() {
             </button>
 
             <div className="relative">
-              <button
-                onClick={() => setShowLanguageMenu(!showLanguageMenu)}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-orange-100 border border-orange-300 hover:bg-orange-200 transition-all duration-300"
-              >
-                <span className="text-sm font-semibold text-orange-500">{language === 'ar' ? 'العربية' : 'English'}</span>
+            <button
+              onClick={() => setShowLanguageMenu(!showLanguageMenu)}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white border border-gray-300 hover:bg-gray-50 transition-all duration-300"
+            >
+                <span className="text-sm font-semibold text-gray-700">{language === 'ar' ? 'العربية' : 'English'}</span>
               </button>
               {showLanguageMenu && (
-                <div className="absolute top-full right-0 mt-2 bg-card rounded-lg shadow-lg border border-border z-50 min-w-[140px]">
+                <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50 min-w-[140px]">
                   {[
                     { code: 'ar', label: 'العربية' },
                     { code: 'en', label: 'English' },
@@ -341,7 +341,7 @@ export default function Home() {
                         setLanguage(lang.code);
                         setShowLanguageMenu(false);
                       }}
-                      className="w-full px-4 py-2 text-right hover:bg-blue-50 transition-all duration-300 text-blue-600"
+                      className="w-full px-4 py-2 text-right hover:bg-gray-50 transition-all duration-300 text-gray-700"
                     >
                       {lang.label}
                     </button>
@@ -353,12 +353,12 @@ export default function Home() {
             <div className="relative">
               <button
                 onClick={() => setShowCountryMenu(!showCountryMenu)}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-orange-100 border border-orange-300 hover:bg-orange-200 transition-all duration-300"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white border border-gray-300 hover:bg-gray-50 transition-all duration-300"
               >
                 <span className="text-lg">{currentCountry?.flag}</span>
               </button>
               {showCountryMenu && (
-                <div className="absolute top-full right-0 mt-2 bg-card rounded-lg shadow-lg border border-border z-50 max-h-96 overflow-y-auto min-w-[200px]">
+                <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-96 overflow-y-auto min-w-[200px]">
                   {COUNTRIES.map(country => (
                     <button
                       key={country.code}
@@ -366,7 +366,7 @@ export default function Home() {
                         setSelectedCountry(country.code);
                         setShowCountryMenu(false);
                       }}
-                      className="w-full px-4 py-2 text-right flex items-center gap-2 hover:bg-blue-50 transition-all duration-300 text-blue-600"
+                      className="w-full px-4 py-2 text-right flex items-center gap-2 hover:bg-gray-50 transition-all duration-300 text-gray-700"
                     >
                       <span className="text-lg">{country.flag}</span>
                       <span>{isRTL ? country.name : country.nameEn}</span>

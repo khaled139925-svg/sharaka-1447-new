@@ -327,7 +327,7 @@ export default function Home() {
               onClick={() => setShowLanguageMenu(!showLanguageMenu)}
               className="flex items-center gap-2 px-4 py-3 rounded-md border-2 border-blue-500 bg-blue-50 hover:bg-blue-100 transition-all duration-300"
             >
-                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20H7m6-4h.01M15 12H9" /></svg>
+                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" strokeWidth="2"/><circle cx="12" cy="12" r="7" strokeWidth="2"/><circle cx="12" cy="12" r="4" strokeWidth="2"/></svg>
                 <span className="text-sm font-semibold text-blue-600">{language === 'ar' ? 'العربية' : 'English'}</span>
               </button>
               {showLanguageMenu && (

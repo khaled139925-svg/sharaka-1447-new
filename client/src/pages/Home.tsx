@@ -312,11 +312,11 @@ export default function Home() {
 
           <div className="flex items-center gap-2 md:gap-3">
             {/* روابط التنقل السريع - مخفية على الأجهزة الصغيرة */}
-            <div className="hidden lg:flex items-center gap-2">
-              <a href="#consultants" className="px-3 py-2 text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors duration-300">{t.consultants}</a>
-              <a href="#services" className="px-3 py-2 text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors duration-300">{t.services}</a>
-              <a href="#marketplace" className="px-3 py-2 text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors duration-300">{t.marketplace}</a>
-              <a href="#points" className="px-3 py-2 text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors duration-300">{t.points}</a>
+            <div className="flex items-center gap-2">
+              <a href="#consultants" className="px-1 md:px-3 py-2 text-xs md:text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors duration-300">{t.consultants}</a>
+              <a href="#services" className="px-1 md:px-3 py-2 text-xs md:text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors duration-300">{t.services}</a>
+              <a href="#marketplace" className="px-1 md:px-3 py-2 text-xs md:text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors duration-300">{t.marketplace}</a>
+              <a href="#points" className="px-1 md:px-3 py-2 text-xs md:text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors duration-300">{t.points}</a>
             </div>
 
             <button

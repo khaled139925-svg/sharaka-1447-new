@@ -372,8 +372,8 @@ export default function Home() {
                       }}
                       className="flex items-center gap-2 w-full text-left px-4 py-2 text-blue-600 hover:bg-blue-50 transition-colors duration-200"
                     >
+                      <span className="text-sm flex-1">{isRTL ? country.name : country.nameEn}</span>
                       <span className="text-lg">{country.flag}</span>
-                      <span className="text-sm">{isRTL ? country.name : country.nameEn}</span>
                     </button>
                   ))}
                 </div>

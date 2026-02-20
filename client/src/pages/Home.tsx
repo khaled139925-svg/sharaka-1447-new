@@ -354,7 +354,7 @@ export default function Home() {
             <div className="relative">
               <button
                 onClick={() => setShowCountryMenu(!showCountryMenu)}
-                className="flex items-center gap-2 px-4 py-3 rounded-md border border-orange-200 bg-orange-50 hover:bg-orange-100 transition-all duration-300 min-w-[140px]"
+                className="flex items-center gap-2 px-4 py-3 rounded-md border border-orange-200 bg-orange-50 hover:bg-orange-100 transition-all duration-300"
               >
                 <span className="text-lg">{currentCountry?.flag}</span>
                 <span className="text-sm font-semibold text-orange-600">{isRTL ? currentCountry?.name : currentCountry?.nameEn}</span>

@@ -186,3 +186,7 @@
 [2026-02-20T08:32:19.843Z] Dev server exited with code -15
 [2026-02-20T08:32:22.821Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
 [2026-02-20T08:32:23.235Z] Server running on http://localhost:3000/
+[2026-02-20T10:57:13.733Z] Dev server process group stopped
+[2026-02-20T10:57:13.745Z] Dev server exited with code -15
+[2026-02-20T10:57:16.737Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-02-20T10:57:17.106Z] Server running on http://localhost:3000/

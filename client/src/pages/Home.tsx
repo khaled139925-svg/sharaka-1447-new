@@ -314,6 +314,63 @@ export default function Home() {
   const currentCountry = COUNTRIES.find(c => c.code === selectedCountry);
   const isRTL = language === 'ar';
 
+  // دالة حفظ الحجز وإرسال البريد
+  const handleBookingSubmit = async () => {
+    if (!bookingData.name || !bookingData.email || !bookingData.phone || !bookingData.day || !bookingData.time) {
+      alert(isRTL ? 'يرجى ملء جميع الحقول' : 'Please fill all fields');
+      return;
+    }
+
+    if (!selectedConsultant) return;
+
+    try {
+      // حفظ البيانات في localStorage (قاعدة بيانات محلية)
+      const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+      const newBooking = {
+        id: Date.now(),
+        consultantName: selectedConsultant.name,
+        consultantEmail: 'consultant@sharaka.com',
+        ...bookingData,
+        createdAt: new Date().toISOString(),
+      };
+      bookings.push(newBooking);
+      localStorage.setItem('bookings', JSON.stringify(bookings));
+
+      // إرسال بريد للعميل
+      const clientEmailResponse = await fetch('https://formspree.io/f/xyzpqwab', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: bookingData.email,
+          subject: `${isRTL ? 'تأكيد حجز موعد مع' : 'Appointment Confirmation with'} ${selectedConsultant.name}`,
+          message: `${isRTL ? 'تم حجز موعدك بنجاح!' : 'Your appointment has been booked successfully!'}\n\n${isRTL ? 'المستشار' : 'Consultant'}: ${selectedConsultant.name}\n${isRTL ? 'التاريخ' : 'Date'}: ${bookingData.day}\n${isRTL ? 'الوقت' : 'Time'}: ${bookingData.time}`,
+        }),
+      });
+
+      // إرسال بريد للمستشار
+      const consultantEmailResponse = await fetch('https://formspree.io/f/xyzpqwab', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: 'khaled1399259@gmail.com',
+          subject: `${isRTL ? 'حجز موعد جديد' : 'New Appointment Booking'}`,
+          message: `${isRTL ? 'لديك حجز موعد جديد!' : 'You have a new appointment booking!'}\n\n${isRTL ? 'العميل' : 'Client'}: ${bookingData.name}\n${isRTL ? 'البريد' : 'Email'}: ${bookingData.email}\n${isRTL ? 'الهاتف' : 'Phone'}: ${bookingData.phone}\n${isRTL ? 'الموضوع' : 'Subject'}: ${bookingData.subject}\n${isRTL ? 'التاريخ' : 'Date'}: ${bookingData.day}\n${isRTL ? 'الوقت' : 'Time'}: ${bookingData.time}`,
+        }),
+      });
+
+      if (clientEmailResponse.ok && consultantEmailResponse.ok) {
+        alert(isRTL ? 'تم حجز الموعد بنجاح! تم إرسال رسالة تأكيد إلى بريدك الإلكتروني' : 'Appointment booked successfully! A confirmation email has been sent to your email');
+        setSelectedConsultant(null);
+        setBookingData({name: '', email: '', phone: '', subject: '', day: '', time: ''});
+      } else {
+        alert(isRTL ? 'تم حجز الموعد لكن حدث خطأ في إرسال البريد' : 'Appointment booked but there was an error sending the email');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert(isRTL ? 'حدث خطأ في حجز الموعد' : 'Error booking appointment');
+    }
+  };
+
   return (
     <div className={`min-h-screen bg-background ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
       <header style={{ position: 'fixed', top: 0, left: 0, right: 0, width: '100%', zIndex: 50, backgroundColor: 'white', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }} className="">
@@ -697,11 +754,7 @@ export default function Home() {
             {/* الأزرار */}
             <div className="flex gap-3 mt-6">
               <button
-                onClick={() => {
-                  alert(isRTL ? 'تم حجز الموعد بنجاح!' : 'Appointment booked successfully!');
-                  setSelectedConsultant(null);
-                  setBookingData({name: '', email: '', phone: '', subject: '', day: '', time: ''});
-                }}
+                onClick={handleBookingSubmit}
                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300"
               >
                 {isRTL ? 'تأكيد' : 'Confirm'}

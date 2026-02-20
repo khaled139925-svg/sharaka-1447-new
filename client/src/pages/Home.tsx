@@ -310,10 +310,18 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-3">
+            {/* روابط التنقل السريع - مخفية على الأجهزة الصغيرة */}
+            <div className="hidden lg:flex items-center gap-2">
+              <a href="#consultants" className="px-3 py-2 text-sm font-semibold text-blue-600 hover:text-orange-500 transition-colors duration-300">{t.consultants}</a>
+              <a href="#services" className="px-3 py-2 text-sm font-semibold text-blue-600 hover:text-orange-500 transition-colors duration-300">{t.services}</a>
+              <a href="#marketplace" className="px-3 py-2 text-sm font-semibold text-blue-600 hover:text-orange-500 transition-colors duration-300">{t.marketplace}</a>
+              <a href="#points" className="px-3 py-2 text-sm font-semibold text-blue-600 hover:text-orange-500 transition-colors duration-300">{t.points}</a>
+            </div>
+
             <button
               onClick={() => setShowMenu(!showMenu)}
-              className="flex items-center justify-center p-2 rounded-lg hover:bg-orange-100 transition-all duration-300 md:hidden"
+              className="flex items-center justify-center p-2 rounded-lg hover:bg-orange-100 transition-all duration-300 lg:hidden"
             >
               {showMenu ? (
                 <X size={24} className="text-orange-500" />

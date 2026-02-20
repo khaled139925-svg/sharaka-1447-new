@@ -302,8 +302,12 @@ export default function Home() {
     <div className={`min-h-screen bg-background ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
       <header style={{ position: 'fixed', top: 0, left: 0, right: 0, width: '100%', zIndex: 50 }} className="">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <img src={LOGO_URL} alt="Sharaka" className="h-16 w-auto object-contain" />
+            <div className="hidden md:block">
+              <p className="text-lg font-bold text-orange-500 leading-tight">منصة الخدمات المتكاملة</p>
+              <p className="text-sm text-blue-600 font-semibold">Integrated Services Platform</p>
+            </div>
           </div>
 
           <div className="flex items-center gap-3">

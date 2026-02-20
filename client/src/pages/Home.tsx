@@ -300,7 +300,7 @@ export default function Home() {
 
   return (
     <div className={`min-h-screen bg-background ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-      <header className="fixed top-0 left-0 right-0 z-50 bg-card shadow-md border-b border-border">
+      <header style={{ position: 'fixed', top: 0, left: 0, right: 0, width: '100%', zIndex: 50 }} className="">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <img src={LOGO_URL} alt="Sharaka" className="h-16 w-auto object-contain" />
@@ -375,20 +375,20 @@ export default function Home() {
         </div>
 
         {showMenu && (
-          <div className="bg-card border-t border-border md:hidden">
+          <div className="md:hidden">
             <div className="container mx-auto px-4 py-4 space-y-3">
-              <a href="#consultants" onClick={() => setShowMenu(false)} className="block px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-300 font-semibold">المستشارون</a>
-              <a href="#services" onClick={() => setShowMenu(false)} className="block px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-300 font-semibold">الخدمات</a>
-              <a href="#marketplace" onClick={() => setShowMenu(false)} className="block px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-300 font-semibold">السوق</a>
-              <a href="#paths" onClick={() => setShowMenu(false)} className="block px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-300 font-semibold">المسارات</a>
-              <a href="#points" onClick={() => setShowMenu(false)} className="block px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-300 font-semibold">النقاط</a>
-              <a href="#contact" onClick={() => setShowMenu(false)} className="block px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-300 font-semibold">تواصل</a>
+              <a href="#consultants" onClick={() => setShowMenu(false)} className="block px-4 py-2 transition-all duration-300 font-semibold">المستشارون</a>
+              <a href="#services" onClick={() => setShowMenu(false)} className="block px-4 py-2 transition-all duration-300 font-semibold">الخدمات</a>
+              <a href="#marketplace" onClick={() => setShowMenu(false)} className="block px-4 py-2 transition-all duration-300 font-semibold">السوق</a>
+              <a href="#paths" onClick={() => setShowMenu(false)} className="block px-4 py-2 transition-all duration-300 font-semibold">المسارات</a>
+              <a href="#points" onClick={() => setShowMenu(false)} className="block px-4 py-2 transition-all duration-300 font-semibold">النقاط</a>
+              <a href="#contact" onClick={() => setShowMenu(false)} className="block px-4 py-2 transition-all duration-300 font-semibold">تواصل</a>
             </div>
           </div>
         )}
       </header>
 
-      <main style={{ marginTop: '96px' }}>
+      <main style={{ marginTop: '80px' }}>
         <section className="py-8 bg-gradient-to-b from-green-50 to-background">
           <div className="container mx-auto px-4 text-center space-y-2">
             <img src={LOGO_URL} alt="Sharaka" className="h-64 md:h-80 w-auto mx-auto animate-bounce" style={{animationDuration: '3s'}} />

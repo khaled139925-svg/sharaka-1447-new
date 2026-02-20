@@ -293,6 +293,15 @@ export default function Home() {
   const [showCountryMenu, setShowCountryMenu] = useState(false);
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [selectedConsultant, setSelectedConsultant] = useState<typeof CONSULTANTS[0] | null>(null);
+  const [bookingData, setBookingData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    subject: '',
+    day: '',
+    time: '',
+  });
 
   const t = translations[language];
   const currentCountry = COUNTRIES.find(c => c.code === selectedCountry);
@@ -420,10 +429,11 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {CONSULTANTS.map(consultant => (
                 <div key={consultant.id} className="bg-white rounded-lg shadow-md p-6 border border-blue-200">
-                  <img src={consultant.image} alt={consultant.name} className="w-full h-48 object-cover rounded-lg mb-4" />
+                  <img src={consultant.image} alt={consultant.name} className="w-full h-48 object-cover rounded-lg mb-4 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => setSelectedConsultant(consultant)} />
                   <h3 className="text-3xl font-bold text-orange-500 mb-1">{isRTL ? consultant.name : consultant.nameEn}</h3>
                   <p className="text-xl text-blue-600 mb-2 font-semibold">{isRTL ? consultant.specialty : consultant.specialtyEn}</p>
-                  <p className="text-lg text-gray-600">{isRTL ? consultant.bio : consultant.bioEn}</p>
+                  <p className="text-lg text-gray-600 mb-4">{isRTL ? consultant.bio : consultant.bioEn}</p>
+                  <button onClick={() => setSelectedConsultant(consultant)} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300">{isRTL ? 'حجز موعد' : 'Book Appointment'}</button>
                 </div>
               ))}
             </div>
@@ -584,6 +594,121 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* نافذة حجز الموعد */}
+      {selectedConsultant && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-blue-600">{isRTL ? 'حجز موعد مع ' + selectedConsultant.name : 'Book Appointment with ' + selectedConsultant.nameEn}</h2>
+              <button onClick={() => setSelectedConsultant(null)} className="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+            </div>
+
+            <div className="space-y-4">
+              {/* الاسم */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">{isRTL ? 'الاسم' : 'Name'}</label>
+                <input
+                  type="text"
+                  value={bookingData.name}
+                  onChange={(e) => setBookingData({...bookingData, name: e.target.value})}
+                  placeholder={isRTL ? 'أدخل اسمك' : 'Enter your name'}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* البريد الإلكتروني */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">{isRTL ? 'البريد الإلكتروني' : 'Email'}</label>
+                <input
+                  type="email"
+                  value={bookingData.email}
+                  onChange={(e) => setBookingData({...bookingData, email: e.target.value})}
+                  placeholder={isRTL ? 'بريدك الإلكتروني' : 'your@email.com'}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* الهاتف */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">{isRTL ? 'الهاتف' : 'Phone'}</label>
+                <input
+                  type="tel"
+                  value={bookingData.phone}
+                  onChange={(e) => setBookingData({...bookingData, phone: e.target.value})}
+                  placeholder={isRTL ? 'رقم هاتفك' : 'Your phone number'}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* الموضوع */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">{isRTL ? 'الموضوع' : 'Subject'}</label>
+                <input
+                  type="text"
+                  value={bookingData.subject}
+                  onChange={(e) => setBookingData({...bookingData, subject: e.target.value})}
+                  placeholder={isRTL ? 'موضوع الاستشارة' : 'Consultation topic'}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* اختيار اليوم */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">{isRTL ? 'اختر اليوم' : 'Select Day'}</label>
+                <select
+                  value={bookingData.day}
+                  onChange={(e) => setBookingData({...bookingData, day: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">{isRTL ? 'اختر اليوم' : 'Select a day'}</option>
+                  {['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'].map((day, index) => (
+                    <option key={index} value={day}>{isRTL ? day : ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'][index]}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* اختيار الساعة */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">{isRTL ? 'اختر الساعة' : 'Select Time'}</label>
+                <select
+                  value={bookingData.time}
+                  onChange={(e) => setBookingData({...bookingData, time: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">{isRTL ? 'اختر الساعة' : 'Select a time'}</option>
+                  {Array.from({length: 10}, (_, i) => {
+                    const hour = 9 + i;
+                    return (
+                      <option key={i} value={`${hour}:00`}>{`${hour}:00`}</option>
+                    );
+                  })}
+                </select>
+              </div>
+            </div>
+
+            {/* الأزرار */}
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => {
+                  alert(isRTL ? 'تم حجز الموعد بنجاح!' : 'Appointment booked successfully!');
+                  setSelectedConsultant(null);
+                  setBookingData({name: '', email: '', phone: '', subject: '', day: '', time: ''});
+                }}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300"
+              >
+                {isRTL ? 'تأكيد' : 'Confirm'}
+              </button>
+              <button
+                onClick={() => setSelectedConsultant(null)}
+                className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition-colors duration-300"
+              >
+                {isRTL ? 'إلغاء' : 'Cancel'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -325,7 +325,7 @@ export default function Home() {
             <div className="relative">
             <button
               onClick={() => setShowLanguageMenu(!showLanguageMenu)}
-              className="flex items-center gap-2 px-4 py-3 rounded-md border border-blue-200 bg-blue-50 hover:bg-blue-100 transition-all duration-300"
+              className="flex items-center gap-2 px-4 py-3 rounded-md border border-blue-200 bg-blue-50 hover:bg-blue-100 transition-all duration-300 min-w-[140px]"
             >
                 <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                 <span className="text-sm font-semibold text-blue-600">{language === 'ar' ? 'العربية' : 'English'}</span>
@@ -354,13 +354,13 @@ export default function Home() {
             <div className="relative">
               <button
                 onClick={() => setShowCountryMenu(!showCountryMenu)}
-                className="flex items-center gap-2 px-4 py-3 rounded-md border border-blue-200 bg-blue-50 hover:bg-blue-100 transition-all duration-300"
+                className="flex items-center gap-2 px-4 py-3 rounded-md border border-orange-200 bg-orange-50 hover:bg-orange-100 transition-all duration-300"
               >
                 <span className="text-lg">{currentCountry?.flag}</span>
-                <span className="text-sm font-semibold text-blue-600">{isRTL ? currentCountry?.name : currentCountry?.nameEn}</span>
+                <span className="text-sm font-semibold text-orange-600">{isRTL ? currentCountry?.name : currentCountry?.nameEn}</span>
               </button>
               {showCountryMenu && (
-                <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-lg border border-blue-300 z-50 max-h-96 overflow-y-auto min-w-[200px]">
+                <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-lg border border-orange-300 z-50 max-h-96 overflow-y-auto min-w-[200px]">
                   {COUNTRIES.map(country => (
                     <button
                       key={country.code}
@@ -368,7 +368,7 @@ export default function Home() {
                         setSelectedCountry(country.code);
                         setShowCountryMenu(false);
                       }}
-                      className="flex items-center gap-2 w-full text-left px-4 py-2 text-blue-600 hover:bg-blue-50 transition-colors duration-200"
+                      className="flex items-center gap-2 w-full text-left px-4 py-2 text-orange-600 hover:bg-orange-50 transition-colors duration-200"
                     >
                       <span className="text-lg">{country.flag}</span>
                       <span className="text-sm">{isRTL ? country.name : country.nameEn}</span>

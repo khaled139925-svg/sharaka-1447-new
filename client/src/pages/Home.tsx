@@ -325,13 +325,12 @@ export default function Home() {
             <div className="relative">
             <button
               onClick={() => setShowLanguageMenu(!showLanguageMenu)}
-              className="flex items-center gap-2 px-3 py-2 rounded-md bg-green-50 border border-green-200 hover:bg-green-100 transition-all duration-300"
+              className="flex items-center gap-2 px-3 py-2 rounded-md border-2 border-blue-500 hover:bg-blue-50 transition-all duration-300"
             >
-                <span className="text-sm font-semibold text-gray-600">{language === 'ar' ? 'العربية' : 'English'}</span>
-                <span className="text-gray-400 text-xs">›</span>
+                <span className="text-sm font-semibold text-blue-600">{language === 'ar' ? 'العربية' : 'English'}</span>
               </button>
               {showLanguageMenu && (
-                <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50 min-w-[140px]">
+                <div className="absolute top-full right-0 mt-2 bg-blue-500 rounded-lg shadow-lg border border-blue-600 z-50 min-w-[140px]">
                   {[
                     { code: 'ar', label: 'العربية' },
                     { code: 'en', label: 'English' },
@@ -342,7 +341,7 @@ export default function Home() {
                         setLanguage(lang.code);
                         setShowLanguageMenu(false);
                       }}
-                      className="w-full px-4 py-2 text-right hover:bg-gray-50 transition-all duration-300 text-gray-700"
+                      className="w-full px-4 py-2 text-right hover:bg-blue-600 transition-all duration-300 text-white"
                     >
                       {lang.label}
                     </button>
@@ -354,13 +353,12 @@ export default function Home() {
             <div className="relative">
               <button
                 onClick={() => setShowCountryMenu(!showCountryMenu)}
-                className="flex items-center gap-2 px-3 py-2 rounded-md bg-green-50 border border-green-200 hover:bg-green-100 transition-all duration-300"
+                className="flex items-center justify-center w-10 h-10 rounded-md border-2 border-blue-500 hover:bg-blue-50 transition-all duration-300"
               >
                 <span className="text-lg">{currentCountry?.flag}</span>
-                <span className="text-gray-400 text-xs">›</span>
               </button>
               {showCountryMenu && (
-                <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-96 overflow-y-auto min-w-[200px]">
+                <div className="absolute top-full right-0 mt-2 bg-blue-500 rounded-lg shadow-lg border border-blue-600 z-50 max-h-96 overflow-y-auto min-w-[200px]">
                   {COUNTRIES.map(country => (
                     <button
                       key={country.code}
@@ -368,7 +366,7 @@ export default function Home() {
                         setSelectedCountry(country.code);
                         setShowCountryMenu(false);
                       }}
-                      className="w-full px-4 py-2 text-right flex items-center gap-2 hover:bg-gray-50 transition-all duration-300 text-gray-700"
+                      className="w-full px-4 py-2 text-right flex items-center gap-2 hover:bg-blue-600 transition-all duration-300 text-white"
                     >
                       <span className="text-lg">{country.flag}</span>
                       <span>{isRTL ? country.name : country.nameEn}</span>

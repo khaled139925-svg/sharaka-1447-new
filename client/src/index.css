@@ -26,7 +26,4 @@ header {
   width: 100% !important;
 }
 
-/* Add padding to main to prevent content overlap */
-main {
-  padding-top: 6rem !important;
-}
+/* Main content spacing handled via inline style */

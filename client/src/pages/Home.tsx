@@ -388,7 +388,7 @@ export default function Home() {
         )}
       </header>
 
-      <main className="pt-24">
+      <main style={{ marginTop: '96px' }}>
         <section className="py-8 bg-gradient-to-b from-green-50 to-background">
           <div className="container mx-auto px-4 text-center space-y-2">
             <img src={LOGO_URL} alt="Sharaka" className="h-64 md:h-80 w-auto mx-auto animate-bounce" style={{animationDuration: '3s'}} />

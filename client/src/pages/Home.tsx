@@ -389,43 +389,43 @@ export default function Home() {
       </header>
 
       <main>
-        <section className="py-12 bg-gradient-to-b from-green-50 to-background">
-          <div className="container mx-auto px-4 text-center space-y-4">
-            <img src={LOGO_URL} alt="Sharaka" className="h-80 md:h-96 w-auto mx-auto animate-bounce" style={{animationDuration: '3s'}} />
-            <h1 className="text-6xl md:text-8xl font-bold text-orange-500">{t.platformName}</h1>
-            <p className="text-2xl text-gray-600 max-w-2xl mx-auto">{t.description}</p>
+        <section className="py-8 bg-gradient-to-b from-green-50 to-background">
+          <div className="container mx-auto px-4 text-center space-y-2">
+            <img src={LOGO_URL} alt="Sharaka" className="h-64 md:h-80 w-auto mx-auto animate-bounce" style={{animationDuration: '3s'}} />
+            <h1 className="text-7xl md:text-9xl font-bold text-orange-500 leading-tight">{t.platformName}</h1>
+            <p className="text-3xl md:text-4xl text-gray-600 max-w-3xl mx-auto font-semibold">{t.description}</p>
           </div>
         </section>
 
-        <section id="consultants" className="py-12 bg-blue-50">
+        <section id="consultants" className="py-8 bg-blue-50">
           <div className="container mx-auto px-4">
-            <h2 className="text-5xl font-bold text-orange-500 mb-2 text-center">{t.consultants}</h2>
-            <p className="text-2xl text-blue-600 mb-8 text-center">{t.consultantsDesc}</p>
+            <h2 className="text-6xl font-bold text-orange-500 mb-1 text-center">{t.consultants}</h2>
+            <p className="text-3xl text-blue-600 mb-6 text-center font-semibold">{t.consultantsDesc}</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {CONSULTANTS.map(consultant => (
                 <div key={consultant.id} className="bg-white rounded-lg shadow-md p-6 border border-blue-200">
                   <img src={consultant.image} alt={consultant.name} className="w-full h-48 object-cover rounded-lg mb-4" />
-                  <h3 className="text-2xl font-bold text-orange-500 mb-1">{isRTL ? consultant.name : consultant.nameEn}</h3>
-                  <p className="text-lg text-blue-600 mb-2">{isRTL ? consultant.specialty : consultant.specialtyEn}</p>
-                  <p className="text-base text-gray-600">{isRTL ? consultant.bio : consultant.bioEn}</p>
+                  <h3 className="text-3xl font-bold text-orange-500 mb-1">{isRTL ? consultant.name : consultant.nameEn}</h3>
+                  <p className="text-xl text-blue-600 mb-2 font-semibold">{isRTL ? consultant.specialty : consultant.specialtyEn}</p>
+                  <p className="text-lg text-gray-600">{isRTL ? consultant.bio : consultant.bioEn}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        <section id="services" className="py-12 bg-blue-50">
+        <section id="services" className="py-8 bg-blue-50">
           <div className="container mx-auto px-4">
-            <h2 className="text-5xl font-bold text-orange-500 mb-2 text-center">{t.services}</h2>
-            <p className="text-2xl text-blue-600 mb-8 text-center">{t.servicesDesc}</p>
+            <h2 className="text-6xl font-bold text-orange-500 mb-1 text-center">{t.services}</h2>
+            <p className="text-3xl text-blue-600 mb-6 text-center font-semibold">{t.servicesDesc}</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {SERVICES.map(service => {
                 const IconComponent = service.icon;
                 return (
                   <div key={service.id} className="bg-white rounded-lg shadow-md p-6 border border-blue-200">
                     <IconComponent size={40} className="text-orange-500 mb-4" />
-                    <h3 className="text-2xl font-bold text-orange-500 mb-2">{isRTL ? service.title : service.titleEn}</h3>
-                    <p className="text-lg text-blue-600">{isRTL ? service.description : service.descriptionEn}</p>
+                    <h3 className="text-3xl font-bold text-orange-500 mb-2">{isRTL ? service.title : service.titleEn}</h3>
+                    <p className="text-xl text-blue-600 font-semibold">{isRTL ? service.description : service.descriptionEn}</p>
                   </div>
                 );
               })}
@@ -433,18 +433,18 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="marketplace" className="py-12 bg-orange-50">
+        <section id="marketplace" className="py-8 bg-orange-50">
           <div className="container mx-auto px-4">
-            <h2 className="text-5xl font-bold text-orange-500 mb-2 text-center">{t.marketplace}</h2>
-            <p className="text-2xl text-blue-600 mb-8 text-center">{t.marketplaceDesc}</p>
+            <h2 className="text-6xl font-bold text-orange-500 mb-1 text-center">{t.marketplace}</h2>
+            <p className="text-3xl text-blue-600 mb-6 text-center font-semibold">{t.marketplaceDesc}</p>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               {STORES.map(store => (
                 <div key={store.id} className="bg-white rounded-lg shadow-md overflow-hidden border border-orange-200">
                   <img src={store.image} alt={store.name} className="w-full h-40 object-cover" />
                   <div className="p-4">
-                    <h3 className="text-xl font-bold text-orange-500 mb-1">{isRTL ? store.name : store.nameEn}</h3>
-                    <p className="text-base text-blue-600 mb-2">{isRTL ? store.category : store.categoryEn}</p>
-                    <p className="text-yellow-500">★ {store.rating}</p>
+                    <h3 className="text-2xl font-bold text-orange-500 mb-1">{isRTL ? store.name : store.nameEn}</h3>
+                    <p className="text-lg text-blue-600 mb-2 font-semibold">{isRTL ? store.category : store.categoryEn}</p>
+                    <p className="text-lg text-yellow-500">★ {store.rating}</p>
                   </div>
                 </div>
               ))}
@@ -452,73 +452,73 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="paths" className="py-12 bg-blue-50">
+        <section id="paths" className="py-8 bg-blue-50">
           <div className="container mx-auto px-4">
-            <h2 className="text-4xl font-bold text-orange-500 mb-2 text-center">{t.paths}</h2>
-            <p className="text-lg text-blue-600 mb-8 text-center">{t.pathsDesc}</p>
+            <h2 className="text-6xl font-bold text-orange-500 mb-1 text-center">{t.paths}</h2>
+            <p className="text-3xl text-blue-600 mb-6 text-center font-semibold">{t.pathsDesc}</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {PATHS.map(path => (
                 <div key={path.id} className="bg-white rounded-lg shadow-md p-6 border border-blue-200">
                   <div className="text-4xl mb-4">{path.icon}</div>
-                  <h3 className="text-xl font-bold text-orange-500 mb-2">{isRTL ? path.title : path.titleEn}</h3>
-                  <p className="text-blue-600">{isRTL ? path.desc : path.descEn}</p>
+                  <h3 className="text-2xl font-bold text-orange-500 mb-2">{isRTL ? path.title : path.titleEn}</h3>
+                  <p className="text-lg text-blue-600 font-semibold">{isRTL ? path.desc : path.descEn}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        <section id="points" className="py-12 bg-blue-50">
+        <section id="points" className="py-8 bg-blue-50">
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-4xl font-bold text-orange-500 mb-2 text-center">{t.points}</h2>
-            <p className="text-lg text-blue-600 mb-8 text-center">{t.pointsDesc}</p>
+            <h2 className="text-6xl font-bold text-orange-500 mb-1 text-center">{t.points}</h2>
+            <p className="text-3xl text-blue-600 mb-6 text-center font-semibold">{t.pointsDesc}</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-white rounded-lg shadow-md p-6 border border-blue-200">
                 <div className="text-4xl mb-4">⚡</div>
-                <p className="text-blue-600">{t.earnPoints}</p>
-                <p className="text-gray-600 text-sm">{t.earnPointsDesc}</p>
+                <p className="text-xl text-blue-600 font-semibold">{t.earnPoints}</p>
+                <p className="text-lg text-gray-600">{t.earnPointsDesc}</p>
               </div>
               <div className="bg-white rounded-lg shadow-md p-6 border border-blue-200">
                 <div className="text-4xl mb-4">🏅</div>
-                <p className="text-blue-600">{t.collectBalance}</p>
-                <p className="text-gray-600 text-sm">{t.collectBalanceDesc}</p>
+                <p className="text-xl text-blue-600 font-semibold">{t.collectBalance}</p>
+                <p className="text-lg text-gray-600">{t.collectBalanceDesc}</p>
               </div>
               <div className="bg-white rounded-lg shadow-md p-6 border border-blue-200">
                 <div className="text-4xl mb-4">📈</div>
-                <p className="text-blue-600">{t.useBalance}</p>
-                <p className="text-gray-600 text-sm">{t.useBalanceDesc}</p>
+                <p className="text-xl text-blue-600 font-semibold">{t.useBalance}</p>
+                <p className="text-lg text-gray-600">{t.useBalanceDesc}</p>
               </div>
             </div>
           </div>
         </section>
 
-        <section id="contact" className="py-12 bg-blue-50">
+        <section id="contact" className="py-8 bg-blue-50">
           <div className="container mx-auto px-4">
-            <h2 className="text-4xl font-bold text-orange-500 mb-2 text-center">{t.contact}</h2>
-            <p className="text-lg text-blue-600 mb-8 text-center">{t.contactDesc}</p>
+            <h2 className="text-6xl font-bold text-orange-500 mb-1 text-center">{t.contact}</h2>
+            <p className="text-3xl text-blue-600 mb-6 text-center font-semibold">{t.contactDesc}</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-white rounded-lg shadow-md p-6 border border-blue-200">
                 <Mail size={32} className="text-orange-500 mb-4" />
-                <p className="text-orange-500 font-semibold">{USER_EMAIL}</p>
+                <p className="text-lg text-orange-500 font-semibold">{USER_EMAIL}</p>
               </div>
               <div className="bg-white rounded-lg shadow-md p-6 border border-blue-200">
                 <Phone size={32} className="text-orange-500 mb-4" />
-                <p className="text-orange-500 font-semibold">+966 11 2345 6789</p>
+                <p className="text-lg text-orange-500 font-semibold">+966 11 2345 6789</p>
               </div>
               <div className="bg-white rounded-lg shadow-md p-6 border border-blue-200">
                 <MapPin size={32} className="text-orange-500 mb-4" />
-                <p className="text-orange-500 font-semibold">الرياض، السعودية</p>
+                <p className="text-lg text-orange-500 font-semibold">الرياض، السعودية</p>
               </div>
             </div>
           </div>
         </section>
 
-        <section id="about" className="py-12 bg-blue-50">
+        <section id="about" className="py-8 bg-blue-50">
           <div className="container mx-auto px-4">
-            <h2 className="text-4xl font-bold text-orange-500 mb-6 text-center">{t.about}</h2>
+            <h2 className="text-6xl font-bold text-orange-500 mb-4 text-center">{t.about}</h2>
             <div className="bg-white rounded-lg shadow-md p-8 border border-blue-200">
-              <h3 className="text-2xl font-bold text-orange-500 mb-4 text-center">{t.vision}</h3>
-              <p className="text-blue-600 leading-relaxed">{t.visionText}</p>
+              <h3 className="text-4xl font-bold text-orange-500 mb-4 text-center">{t.vision}</h3>
+              <p className="text-2xl text-blue-600 leading-relaxed font-semibold">{t.visionText}</p>
             </div>
           </div>
         </section>

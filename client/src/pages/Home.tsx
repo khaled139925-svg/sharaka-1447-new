@@ -300,7 +300,7 @@ export default function Home() {
 
   return (
     <div className={`min-h-screen bg-background ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-      <header className="sticky top-0 z-50 bg-card shadow-md border-b border-border">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-card shadow-md border-b border-border">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <img src={LOGO_URL} alt="Sharaka" className="h-16 w-auto object-contain" />
@@ -388,7 +388,7 @@ export default function Home() {
         )}
       </header>
 
-      <main>
+      <main className="pt-24">
         <section className="py-8 bg-gradient-to-b from-green-50 to-background">
           <div className="container mx-auto px-4 text-center space-y-2">
             <img src={LOGO_URL} alt="Sharaka" className="h-64 md:h-80 w-auto mx-auto animate-bounce" style={{animationDuration: '3s'}} />

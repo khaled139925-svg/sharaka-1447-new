@@ -199,7 +199,7 @@ export default function Admin() {
   ];
 
   return (
-    <div className="min-h-screen w-full bg-gray-50 rtl" dir="rtl">
+    <div className="min-h-screen w-full bg-gray-50" dir="rtl">
       {/* الترويسة */}
       <header className="bg-white shadow-lg sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-5 flex justify-between items-center">
@@ -214,7 +214,8 @@ export default function Admin() {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
+      <div className="w-full px-4 py-6 md:py-8">
+        <div className="max-w-7xl mx-auto">
         {/* أزرار الأقسام */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 md:gap-3 mb-6 md:mb-8">
           {sections.map((section) => {
@@ -238,7 +239,7 @@ export default function Admin() {
         </div>
 
         {/* محتوى الأقسام */}
-        <div className="bg-white rounded-2xl shadow-lg p-4 md:p-8 min-h-96 animate-fadeIn">
+        <div className="bg-white rounded-2xl shadow-lg p-4 md:p-8 min-h-96 animate-fadeIn mt-6 md:mt-8">
           {/* قسم المستشارون */}
           {adminState.currentSection === 'consultants' && (
             <div className="space-y-6">
@@ -449,9 +450,15 @@ export default function Admin() {
             </div>
           )}
         </div>
+        </div>
       </div>
 
       <style>{`
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
         @keyframes fadeIn {
           from {
             opacity: 0;
@@ -464,6 +471,10 @@ export default function Admin() {
         }
         .animate-fadeIn {
           animation: fadeIn 0.3s ease-in-out;
+        }
+        body, html {
+          margin: 0;
+          padding: 0;
         }
       `}</style>
     </div>

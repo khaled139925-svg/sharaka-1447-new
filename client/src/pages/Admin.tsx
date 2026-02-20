@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Lock, LogOut, Users, Store, Coins, FileText, MessageSquare, ChevronRight, ChevronDown, Plus, Edit, Trash2, BookOpen } from 'lucide-react';
+import { Lock, LogOut, Users, Store, Coins, FileText, MessageSquare, ChevronRight, ChevronDown, Plus, Edit, Trash2, BookOpen, ArrowLeft } from 'lucide-react';
 
 interface AdminUser {
   isAuthenticated: boolean;
@@ -9,12 +9,6 @@ interface AdminUser {
 
 interface AdminState {
   currentSection: 'consultants' | 'stores' | 'points' | 'bookings' | 'messages' | 'paths';
-  consultants: any[];
-  stores: any[];
-  users: any[];
-  bookings: any[];
-  messages: any[];
-  paths: any[];
   expandedPath: string | null;
 }
 
@@ -22,7 +16,6 @@ const PATHS_DATA = [
   {
     id: 'student',
     title: 'المسار الطلابي',
-    titleEn: 'Student Path',
     icon: '📚',
     desc: 'دورات وتحضير للاختبارات',
     courses: [
@@ -34,7 +27,6 @@ const PATHS_DATA = [
   {
     id: 'employee',
     title: 'مسار الموظف',
-    titleEn: 'Employee Path',
     icon: '👔',
     desc: 'تطوير مهني وفرص عمل',
     courses: [
@@ -46,7 +38,6 @@ const PATHS_DATA = [
   {
     id: 'trader',
     title: 'مسار التاجر',
-    titleEn: 'Trader Path',
     icon: '🛍️',
     desc: 'دعم المتاجر الإلكترونية',
     courses: [
@@ -58,7 +49,6 @@ const PATHS_DATA = [
   {
     id: 'entrepreneur',
     title: 'رائد الأعمال',
-    titleEn: 'Entrepreneur',
     icon: '🚀',
     desc: 'استشارات وتمويل',
     courses: [
@@ -70,7 +60,6 @@ const PATHS_DATA = [
   {
     id: 'jobseeker',
     title: 'الباحث عن عمل',
-    titleEn: 'Job Seeker',
     icon: '🎯',
     desc: 'فرص عمل وتطوير مهارات',
     courses: [
@@ -82,7 +71,6 @@ const PATHS_DATA = [
   {
     id: 'researcher',
     title: 'الباحث',
-    titleEn: 'Researcher',
     icon: '🔬',
     desc: 'موارد بحثية وتعاون',
     courses: [
@@ -93,18 +81,12 @@ const PATHS_DATA = [
   },
 ];
 
-export default function Admin() {
+export default function Admin({ onBack }: { onBack?: () => void }) {
   const [adminUser, setAdminUser] = useState<AdminUser>({ isAuthenticated: false, role: null });
   const [password, setPassword] = useState('');
   const [showPasswordInput, setShowPasswordInput] = useState(false);
   const [adminState, setAdminState] = useState<AdminState>({
     currentSection: 'consultants',
-    consultants: [],
-    stores: [],
-    users: [],
-    bookings: [],
-    messages: [],
-    paths: PATHS_DATA,
     expandedPath: null,
   });
 
@@ -123,12 +105,6 @@ export default function Admin() {
     setAdminUser({ isAuthenticated: false, role: null });
     setAdminState({
       currentSection: 'consultants',
-      consultants: [],
-      stores: [],
-      users: [],
-      bookings: [],
-      messages: [],
-      paths: PATHS_DATA,
       expandedPath: null,
     });
   };
@@ -136,7 +112,7 @@ export default function Admin() {
   if (!adminUser.isAuthenticated) {
     return (
       <div className="min-h-screen w-full bg-gradient-to-br from-blue-600 via-blue-500 to-blue-700 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full transform transition-all duration-300 hover:shadow-3xl">
+        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
           <div className="flex justify-center mb-6">
             <div className="bg-blue-100 p-4 rounded-full">
               <Lock className="w-8 h-8 text-blue-600" />
@@ -148,25 +124,25 @@ export default function Admin() {
           {!showPasswordInput ? (
             <Button
               onClick={() => setShowPasswordInput(true)}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg"
             >
               دخول الإدارة
             </Button>
           ) : (
-            <div className="space-y-4 animate-fadeIn">
+            <div className="space-y-4">
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleAdminLogin()}
                 placeholder="أدخل كلمة المرور"
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-600 transition-colors"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-600"
                 autoFocus
               />
               <div className="flex gap-3">
                 <Button
                   onClick={handleAdminLogin}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg"
                 >
                   دخول
                 </Button>
@@ -175,7 +151,7 @@ export default function Admin() {
                     setShowPasswordInput(false);
                     setPassword('');
                   }}
-                  className="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105"
+                  className="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-4 rounded-lg"
                 >
                   إلغاء
                 </Button>
@@ -199,26 +175,26 @@ export default function Admin() {
   return (
     <div className="min-h-screen w-full bg-gray-50" dir="rtl">
       {/* الترويسة */}
-      <header className="bg-white shadow-lg sticky top-0 z-50">
-        <div className="w-full px-4 py-5">
+      <header className="bg-white shadow-md sticky top-0 z-50">
+        <div className="w-full px-4 py-4">
           <div className="max-w-7xl mx-auto flex justify-between items-center">
-            <h1 className="text-2xl md:text-3xl font-bold text-blue-600">لوحة التحكم الإدارية</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-blue-600">لوحة التحكم</h1>
             <Button
               onClick={handleAdminLogout}
-              className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 md:px-6 rounded-lg transition-all duration-300 transform hover:scale-105 text-sm md:text-base"
+              className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg"
             >
-              <LogOut className="w-4 h-4 md:w-5 md:h-5" />
+              <LogOut className="w-4 h-4" />
               <span className="hidden sm:inline">تسجيل الخروج</span>
             </Button>
           </div>
         </div>
       </header>
 
-      {/* المحتوى الرئيسي */}
+      {/* المحتوى */}
       <div className="w-full px-4 py-8">
         <div className="max-w-7xl mx-auto">
           {/* أزرار الأقسام */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 md:gap-3 mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
             {sections.map((section) => {
               const Icon = section.icon;
               const isActive = adminState.currentSection === section.id;
@@ -226,10 +202,10 @@ export default function Admin() {
                 <button
                   key={section.id}
                   onClick={() => setAdminState({ ...adminState, currentSection: section.id as any, expandedPath: null })}
-                  className={`p-3 md:p-4 rounded-xl font-bold flex flex-col items-center justify-center gap-2 transition-all duration-300 transform hover:scale-105 text-xs md:text-sm ${
+                  className={`p-4 rounded-lg font-bold flex flex-col items-center justify-center gap-2 transition-all duration-200 text-xs md:text-sm ${
                     isActive
                       ? 'bg-blue-600 text-white shadow-lg'
-                      : 'bg-white text-gray-700 hover:bg-gray-50 shadow'
+                      : 'bg-white text-gray-700 hover:bg-gray-100 shadow'
                   }`}
                 >
                   <Icon className="w-5 h-5 md:w-6 md:h-6" />
@@ -240,25 +216,16 @@ export default function Admin() {
           </div>
 
           {/* محتوى الأقسام */}
-          <div className="bg-white rounded-2xl shadow-lg p-4 md:p-8 min-h-96 animate-fadeIn">
+          <div className="bg-white rounded-lg shadow-md p-6 md:p-8 min-h-96">
             {/* قسم المستشارون */}
             {adminState.currentSection === 'consultants' && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between flex-wrap gap-4">
-                  <h2 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-2">
-                    <Users className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
-                    إدارة المستشارين
-                  </h2>
-                </div>
-                <p className="text-gray-600 text-base md:text-lg">قريباً: إضافة وتعديل وحذف المستشارين وإدارة بياناتهم</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                  <Button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 md:py-3 px-4 md:px-6 rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 text-sm md:text-base">
-                    <Plus className="w-4 h-4 md:w-5 md:h-5" />
-                    إضافة مستشار جديد
-                  </Button>
-                  <Button className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 md:py-3 px-4 md:px-6 rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 text-sm md:text-base">
-                    <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
-                    عرض المستشارين
+              <div className="space-y-4">
+                <h2 className="text-2xl font-bold text-gray-800">إدارة المستشارين</h2>
+                <p className="text-gray-600">قريباً: إضافة وتعديل وحذف المستشارين</p>
+                <div className="flex gap-3">
+                  <Button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg">
+                    <Plus className="w-4 h-4 mr-2" />
+                    إضافة مستشار
                   </Button>
                 </div>
               </div>
@@ -266,22 +233,13 @@ export default function Admin() {
 
             {/* قسم المتاجر */}
             {adminState.currentSection === 'stores' && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between flex-wrap gap-4">
-                  <h2 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-2">
-                    <Store className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
-                    إدارة المتاجر
-                  </h2>
-                </div>
-                <p className="text-gray-600 text-base md:text-lg">قريباً: إنشاء وتعديل وحذف المتاجر وإدارة منتجاتها</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                  <Button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 md:py-3 px-4 md:px-6 rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 text-sm md:text-base">
-                    <Plus className="w-4 h-4 md:w-5 md:h-5" />
-                    إنشاء متجر جديد
-                  </Button>
-                  <Button className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 md:py-3 px-4 md:px-6 rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 text-sm md:text-base">
-                    <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
-                    عرض المتاجر
+              <div className="space-y-4">
+                <h2 className="text-2xl font-bold text-gray-800">إدارة المتاجر</h2>
+                <p className="text-gray-600">قريباً: إنشاء وتعديل وحذف المتاجر</p>
+                <div className="flex gap-3">
+                  <Button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg">
+                    <Plus className="w-4 h-4 mr-2" />
+                    إنشاء متجر
                   </Button>
                 </div>
               </div>
@@ -289,22 +247,13 @@ export default function Admin() {
 
             {/* قسم النقاط */}
             {adminState.currentSection === 'points' && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between flex-wrap gap-4">
-                  <h2 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-2">
-                    <Coins className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
-                    إدارة النقاط والرصيد المالي
-                  </h2>
-                </div>
-                <p className="text-gray-600 text-base md:text-lg">قريباً: التحكم في النقاط والرصيد المالي للمستخدمين</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                  <Button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 md:py-3 px-4 md:px-6 rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 text-sm md:text-base">
-                    <Plus className="w-4 h-4 md:w-5 md:h-5" />
+              <div className="space-y-4">
+                <h2 className="text-2xl font-bold text-gray-800">إدارة النقاط</h2>
+                <p className="text-gray-600">قريباً: التحكم في النقاط والرصيد المالي</p>
+                <div className="flex gap-3">
+                  <Button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg">
+                    <Plus className="w-4 h-4 mr-2" />
                     إضافة نقاط
-                  </Button>
-                  <Button className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 md:py-3 px-4 md:px-6 rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 text-sm md:text-base">
-                    <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
-                    عرض الرصيد
                   </Button>
                 </div>
               </div>
@@ -312,172 +261,91 @@ export default function Admin() {
 
             {/* قسم الحجوزات */}
             {adminState.currentSection === 'bookings' && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between flex-wrap gap-4">
-                  <h2 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-2">
-                    <FileText className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
-                    عرض الحجوزات والطلبات
-                  </h2>
-                </div>
-                <p className="text-gray-600 text-base md:text-lg">قريباً: عرض وإدارة جميع الحجوزات والطلبات الجديدة</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                  <Button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 md:py-3 px-4 md:px-6 rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 text-sm md:text-base">
-                    <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
-                    الحجوزات الجديدة
-                  </Button>
-                  <Button className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 md:py-3 px-4 md:px-6 rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 text-sm md:text-base">
-                    <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
-                    جميع الحجوزات
-                  </Button>
-                </div>
+              <div className="space-y-4">
+                <h2 className="text-2xl font-bold text-gray-800">الحجوزات</h2>
+                <p className="text-gray-600">قريباً: عرض وإدارة الحجوزات</p>
               </div>
             )}
 
             {/* قسم المسارات */}
             {adminState.currentSection === 'paths' && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between flex-wrap gap-4">
-                  <h2 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-2">
-                    <BookOpen className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
-                    إدارة المسارات التعليمية
-                  </h2>
-                </div>
-                <p className="text-gray-600 text-base md:text-lg">إدارة المسارات التعليمية والدورات المتاحة</p>
-                
-                {/* قائمة المسارات */}
-                <div className="space-y-3 md:space-y-4">
-                  {adminState.paths.map((path) => (
+              <div className="space-y-4">
+                <h2 className="text-2xl font-bold text-gray-800">إدارة المسارات</h2>
+                <div className="space-y-3">
+                  {PATHS_DATA.map((path) => (
                     <div key={path.id} className="border border-gray-200 rounded-lg overflow-hidden">
-                      {/* رأس المسار */}
                       <button
                         onClick={() => setAdminState({
                           ...adminState,
                           expandedPath: adminState.expandedPath === path.id ? null : path.id
                         })}
-                        className="w-full bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 p-4 flex items-center justify-between transition-all duration-300"
+                        className="w-full bg-gray-50 hover:bg-gray-100 p-4 flex items-center justify-between transition-colors"
                       >
-                        <div className="flex items-center gap-3 flex-1 text-right">
+                        <div className="flex items-center gap-3 text-right flex-1">
                           <span className="text-2xl">{path.icon}</span>
-                          <div className="text-right">
-                            <h3 className="font-bold text-gray-800 text-base md:text-lg">{path.title}</h3>
-                            <p className="text-gray-600 text-xs md:text-sm">{path.desc}</p>
+                          <div>
+                            <h3 className="font-bold text-gray-800">{path.title}</h3>
+                            <p className="text-sm text-gray-600">{path.desc}</p>
                           </div>
                         </div>
                         {adminState.expandedPath === path.id ? (
-                          <ChevronDown className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                          <ChevronDown className="w-5 h-5 text-blue-600" />
                         ) : (
-                          <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                          <ChevronRight className="w-5 h-5 text-gray-400" />
                         )}
                       </button>
 
-                      {/* محتوى المسار */}
                       {adminState.expandedPath === path.id && (
-                        <div className="bg-white p-4 md:p-6 border-t border-gray-200 space-y-4 animate-fadeIn">
-                          {/* الدورات */}
-                          <div>
-                            <h4 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-                              <BookOpen className="w-4 h-4 text-blue-600" />
-                              الدورات المتاحة
-                            </h4>
-                            <div className="space-y-2">
-                              {path.courses.map((course, idx) => (
-                                <div key={idx} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg hover:bg-gray-100 transition-colors">
-                                  <div className="text-right flex-1">
-                                    <p className="font-semibold text-gray-800 text-sm md:text-base">{course.name}</p>
-                                    <p className="text-gray-500 text-xs md:text-sm">المدة: {course.duration}</p>
-                                  </div>
-                                  <div className="flex gap-2 flex-shrink-0">
-                                    <button className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors">
-                                      <Edit className="w-4 h-4" />
-                                    </button>
-                                    <button className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-colors">
-                                      <Trash2 className="w-4 h-4" />
-                                    </button>
-                                  </div>
-                                </div>
-                              ))}
+                        <div className="bg-white p-4 border-t border-gray-200 space-y-3">
+                          {path.courses.map((course, idx) => (
+                            <div key={idx} className="flex items-center justify-between bg-gray-50 p-3 rounded">
+                              <div className="text-right">
+                                <p className="font-semibold text-gray-800">{course.name}</p>
+                                <p className="text-sm text-gray-600">المدة: {course.duration}</p>
+                              </div>
+                              <div className="flex gap-2">
+                                <button className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded">
+                                  <Edit className="w-4 h-4" />
+                                </button>
+                                <button className="bg-red-600 hover:bg-red-700 text-white p-2 rounded">
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
                             </div>
-                          </div>
-
-                          {/* أزرار التحكم */}
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-gray-200">
-                            <Button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 text-sm">
-                              <Plus className="w-4 h-4" />
-                              إضافة دورة
-                            </Button>
-                            <Button className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 text-sm">
-                              <Edit className="w-4 h-4" />
-                              تعديل المسار
-                            </Button>
-                            <Button className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 text-sm">
-                              <Trash2 className="w-4 h-4" />
-                              حذف المسار
-                            </Button>
-                          </div>
+                          ))}
+                          <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg">
+                            <Plus className="w-4 h-4 mr-2" />
+                            إضافة دورة
+                          </Button>
                         </div>
                       )}
                     </div>
                   ))}
                 </div>
-
-                {/* زر إضافة مسار جديد */}
-                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 text-base">
-                  <Plus className="w-5 h-5" />
-                  إضافة مسار جديد
-                </Button>
               </div>
             )}
 
             {/* قسم الرسائل */}
             {adminState.currentSection === 'messages' && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between flex-wrap gap-4">
-                  <h2 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-2">
-                    <MessageSquare className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
-                    رسائل التواصل
-                  </h2>
-                </div>
-                <p className="text-gray-600 text-base md:text-lg">قريباً: عرض والرد على رسائل التواصل من العملاء</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                  <Button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 md:py-3 px-4 md:px-6 rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 text-sm md:text-base">
-                    <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
-                    الرسائل الجديدة
-                  </Button>
-                  <Button className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 md:py-3 px-4 md:px-6 rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 text-sm md:text-base">
-                    <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
-                    جميع الرسائل
-                  </Button>
-                </div>
+              <div className="space-y-4">
+                <h2 className="text-2xl font-bold text-gray-800">الرسائل</h2>
+                <p className="text-gray-600">قريباً: عرض والرد على الرسائل</p>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      <style>{`
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-in-out;
-        }
-        body, html {
-          margin: 0;
-          padding: 0;
-        }
-      `}</style>
+      {/* زر العودة */}
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="fixed bottom-4 right-4 w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-lg transition-all duration-200 z-40"
+          title="Back to Home"
+        >
+          <ArrowLeft className="w-6 h-6" />
+        </button>
+      )}
     </div>
   );
 }

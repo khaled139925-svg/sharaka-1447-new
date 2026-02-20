@@ -325,9 +325,10 @@ export default function Home() {
             <div className="relative">
             <button
               onClick={() => setShowLanguageMenu(!showLanguageMenu)}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white border border-gray-300 hover:bg-gray-50 transition-all duration-300"
+              className="flex items-center gap-2 px-3 py-2 rounded-md bg-green-50 border border-green-200 hover:bg-green-100 transition-all duration-300"
             >
-                <span className="text-sm font-semibold text-gray-700">{language === 'ar' ? 'العربية' : 'English'}</span>
+                <span className="text-sm font-semibold text-gray-600">{language === 'ar' ? 'العربية' : 'English'}</span>
+                <span className="text-gray-400 text-xs">›</span>
               </button>
               {showLanguageMenu && (
                 <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50 min-w-[140px]">
@@ -353,9 +354,10 @@ export default function Home() {
             <div className="relative">
               <button
                 onClick={() => setShowCountryMenu(!showCountryMenu)}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white border border-gray-300 hover:bg-gray-50 transition-all duration-300"
+                className="flex items-center gap-2 px-3 py-2 rounded-md bg-green-50 border border-green-200 hover:bg-green-100 transition-all duration-300"
               >
                 <span className="text-lg">{currentCountry?.flag}</span>
+                <span className="text-gray-400 text-xs">›</span>
               </button>
               {showCountryMenu && (
                 <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-96 overflow-y-auto min-w-[200px]">

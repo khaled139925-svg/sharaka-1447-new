@@ -325,10 +325,10 @@ export default function Home() {
             <div className="relative">
             <button
               onClick={() => setShowLanguageMenu(!showLanguageMenu)}
-              className="flex items-center gap-2 px-3 py-2 rounded-md border-2 border-blue-500 bg-blue-50 hover:bg-blue-100 transition-all duration-300"
+              className="flex items-center gap-2 px-4 py-3 rounded-md border-2 border-blue-500 bg-blue-50 hover:bg-blue-100 transition-all duration-300"
             >
                 <span className="text-sm font-semibold text-blue-600">{language === 'ar' ? 'العربية' : 'English'}</span>
-                <span className="w-5 h-5 rounded-full bg-blue-500"></span>
+                <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm6 0a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"></path></svg>
               </button>
               {showLanguageMenu && (
                 <div className="absolute top-full right-0 mt-2 bg-blue-500 rounded-lg shadow-lg border border-blue-600 z-50 min-w-[140px]">
@@ -354,10 +354,10 @@ export default function Home() {
             <div className="relative">
               <button
                 onClick={() => setShowCountryMenu(!showCountryMenu)}
-                className="flex items-center gap-2 px-3 py-2 rounded-md border-2 border-blue-500 bg-blue-50 hover:bg-blue-100 transition-all duration-300"
+                className="flex items-center gap-2 px-4 py-3 rounded-md border-2 border-blue-500 bg-blue-50 hover:bg-blue-100 transition-all duration-300"
               >
                 <span className="text-lg">{currentCountry?.flag}</span>
-                <span className="text-sm font-semibold text-blue-600">{currentCountry?.code}</span>
+                <span className="text-sm font-semibold text-blue-600">{isRTL ? currentCountry?.name : currentCountry?.nameEn}</span>
               </button>
               {showCountryMenu && (
                 <div className="absolute top-full right-0 mt-2 bg-blue-500 rounded-lg shadow-lg border border-blue-600 z-50 max-h-96 overflow-y-auto min-w-[200px]">

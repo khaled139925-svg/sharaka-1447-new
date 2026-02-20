@@ -175,6 +175,8 @@ const CONSULTANTS = [
     specialtyEn: 'Business Management Consultations',
     bio: 'خبرة 15 سنة في إدارة المشاريع والشركات',
     bioEn: '15 years of experience in project and company management',
+    fullBio: 'د. أحمد محمد متخصص في إدارة الأعمال والمشاريع الكبرى مع خبرة تزيد عن 15 سنة في القطاع الخاص والحكومي. حصل على درجة الدكتوراه من جامعة عريقة وقاد عدداً من المشاريع الناجحة التي حققت نتائج استثنائية. متخصص في تطوير الاستراتيجيات التنظيمية وتحسين الأداء المؤسسي. يقدم استشارات في مجالات التخطيط الاستراتيجي وإدارة الموارد البشرية وتطوير القيادات.',
+    fullBioEn: 'Dr. Ahmed Mohammed is a specialist in business management and large-scale projects with over 15 years of experience in both private and public sectors. He holds a doctorate degree from a prestigious university and has led numerous successful projects that achieved exceptional results. He specializes in developing organizational strategies and improving institutional performance. He provides consultations in strategic planning, human resource management, and leadership development.',
     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop',
     zohoDuration: 60,
   },
@@ -186,6 +188,8 @@ const CONSULTANTS = [
     specialtyEn: 'Digital Marketing',
     bio: 'متخصصة في التسويق الإلكتروني والعلامات التجارية',
     bioEn: 'Specialized in e-marketing and branding',
+    fullBio: 'أ. فاطمة علي خبيرة تسويق رقمي معروفة بخبرتها الواسعة في بناء العلامات التجارية القوية وتطوير استراتيجيات التسويق الرقمي الفعالة. عملت مع أكثر من 50 شركة عالمية وساعدتها في زيادة مبيعاتها بنسبة تصل إلى 300%. متخصصة في إدارة وسائل التواصل الاجتماعي والإعلانات الرقمية وتحسين محركات البحث. حاصلة على شهادات متقدمة في التسويق الرقمي من أفضل المؤسسات العالمية.',
+    fullBioEn: 'Fatima Ali is a renowned digital marketing expert known for her extensive experience in building strong brands and developing effective digital marketing strategies. She has worked with over 50 international companies and helped them increase their sales by up to 300%. She specializes in social media management, digital advertising, and search engine optimization. She holds advanced certifications in digital marketing from leading international institutions.',
     image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop',
     zohoDuration: 45,
   },
@@ -197,6 +201,8 @@ const CONSULTANTS = [
     specialtyEn: 'Software Development',
     bio: 'مهندسة برمجيات بخبرة 10 سنوات في التطوير',
     bioEn: '10 years of software engineering experience',
+    fullBio: 'م. سارة حسن مهندسة برمجيات متقدمة بخبرة تزيد عن 10 سنوات في تطوير التطبيقات والأنظمة البرمجية المعقدة. متخصصة في تطوير تطبيقات الويب والجوال باستخدام أحدث التقنيات والإطارات البرمجية. قادت فريق تطوير يضم أكثر من 20 مهندساً وسلمت أكثر من 30 مشروعاً ناجحاً. حاصلة على شهادة الهندسة من جامعة عريقة وتتمتع بخبرة عملية في إدارة المشاريع التقنية الكبرى.',
+    fullBioEn: 'Sarah Hassan is an advanced software engineer with over 10 years of experience in developing applications and complex software systems. She specializes in web and mobile application development using the latest technologies and programming frameworks. She led a development team of over 20 engineers and delivered more than 30 successful projects. She holds an engineering degree from a prestigious university and has practical experience in managing large technical projects.',
     image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop',
     zohoDuration: 90,
   },
@@ -294,6 +300,7 @@ export default function Home() {
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [selectedConsultant, setSelectedConsultant] = useState<typeof CONSULTANTS[0] | null>(null);
+  const [showConsultantBio, setShowConsultantBio] = useState<typeof CONSULTANTS[0] | null>(null);
   const [bookingData, setBookingData] = useState({
     name: '',
     email: '',
@@ -430,7 +437,7 @@ export default function Home() {
               {CONSULTANTS.map(consultant => (
                 <div key={consultant.id} className="bg-white rounded-lg shadow-md p-6 border border-blue-200">
                   <img src={consultant.image} alt={consultant.name} className="w-full h-48 object-cover rounded-lg mb-4 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => setSelectedConsultant(consultant)} />
-                  <h3 className="text-3xl font-bold text-orange-500 mb-1">{isRTL ? consultant.name : consultant.nameEn}</h3>
+                  <h3 className="text-3xl font-bold text-orange-500 mb-1 cursor-pointer hover:underline" onClick={() => setShowConsultantBio(consultant)}>{isRTL ? consultant.name : consultant.nameEn}</h3>
                   <p className="text-xl text-blue-600 mb-2 font-semibold">{isRTL ? consultant.specialty : consultant.specialtyEn}</p>
                   <p className="text-lg text-gray-600 mb-4">{isRTL ? consultant.bio : consultant.bioEn}</p>
                   <button onClick={() => setSelectedConsultant(consultant)} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300">{isRTL ? 'حجز موعد' : 'Book Appointment'}</button>
@@ -706,6 +713,39 @@ export default function Home() {
                 {isRTL ? 'إلغاء' : 'Cancel'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Consultant Full Bio Modal */}
+      {showConsultantBio && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg max-w-2xl w-full max-h-96 overflow-y-auto p-6 relative">
+            <button
+              onClick={() => setShowConsultantBio(null)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl"
+            >
+              ×
+            </button>
+            <div className="flex items-start gap-4 mb-4">
+              <img src={showConsultantBio.image} alt={showConsultantBio.name} className="w-24 h-24 object-cover rounded-lg" />
+              <div>
+                <h2 className="text-3xl font-bold text-blue-600 mb-1">{isRTL ? showConsultantBio.name : showConsultantBio.nameEn}</h2>
+                <p className="text-xl text-orange-500 font-semibold mb-2">{isRTL ? showConsultantBio.specialty : showConsultantBio.specialtyEn}</p>
+              </div>
+            </div>
+            <p className="text-gray-700 leading-relaxed mb-6 text-lg">
+              {isRTL ? showConsultantBio.fullBio : showConsultantBio.fullBioEn}
+            </p>
+            <button
+              onClick={() => {
+                setShowConsultantBio(null);
+                setSelectedConsultant(showConsultantBio);
+              }}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300"
+            >
+              {isRTL ? 'حجز موعد' : 'Book Appointment'}
+            </button>
           </div>
         </div>
       )}

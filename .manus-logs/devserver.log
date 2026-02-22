@@ -375,3 +375,6 @@
 [2026-02-22T19:57:55.272Z] Server closed
 [2026-02-22T19:57:55.812Z] c[OAuth] Initialized with baseURL: https://api.manus.im
 [2026-02-22T19:57:55.812Z] Server running on http://localhost:3000/
+[2026-02-22T20:10:26.890Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-02-22T20:10:27.676Z] [OAuth] Initialized with baseURL: https://api.manus.im
+[2026-02-22T20:10:27.677Z] Server running on http://localhost:3000/

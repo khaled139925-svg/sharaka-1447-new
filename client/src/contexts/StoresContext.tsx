@@ -6,7 +6,7 @@ export interface Product {
   price: number;
   image: string;
   description: string;
-  points: number; // النقاط بدلاً من الخصم
+  points: number;
 }
 
 export interface Store {
@@ -22,6 +22,14 @@ export interface Store {
   products: Product[];
 }
 
+export interface CartItem {
+  storeId: string;
+  productId: string;
+  quantity: number;
+  product: Product;
+  store: Store;
+}
+
 interface StoresContextType {
   stores: Store[];
   addStore: (store: Store) => void;
@@ -32,6 +40,13 @@ interface StoresContextType {
   deleteProduct: (storeId: string, productId: string) => void;
   getStore: (id: string) => Store | undefined;
   getProduct: (storeId: string, productId: string) => Product | undefined;
+  cart: CartItem[];
+  addToCart: (storeId: string, productId: string, quantity: number) => void;
+  removeFromCart: (storeId: string, productId: string) => void;
+  updateCartQuantity: (storeId: string, productId: string, quantity: number) => void;
+  clearCart: () => void;
+  getCartTotal: () => number;
+  getCartPoints: () => number;
 }
 
 const StoresContext = createContext<StoresContextType | undefined>(undefined);
@@ -47,6 +62,7 @@ export function StoresProvider({ children }: { children: React.ReactNode }) {
       ownerName: 'أحمد محمد',
       ownerEmail: 'ahmed@tech.com',
       ownerPhone: '+966501234567',
+      pointsRatio: 0.1,
       products: [
         {
           id: '1-1',
@@ -54,7 +70,7 @@ export function StoresProvider({ children }: { children: React.ReactNode }) {
           price: 299.99,
           image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop',
           description: 'سماعات بلوتوث عالية الجودة مع بطارية تدوم 24 ساعة',
-          points: 30, // 10% من السعر
+          points: 30,
         },
         {
           id: '1-2',
@@ -67,6 +83,7 @@ export function StoresProvider({ children }: { children: React.ReactNode }) {
       ],
     },
   ]);
+  const [cart, setCart] = useState<CartItem[]>([]);
 
   const addStore = (store: Store) => {
     setStores([...stores, { ...store, id: Date.now().toString() }]);
@@ -132,6 +149,72 @@ export function StoresProvider({ children }: { children: React.ReactNode }) {
     return store?.products.find((product) => product.id === productId);
   };
 
+  const addToCart = (storeId: string, productId: string, quantity: number) => {
+    const store = getStore(storeId);
+    const product = getProduct(storeId, productId);
+    
+    if (!store || !product) return;
+    
+    const existingItem = cart.find(
+      (item) => item.storeId === storeId && item.productId === productId
+    );
+    
+    if (existingItem) {
+      setCart(
+        cart.map((item) =>
+          item.storeId === storeId && item.productId === productId
+            ? { ...item, quantity: item.quantity + quantity }
+            : item
+        )
+      );
+    } else {
+      setCart([
+        ...cart,
+        {
+          storeId,
+          productId,
+          quantity,
+          product,
+          store,
+        },
+      ]);
+    }
+  };
+
+  const removeFromCart = (storeId: string, productId: string) => {
+    setCart(
+      cart.filter(
+        (item) => !(item.storeId === storeId && item.productId === productId)
+      )
+    );
+  };
+
+  const updateCartQuantity = (storeId: string, productId: string, quantity: number) => {
+    if (quantity <= 0) {
+      removeFromCart(storeId, productId);
+    } else {
+      setCart(
+        cart.map((item) =>
+          item.storeId === storeId && item.productId === productId
+            ? { ...item, quantity }
+            : item
+        )
+      );
+    }
+  };
+
+  const clearCart = () => {
+    setCart([]);
+  };
+
+  const getCartTotal = () => {
+    return cart.reduce((total, item) => total + item.product.price * item.quantity, 0);
+  };
+
+  const getCartPoints = () => {
+    return cart.reduce((points, item) => points + item.product.points * item.quantity, 0);
+  };
+
   return (
     <StoresContext.Provider
       value={{
@@ -144,6 +227,13 @@ export function StoresProvider({ children }: { children: React.ReactNode }) {
         deleteProduct,
         getStore,
         getProduct,
+        cart,
+        addToCart,
+        removeFromCart,
+        updateCartQuantity,
+        clearCart,
+        getCartTotal,
+        getCartPoints,
       }}
     >
       {children}

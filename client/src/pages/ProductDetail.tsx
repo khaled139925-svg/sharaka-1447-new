@@ -10,7 +10,7 @@ interface ProductDetailProps {
 }
 
 export default function ProductDetail({ onNavigate, storeId, productId }: ProductDetailProps) {
-  const { getStore, getProduct } = useStores();
+  const { getStore, getProduct, addToCart } = useStores();
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
 
@@ -44,6 +44,7 @@ export default function ProductDetail({ onNavigate, storeId, productId }: Produc
   }
 
   const handleAddToCart = () => {
+    addToCart(storeId, productId, quantity);
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
   };

@@ -530,8 +530,8 @@ export default function Home({ onAdminClick, onNavigate }: { onAdminClick?: () =
             <h2 className="text-6xl font-bold text-orange-500 mb-1 text-center">{t.marketplace}</h2>
             <p className="text-3xl text-blue-600 mb-6 text-center font-semibold">{t.marketplaceDesc}</p>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              {STORES.map(store => (
-                <div key={store.id} className="bg-white rounded-lg shadow-md overflow-hidden border border-orange-200">
+              {[...STORES, ...stores].map(store => (
+                <div key={store.id} onClick={() => onNavigate?.('store-detail', String(store.id))} className="bg-white rounded-lg shadow-md overflow-hidden border border-orange-200 cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-300">
                   <img src={store.image} alt={store.name} className="w-full h-40 object-cover" />
                   <div className="p-4">
                     <h3 className="text-2xl font-bold text-orange-500 mb-1">{isRTL ? store.name : store.nameEn}</h3>

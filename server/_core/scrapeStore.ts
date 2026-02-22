@@ -24,12 +24,19 @@ export async function scrapeStoreFromUrl(url: string) {
     const $ = cheerio.load(html);
 
     // استخراج البيانات الأساسية
-    const title = $('title').text() || $('h1').first().text() || 'متجر جديد';
-    const description = 
+    let title = $('title').text() || $('h1').first().text() || 'متجر جديد';
+    // إزالة كلمات غير مرغوبة من الاسم
+    title = title.replace(/مستنسخ|cloned|clone/gi, '').trim();
+    if (!title) title = 'متجر جديد';
+    
+    let description = 
       $('meta[name="description"]').attr('content') ||
       $('meta[property="og:description"]').attr('content') ||
       $('p').first().text() ||
       'وصف المتجر';
+    // إزالة كلمات غير مرغوبة من الوصف
+    description = description.replace(/مستنسخ|cloned|clone/gi, '').trim();
+    if (!description) description = 'وصف المتجر';
 
     // استخراج الصورة الرئيسية
     let logoUrl = 
@@ -45,6 +52,11 @@ export async function scrapeStoreFromUrl(url: string) {
       } catch (e) {
         logoUrl = '';
       }
+    }
+    
+    // إذا لم نجد شعار، تركه فارغاً
+    if (!logoUrl || logoUrl.includes('placeholder')) {
+      logoUrl = '';
     }
 
     // استخراج المنتجات من الموقع

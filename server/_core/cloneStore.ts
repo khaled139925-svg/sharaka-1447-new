@@ -54,12 +54,18 @@ export async function cloneStoreFromUrl(url: string): Promise<ClonedStoreData> {
  */
 function extractStoreData(html: string, baseUrl: string): ClonedStoreData {
   // استخراج اسم المتجر
-  const nameMatch = html.match(/<title>(.*?)<\/title>/i);
-  const name = nameMatch ? nameMatch[1].trim() : 'متجر جديد';
+  let nameMatch = html.match(/<title>(.*?)<\/title>/i);
+  let name = nameMatch ? nameMatch[1].trim() : 'متجر جديد';
+  // إزالة كلمات غير مرغوبة
+  name = name.replace(/مستنسخ|cloned|clone/gi, '').trim();
+  if (!name) name = 'متجر جديد';
 
   // استخراج الوصف
   const descriptionMatch = html.match(/<meta\s+name="description"\s+content="([^"]*)"/i);
-  const description = descriptionMatch ? descriptionMatch[1] : 'وصف المتجر';
+  let description = descriptionMatch ? descriptionMatch[1] : 'وصف المتجر';
+  // إزالة كلمات غير مرغوبة
+  description = description.replace(/مستنسخ|cloned|clone/gi, '').trim();
+  if (!description) description = 'وصف المتجر';
 
   // استخراج الصورة (الشعار)
   const logoMatch = html.match(/<img[^>]*src="([^"]*)"[^>]*(?:alt="logo"|class="[^"]*logo[^"]*")[^>]*>/i) ||
@@ -68,7 +74,15 @@ function extractStoreData(html: string, baseUrl: string): ClonedStoreData {
   let logo = logoMatch ? logoMatch[1] : '';
   // تحويل الرابط النسبي إلى مطلق
   if (logo && !logo.startsWith('http')) {
-    logo = new URL(logo, baseUrl).href;
+    try {
+      logo = new URL(logo, baseUrl).href;
+    } catch (e) {
+      logo = '';
+    }
+  }
+  // إذا لم نجد شعار، تركه فارغاً
+  if (!logo || logo.includes('placeholder')) {
+    logo = '';
   }
 
   // استخراج المنتجات (مثال بسيط)

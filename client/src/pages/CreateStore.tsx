@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useStores, Product, Store } from '@/contexts/StoresContext';
 import { X, Plus } from 'lucide-react';
+import { ImageUploadField } from '@/components/ImageUploadField';
 
 export default function CreateStore({ onNavigate }: { onNavigate: (page: string, storeId?: string) => void }) {
   const { addStore } = useStores();
@@ -293,17 +294,12 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="block text-lg font-semibold text-gray-700 text-right">صورة المنتج</label>
-                  <input
-                    type="text"
-                    value={productImage}
-                    onChange={(e) => setProductImage(e.target.value)}
-                    placeholder="أدخل رابط صورة المنتج"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-right"
-                    dir="rtl"
-                  />
-                </div>
+                <ImageUploadField
+                  label="صورة المنتج"
+                  value={productImage}
+                  onChange={setProductImage}
+                  required
+                />
 
                 <div className="space-y-2">
                   <label className="block text-lg font-semibold text-gray-700 text-right">وصف المنتج</label>

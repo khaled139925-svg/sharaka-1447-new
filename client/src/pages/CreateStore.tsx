@@ -132,10 +132,11 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
         {/* Clone Store Section */}
         <div className="bg-blue-50 rounded-lg border-2 border-blue-300 p-6 mb-8">
           <h2 className="text-xl font-bold text-right text-blue-900 mb-4">استنسخ متجراً موجوداً</h2>
+          <p className="text-sm text-blue-700 mb-4 text-right">ملاحظة: إذا فشل جلب البيانات من الرابط، يمكنك إدخال البيانات يدويًا في النموذج أدناه</p>
           <div className="flex gap-2 flex-col sm:flex-row">
             <input
               type="text"
-              placeholder="أدخل رابط المتجر الخارجي"
+              placeholder="أدخل رابط المتجر الخارجي (اختياري)"
               value={cloneUrl}
               onChange={(e) => setCloneUrl(e.target.value)}
               className="flex-1 px-4 py-2 border border-blue-300 rounded-lg focus:outline-none focus:border-blue-500"
@@ -149,9 +150,14 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
                 }
                 try {
                   // محاولة جلب بيانات المتجر من الرابط
-                  const response = await fetch(cloneUrl);
+                  const response = await fetch(cloneUrl, {
+                    method: 'GET',
+                    headers: {
+                      'Accept': 'text/html',
+                    }
+                  });
                   if (!response.ok) {
-                    throw new Error('لم يتم العثور على الرابط');
+                    throw new Error('لم يتم العثور على الرابط أو الموقع لا يسمح بالوصول');
                   }
                   const html = await response.text();
                   
@@ -160,23 +166,24 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
                   const doc = parser.parseFromString(html, 'text/html');
                   
                   // استخراج العنوان والوصف
-                  const title = doc.querySelector('title')?.textContent || 'متجر مستنسخ';
-                  const description = doc.querySelector('meta[name="description"]')?.getAttribute('content') || 'تم استنساخ هذا المتجر من رابط خارجي';
+                  const title = doc.querySelector('title')?.textContent || doc.querySelector('h1')?.textContent || 'متجر مستنسخ';
+                  const description = doc.querySelector('meta[name="description"]')?.getAttribute('content') || doc.querySelector('meta[property="og:description"]')?.getAttribute('content') || 'تم استنساخ هذا المتجر من رابط خارجي';
                   
                   // تعيين البيانات
-                  setStoreName(title);
-                  setStoreDescription(description);
+                  setStoreName(title.trim());
+                  setStoreDescription(description.trim());
                   setStoreCategory('عام');
                   setStorePointsRatio('1');
                   setCloneUrl('');
-                  alert('تم تحميل بيانات المتجر بنجاح!');
+                  alert('تم تحميل بيانات المتجر بنجاح! يمكنك الآن تعديل البيانات وإضافة المنتجات');
                 } catch (error) {
-                  alert('خطأ في جلب بيانات المتجر: ' + (error instanceof Error ? error.message : 'خطأ غير معروف'));
+                  const errorMsg = error instanceof Error ? error.message : 'خطأ غير معروف';
+                  alert('⚠️ لم يتم جلب البيانات من الرابط.\n\nالسبب: ' + errorMsg + '\n\nيمكنك إدخال البيانات يدويًا في النموذج أدناه');
                 }
               }}
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold whitespace-nowrap"
             >
-              استنسخ المتجر
+              جرب الاستنساخ
             </Button>
           </div>
         </div>

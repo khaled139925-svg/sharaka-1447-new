@@ -194,3 +194,159 @@
 [2026-02-20T11:32:42.653Z] Dev server exited with code -15
 [2026-02-20T11:32:45.729Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
 [2026-02-20T11:32:46.096Z] Server running on http://localhost:3000/
+[2026-02-22T18:30:39.006Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-02-22T18:30:39.491Z] Server running on http://localhost:3000/
+[2026-02-22T18:31:20.173Z] 1:31:20 PM [tsx] change in ./server/_core/index.ts Restarting...
+[2026-02-22T18:31:20.368Z] c
+[2026-02-22T18:31:20.369Z] node:internal/modules/run_main:122
+[2026-02-22T18:31:20.369Z] triggerUncaughtException(
+[2026-02-22T18:31:20.370Z] ^
+[2026-02-22T18:31:20.370Z] Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'express' imported from /home/ubuntu/sharaka-platform/server/_core/index.ts
+[2026-02-22T18:31:20.370Z] at packageResolve (node:internal/modules/esm/resolve:857:9)
+[2026-02-22T18:31:20.370Z] at moduleResolve (node:internal/modules/esm/resolve:926:18)
+[2026-02-22T18:31:20.371Z] at defaultResolve (node:internal/modules/esm/resolve:1056:11)
+[2026-02-22T18:31:20.371Z] at nextResolve (node:internal/modules/esm/hooks:748:28)
+[2026-02-22T18:31:20.371Z] at resolveBase (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771785080262:2:3744)
+[2026-02-22T18:31:20.371Z] at resolveDirectory (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771785080262:2:4243)
+[2026-02-22T18:31:20.371Z] at resolveTsPaths (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771785080262:2:4984)
+[2026-02-22T18:31:20.372Z] at async resolve (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771785080262:2:5355)
+[2026-02-22T18:31:20.372Z] at async nextResolve (node:internal/modules/esm/hooks:748:22)
+[2026-02-22T18:31:20.372Z] at async Hooks.resolve (node:internal/modules/esm/hooks:240:24) {
+[2026-02-22T18:31:20.372Z] code: 'ERR_MODULE_NOT_FOUND'
+[2026-02-22T18:31:20.372Z] }
+[2026-02-22T18:31:20.373Z] 
+[2026-02-22T18:31:20.373Z] Node.js v22.13.0
+[2026-02-22T18:31:51.032Z] Dev server process group stopped
+[2026-02-22T18:31:51.038Z] Dev server exited with code -15
+[2026-02-22T18:31:54.037Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-02-22T18:31:54.466Z] 
+[2026-02-22T18:31:54.467Z] node:internal/modules/run_main:122
+[2026-02-22T18:31:54.467Z] triggerUncaughtException(
+[2026-02-22T18:31:54.467Z] ^
+[2026-02-22T18:31:54.468Z] Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'zod' imported from /home/ubuntu/sharaka-platform/server/routers.ts
+[2026-02-22T18:31:54.468Z] Did you mean to import "zod/index.cjs"?
+[2026-02-22T18:31:54.468Z] at packageResolve (node:internal/modules/esm/resolve:857:9)
+[2026-02-22T18:31:54.469Z] at moduleResolve (node:internal/modules/esm/resolve:926:18)
+[2026-02-22T18:31:54.469Z] at defaultResolve (node:internal/modules/esm/resolve:1056:11)
+[2026-02-22T18:31:54.469Z] at nextResolve (node:internal/modules/esm/hooks:748:28)
+[2026-02-22T18:31:54.469Z] at resolveBase (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771785114347:2:3744)
+[2026-02-22T18:31:54.470Z] at resolveDirectory (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771785114347:2:4243)
+[2026-02-22T18:31:54.470Z] at resolveTsPaths (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771785114347:2:4984)
+[2026-02-22T18:31:54.470Z] at async resolve (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771785114347:2:5355)
+[2026-02-22T18:31:54.470Z] at async nextResolve (node:internal/modules/esm/hooks:748:22)
+[2026-02-22T18:31:54.471Z] at async Hooks.resolve (node:internal/modules/esm/hooks:240:24) {
+[2026-02-22T18:31:54.471Z] code: 'ERR_MODULE_NOT_FOUND'
+[2026-02-22T18:31:54.471Z] }
+[2026-02-22T18:31:54.471Z] 
+[2026-02-22T18:31:54.472Z] Node.js v22.13.0
+[2026-02-22T18:32:15.444Z] Dev server process group stopped
+[2026-02-22T18:32:15.451Z] Dev server exited with code -15
+[2026-02-22T18:32:18.450Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-02-22T18:32:18.981Z] 
+[2026-02-22T18:32:18.982Z] node:internal/modules/run_main:122
+[2026-02-22T18:32:18.982Z] triggerUncaughtException(
+[2026-02-22T18:32:18.983Z] ^
+[2026-02-22T18:32:18.983Z] Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'jose' imported from /home/ubuntu/sharaka-platform/server/_core/cookies.ts
+[2026-02-22T18:32:18.983Z] at packageResolve (node:internal/modules/esm/resolve:857:9)
+[2026-02-22T18:32:18.983Z] at moduleResolve (node:internal/modules/esm/resolve:926:18)
+[2026-02-22T18:32:18.983Z] at defaultResolve (node:internal/modules/esm/resolve:1056:11)
+[2026-02-22T18:32:18.984Z] at nextResolve (node:internal/modules/esm/hooks:748:28)
+[2026-02-22T18:32:18.984Z] at resolveBase (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771785138751:2:3744)
+[2026-02-22T18:32:18.984Z] at resolveDirectory (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771785138751:2:4243)
+[2026-02-22T18:32:18.985Z] at resolveTsPaths (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771785138751:2:4984)
+[2026-02-22T18:32:18.985Z] at async resolve (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771785138751:2:5355)
+[2026-02-22T18:32:18.985Z] at async nextResolve (node:internal/modules/esm/hooks:748:22)
+[2026-02-22T18:32:18.986Z] at async Hooks.resolve (node:internal/modules/esm/hooks:240:24) {
+[2026-02-22T18:32:18.986Z] code: 'ERR_MODULE_NOT_FOUND'
+[2026-02-22T18:32:18.986Z] }
+[2026-02-22T18:32:18.986Z] 
+[2026-02-22T18:32:18.986Z] Node.js v22.13.0
+[2026-02-22T18:32:32.846Z] Dev server process group stopped
+[2026-02-22T18:32:32.872Z] Dev server exited with code -15
+[2026-02-22T18:32:35.851Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-02-22T18:32:36.646Z] /home/ubuntu/sharaka-platform/server/db.ts:1
+[2026-02-22T18:32:36.647Z] import { db as drizzleDb } from './_core/index';
+[2026-02-22T18:32:36.648Z] ^
+[2026-02-22T18:32:36.648Z] 
+[2026-02-22T18:32:36.648Z] SyntaxError: The requested module './_core/index' does not provide an export named 'db'
+[2026-02-22T18:32:36.648Z] at ModuleJob._instantiate (node:internal/modules/esm/module_job:180:21)
+[2026-02-22T18:32:36.649Z] at async ModuleJob.run (node:internal/modules/esm/module_job:263:5)
+[2026-02-22T18:32:36.649Z] at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:547:26)
+[2026-02-22T18:32:36.649Z] at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:116:5)
+[2026-02-22T18:32:36.650Z] 
+[2026-02-22T18:32:36.650Z] Node.js v22.13.0
+[2026-02-22T18:33:00.960Z] 1:33:00 PM [tsx] change in ./server/db.ts Rerunning...
+[2026-02-22T18:33:01.194Z] c
+[2026-02-22T18:33:01.195Z] node:internal/modules/run_main:122
+[2026-02-22T18:33:01.195Z] triggerUncaughtException(
+[2026-02-22T18:33:01.196Z] ^
+[2026-02-22T18:33:01.196Z] Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/home/ubuntu/sharaka-platform/drizzle/index' imported from /home/ubuntu/sharaka-platform/server/db.ts
+[2026-02-22T18:33:01.196Z] at finalizeResolution (node:internal/modules/esm/resolve:275:11)
+[2026-02-22T18:33:01.197Z] at moduleResolve (node:internal/modules/esm/resolve:932:10)
+[2026-02-22T18:33:01.197Z] at defaultResolve (node:internal/modules/esm/resolve:1056:11)
+[2026-02-22T18:33:01.197Z] at nextResolve (node:internal/modules/esm/hooks:748:28)
+[2026-02-22T18:33:01.198Z] at resolveBase (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771785181041:2:3744)
+[2026-02-22T18:33:01.198Z] at async resolveDirectory (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771785181041:2:4237)
+[2026-02-22T18:33:01.198Z] at async resolve (file:///home/ubuntu/.local/share/pnpm/global/5/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1771785181041:2:5355)
+[2026-02-22T18:33:01.199Z] at async nextResolve (node:internal/modules/esm/hooks:748:22)
+[2026-02-22T18:33:01.199Z] at async Hooks.resolve (node:internal/modules/esm/hooks:240:24)
+[2026-02-22T18:33:01.199Z] at async handleMessage (node:internal/modules/esm/worker:199:18) {
+[2026-02-22T18:33:01.199Z] code: 'ERR_MODULE_NOT_FOUND',
+[2026-02-22T18:33:01.200Z] url: 'file:///home/ubuntu/sharaka-platform/drizzle/index'
+[2026-02-22T18:33:01.200Z] }
+[2026-02-22T18:33:01.200Z] 
+[2026-02-22T18:33:01.201Z] Node.js v22.13.0
+[2026-02-22T18:33:21.922Z] 1:33:21 PM [tsx] change in ./server/db.ts Rerunning...
+[2026-02-22T18:33:22.663Z] c/home/ubuntu/sharaka-platform/node_modules/.pnpm/path-to-regexp@8.3.0/node_modules/path-to-regexp/src/index.ts:225
+[2026-02-22T18:33:22.664Z] throw new PathError(`Missing parameter name at index ${index}`, str);
+[2026-02-22T18:33:22.664Z] ^
+[2026-02-22T18:33:22.664Z] 
+[2026-02-22T18:33:22.665Z] 
+[2026-02-22T18:33:22.665Z] PathError [TypeError]: Missing parameter name at index 1: *; visit https://git.new/pathToRegexpError for info
+[2026-02-22T18:33:22.665Z] at name (/home/ubuntu/sharaka-platform/node_modules/.pnpm/path-to-regexp@8.3.0/node_modules/path-to-regexp/src/index.ts:225:13)
+[2026-02-22T18:33:22.665Z] at parse (/home/ubuntu/sharaka-platform/node_modules/.pnpm/path-to-regexp@8.3.0/node_modules/path-to-regexp/src/index.ts:242:62)
+[2026-02-22T18:33:22.665Z] at pathToRegexp (/home/ubuntu/sharaka-platform/node_modules/.pnpm/path-to-regexp@8.3.0/node_modules/path-to-regexp/src/index.ts:480:54)
+[2026-02-22T18:33:22.666Z] at Object.match (/home/ubuntu/sharaka-platform/node_modules/.pnpm/path-to-regexp@8.3.0/node_modules/path-to-regexp/src/index.ts:438:28)
+[2026-02-22T18:33:22.666Z] at matcher (/home/ubuntu/sharaka-platform/node_modules/.pnpm/router@2.2.0/node_modules/router/lib/layer.js:86:23)
+[2026-02-22T18:33:22.666Z] at new Layer (/home/ubuntu/sharaka-platform/node_modules/.pnpm/router@2.2.0/node_modules/router/lib/layer.js:93:62)
+[2026-02-22T18:33:22.666Z] at Function.route (/home/ubuntu/sharaka-platform/node_modules/.pnpm/router@2.2.0/node_modules/router/index.js:428:17)
+[2026-02-22T18:33:22.666Z] at Function.route (/home/ubuntu/sharaka-platform/node_modules/.pnpm/express@5.2.1/node_modules/express/lib/application.js:257:22)
+[2026-02-22T18:33:22.667Z] at app.<computed> [as get] (/home/ubuntu/sharaka-platform/node_modules/.pnpm/express@5.2.1/node_modules/express/lib/application.js:478:22)
+[2026-02-22T18:33:22.667Z] at <anonymous> (/home/ubuntu/sharaka-platform/server/_core/index.ts:24:5) {
+[2026-02-22T18:33:22.667Z] originalPath: '*'
+[2026-02-22T18:33:22.667Z] }
+[2026-02-22T18:33:22.667Z] 
+[2026-02-22T18:33:22.667Z] Node.js v22.13.0
+[2026-02-22T18:33:25.350Z] Dev server process group stopped
+[2026-02-22T18:33:25.356Z] Dev server exited with code -15
+[2026-02-22T18:33:28.356Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-02-22T18:33:29.003Z] /home/ubuntu/sharaka-platform/node_modules/.pnpm/path-to-regexp@8.3.0/node_modules/path-to-regexp/src/index.ts:225
+[2026-02-22T18:33:29.004Z] throw new PathError(`Missing parameter name at index ${index}`, str);
+[2026-02-22T18:33:29.004Z] ^
+[2026-02-22T18:33:29.004Z] 
+[2026-02-22T18:33:29.004Z] 
+[2026-02-22T18:33:29.005Z] PathError [TypeError]: Missing parameter name at index 1: *; visit https://git.new/pathToRegexpError for info
+[2026-02-22T18:33:29.005Z] at name (/home/ubuntu/sharaka-platform/node_modules/.pnpm/path-to-regexp@8.3.0/node_modules/path-to-regexp/src/index.ts:225:13)
+[2026-02-22T18:33:29.005Z] at parse (/home/ubuntu/sharaka-platform/node_modules/.pnpm/path-to-regexp@8.3.0/node_modules/path-to-regexp/src/index.ts:242:62)
+[2026-02-22T18:33:29.005Z] at pathToRegexp (/home/ubuntu/sharaka-platform/node_modules/.pnpm/path-to-regexp@8.3.0/node_modules/path-to-regexp/src/index.ts:480:54)
+[2026-02-22T18:33:29.005Z] at Object.match (/home/ubuntu/sharaka-platform/node_modules/.pnpm/path-to-regexp@8.3.0/node_modules/path-to-regexp/src/index.ts:438:28)
+[2026-02-22T18:33:29.006Z] at matcher (/home/ubuntu/sharaka-platform/node_modules/.pnpm/router@2.2.0/node_modules/router/lib/layer.js:86:23)
+[2026-02-22T18:33:29.006Z] at new Layer (/home/ubuntu/sharaka-platform/node_modules/.pnpm/router@2.2.0/node_modules/router/lib/layer.js:93:62)
+[2026-02-22T18:33:29.006Z] at Function.route (/home/ubuntu/sharaka-platform/node_modules/.pnpm/router@2.2.0/node_modules/router/index.js:428:17)
+[2026-02-22T18:33:29.006Z] at Function.route (/home/ubuntu/sharaka-platform/node_modules/.pnpm/express@5.2.1/node_modules/express/lib/application.js:257:22)
+[2026-02-22T18:33:29.006Z] at app.<computed> [as get] (/home/ubuntu/sharaka-platform/node_modules/.pnpm/express@5.2.1/node_modules/express/lib/application.js:478:22)
+[2026-02-22T18:33:29.006Z] at <anonymous> (/home/ubuntu/sharaka-platform/server/_core/index.ts:24:5) {
+[2026-02-22T18:33:29.006Z] originalPath: '*'
+[2026-02-22T18:33:29.007Z] }
+[2026-02-22T18:33:29.007Z] 
+[2026-02-22T18:33:29.007Z] Node.js v22.13.0
+[2026-02-22T18:33:46.189Z] 1:33:46 PM [tsx] change in ./server/_core/index.ts Rerunning...
+[2026-02-22T18:33:46.477Z] c[OAuth] Initialized with baseURL: https://api.manus.im
+[2026-02-22T18:33:46.478Z] Server running on http://localhost:3000/
+[2026-02-22T18:33:49.620Z] Dev server process group stopped
+[2026-02-22T18:33:49.621Z] SIGTERM received, shutting down gracefully
+[2026-02-22T18:33:49.622Z] Server closed
+[2026-02-22T18:33:49.639Z] Dev server exited with code -15
+[2026-02-22T18:33:52.625Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-02-22T18:33:53.089Z] [OAuth] Initialized with baseURL: https://api.manus.im
+[2026-02-22T18:33:53.090Z] Server running on http://localhost:3000/

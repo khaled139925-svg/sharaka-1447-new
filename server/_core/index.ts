@@ -1,45 +1,65 @@
-import http from 'http';
-import fs from 'fs';
+import express from 'express';
 import path from 'path';
+import fs from 'fs';
 
+const app = express();
 const PORT = process.env.PORT || 3000;
 const DIST_DIR = path.join(process.cwd(), 'dist');
 
-const server = http.createServer((req, res) => {
-  let filePath = path.join(DIST_DIR, req.url === '/' ? 'index.html' : req.url);
-  
-  // Security: prevent directory traversal
-  if (!filePath.startsWith(DIST_DIR)) {
-    filePath = path.join(DIST_DIR, 'index.html');
-  }
+// Middleware
+app.use(express.json());
+app.use(express.static(DIST_DIR));
 
-  fs.readFile(filePath, (err, data) => {
-    if (err) {
-      // Serve index.html for all routes (SPA)
-      fs.readFile(path.join(DIST_DIR, 'index.html'), (err2, data2) => {
-        res.writeHead(200, { 'Content-Type': 'text/html' });
-        res.end(data2);
-      });
-    } else {
-      const ext = path.extname(filePath);
-      const contentTypes: Record<string, string> = {
-        '.html': 'text/html',
-        '.js': 'application/javascript',
-        '.css': 'text/css',
-        '.json': 'application/json',
-        '.png': 'image/png',
-        '.jpg': 'image/jpeg',
-        '.gif': 'image/gif',
-        '.svg': 'image/svg+xml',
-      };
-      
-      const contentType = contentTypes[ext] || 'application/octet-stream';
-      res.writeHead(200, { 'Content-Type': contentType });
-      res.end(data);
-    }
+// API Routes
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
+// SPA fallback - serve index.html for all other routes
+app.get('/', (req, res) => {
+  const indexPath = path.join(DIST_DIR, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.status(404).send('Not found');
+  }
+});
+
+// Catch-all for SPA routing
+app.use((req, res) => {
+  const indexPath = path.join(DIST_DIR, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.status(404).json({ error: 'Not found' });
+  }
+});
+
+// Error handling
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error('Error:', err);
+  res.status(500).json({ error: 'Internal server error' });
+});
+
+// Start server
+const server = app.listen(PORT, () => {
+  console.log(`[OAuth] Initialized with baseURL: https://api.manus.im`);
+  console.log(`Server running on http://localhost:${PORT}/`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}/`);
+process.on('SIGINT', () => {
+  console.log('SIGINT received, shutting down gracefully');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
 });

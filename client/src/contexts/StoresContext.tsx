@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState } from 'react';
+'use client';
+
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export interface Product {
   id: string;
@@ -52,48 +54,96 @@ interface StoresContextType {
 
 const StoresContext = createContext<StoresContextType | undefined>(undefined);
 
+// البيانات الافتراضية
+const DEFAULT_STORES: Store[] = [
+  {
+    id: '1',
+    name: 'متجر التكنولوجيا',
+    description: 'متجر متخصص في الأجهزة الإلكترونية',
+    category: 'إلكترونيات',
+    logo: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&h=200&fit=crop',
+    ownerName: 'أحمد محمد',
+    ownerEmail: 'ahmed@tech.com',
+    ownerPhone: '+966501234567',
+    pointsRatio: 0.1,
+    products: [
+      {
+        id: '1-1',
+        name: 'سماعات بلوتوث',
+        price: 299.99,
+        image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop',
+        description: 'سماعات بلوتوث عالية الجودة مع بطارية تدوم 24 ساعة',
+        points: 30,
+        quantity: 10,
+      },
+      {
+        id: '1-2',
+        name: 'هاتف ذكي',
+        price: 1299.99,
+        image: 'https://images.unsplash.com/photo-1511707267537-b85faf00021e?w=300&h=300&fit=crop',
+        description: 'هاتف ذكي بأحدث المواصفات والتقنيات',
+        points: 130,
+        quantity: 5,
+      },
+    ],
+  },
+];
+
 export function StoresProvider({ children }: { children: React.ReactNode }) {
-  const [stores, setStores] = useState<Store[]>([
-    {
-      id: '1',
-      name: 'متجر التكنولوجيا',
-      description: 'متجر متخصص في الأجهزة الإلكترونية',
-      category: 'إلكترونيات',
-      logo: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&h=200&fit=crop',
-      ownerName: 'أحمد محمد',
-      ownerEmail: 'ahmed@tech.com',
-      ownerPhone: '+966501234567',
-      pointsRatio: 0.1,
-      products: [
-        {
-          id: '1-1',
-          name: 'سماعات بلوتوث',
-          price: 299.99,
-          image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop',
-          description: 'سماعات بلوتوث عالية الجودة مع بطارية تدوم 24 ساعة',
-          points: 30,
-        },
-        {
-          id: '1-2',
-          name: 'هاتف ذكي',
-          price: 1299.99,
-          image: 'https://images.unsplash.com/photo-1511707267537-b85faf00021e?w=300&h=300&fit=crop',
-          description: 'هاتف ذكي حديث مع كاميرا احترافية',
-          points: 130,
-        },
-      ],
-    },
-  ]);
+  const [stores, setStores] = useState<Store[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // تحميل البيانات من localStorage عند التحميل
+  useEffect(() => {
+    const savedStores = localStorage.getItem('sharaka_stores');
+    const savedCart = localStorage.getItem('sharaka_cart');
+
+    if (savedStores) {
+      try {
+        setStores(JSON.parse(savedStores));
+      } catch (error) {
+        console.error('خطأ في تحميل المتاجر:', error);
+        setStores(DEFAULT_STORES);
+      }
+    } else {
+      setStores(DEFAULT_STORES);
+    }
+
+    if (savedCart) {
+      try {
+        setCart(JSON.parse(savedCart));
+      } catch (error) {
+        console.error('خطأ في تحميل السلة:', error);
+        setCart([]);
+      }
+    }
+
+    setIsLoaded(true);
+  }, []);
+
+  // حفظ المتاجر في localStorage عند التغيير
+  useEffect(() => {
+    if (isLoaded) {
+      localStorage.setItem('sharaka_stores', JSON.stringify(stores));
+    }
+  }, [stores, isLoaded]);
+
+  // حفظ السلة في localStorage عند التغيير
+  useEffect(() => {
+    if (isLoaded) {
+      localStorage.setItem('sharaka_cart', JSON.stringify(cart));
+    }
+  }, [cart, isLoaded]);
 
   const addStore = (store: Store) => {
-    setStores([...stores, { ...store, id: Date.now().toString() }]);
+    setStores([...stores, store]);
   };
 
-  const updateStore = (id: string, updatedStore: Partial<Store>) => {
+  const updateStore = (id: string, updates: Partial<Store>) => {
     setStores(
       stores.map((store) =>
-        store.id === id ? { ...store, ...updatedStore } : store
+        store.id === id ? { ...store, ...updates } : store
       )
     );
   };
@@ -106,23 +156,20 @@ export function StoresProvider({ children }: { children: React.ReactNode }) {
     setStores(
       stores.map((store) =>
         store.id === storeId
-          ? {
-              ...store,
-              products: [...store.products, { ...product, id: Date.now().toString() }],
-            }
+          ? { ...store, products: [...store.products, product] }
           : store
       )
     );
   };
 
-  const updateProduct = (storeId: string, productId: string, updatedProduct: Partial<Product>) => {
+  const updateProduct = (storeId: string, productId: string, updates: Partial<Product>) => {
     setStores(
       stores.map((store) =>
         store.id === storeId
           ? {
               ...store,
               products: store.products.map((product) =>
-                product.id === productId ? { ...product, ...updatedProduct } : product
+                product.id === productId ? { ...product, ...updates } : product
               ),
             }
           : store
@@ -143,9 +190,11 @@ export function StoresProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
-  const getStore = (id: string) => stores.find((store) => store.id === id);
+  const getStore = (id: string): Store | undefined => {
+    return stores.find((store) => store.id === id);
+  };
 
-  const getProduct = (storeId: string, productId: string) => {
+  const getProduct = (storeId: string, productId: string): Product | undefined => {
     const store = getStore(storeId);
     return store?.products.find((product) => product.id === productId);
   };
@@ -153,13 +202,13 @@ export function StoresProvider({ children }: { children: React.ReactNode }) {
   const addToCart = (storeId: string, productId: string, quantity: number) => {
     const store = getStore(storeId);
     const product = getProduct(storeId, productId);
-    
+
     if (!store || !product) return;
-    
+
     const existingItem = cart.find(
       (item) => item.storeId === storeId && item.productId === productId
     );
-    
+
     if (existingItem) {
       setCart(
         cart.map((item) =>

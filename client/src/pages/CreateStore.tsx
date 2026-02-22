@@ -1,11 +1,16 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useStores, Product, Store } from '@/contexts/StoresContext';
-import { X, Plus } from 'lucide-react';
+import { X, Plus, Copy, Loader2 } from 'lucide-react';
 import { ImageUploadField } from '@/components/ImageUploadField';
 
 export default function CreateStore({ onNavigate }: { onNavigate: (page: string, storeId?: string) => void }) {
   const { addStore } = useStores();
+  
+  const [cloneUrl, setCloneUrl] = useState('');
+  const [cloneLoading, setCloneLoading] = useState(false);
+  const [cloneError, setCloneError] = useState<string | null>(null);
+  const [showCloneForm, setShowCloneForm] = useState(false);
   
   const [storeName, setStoreName] = useState('');
   const [storeDescription, setStoreDescription] = useState('');

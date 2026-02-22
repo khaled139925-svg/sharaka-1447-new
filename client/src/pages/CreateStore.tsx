@@ -23,6 +23,7 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
   const [productPrice, setProductPrice] = useState('');
   const [productImage, setProductImage] = useState('');
   const [productDescription, setProductDescription] = useState('');
+  const [productQuantity, setProductQuantity] = useState('');
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -36,8 +37,25 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
   };
 
   const handleAddProduct = () => {
-    if (!productName || !productPrice || !productImage || !productDescription) {
-      alert('يرجى ملء جميع حقول المنتج');
+    // التحقق من جميع الحقول
+    if (!productName || !productName.trim()) {
+      alert('يرجى إدخال اسم المنتج');
+      return;
+    }
+    if (!productPrice || parseFloat(productPrice) <= 0) {
+      alert('يرجى إدخال سعر صحيح');
+      return;
+    }
+    if (!productImage || productImage.trim() === '') {
+      alert('يرجى تحميل صورة المنتج');
+      return;
+    }
+    if (!productDescription || !productDescription.trim()) {
+      alert('يرجى إدخال وصف المنتج');
+      return;
+    }
+    if (!productQuantity || parseInt(productQuantity) <= 0) {
+      alert('يرجى إدخال كمية صحيحة');
       return;
     }
 
@@ -47,6 +65,7 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
       price: parseFloat(productPrice),
       image: productImage,
       description: productDescription,
+      quantity: parseInt(productQuantity),
     };
 
     setProducts([...products, newProduct]);
@@ -54,6 +73,7 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
     setProductPrice('');
     setProductImage('');
     setProductDescription('');
+    setProductQuantity('');
     setShowAddProduct(false);
   };
 
@@ -300,6 +320,19 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
                   onChange={setProductImage}
                   required
                 />
+
+                <div className="space-y-2">
+                  <label className="block text-lg font-semibold text-gray-700 text-right">الكمية المتاحة</label>
+                  <input
+                    type="number"
+                    value={productQuantity}
+                    onChange={(e) => setProductQuantity(e.target.value)}
+                    placeholder="أدخل الكمية المتاحة"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-right"
+                    dir="rtl"
+                    min="1"
+                  />
+                </div>
 
                 <div className="space-y-2">
                   <label className="block text-lg font-semibold text-gray-700 text-right">وصف المنتج</label>

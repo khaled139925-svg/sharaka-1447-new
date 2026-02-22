@@ -7,6 +7,7 @@ export interface Product {
   image: string;
   description: string;
   points: number;
+  quantity?: number;
 }
 
 export interface Store {

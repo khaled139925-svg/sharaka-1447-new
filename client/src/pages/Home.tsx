@@ -533,7 +533,9 @@ export default function Home({ onAdminClick, onNavigate }: { onAdminClick?: () =
               {[...STORES, ...stores].map(store => {
                 // التعامل مع المتاجر الوهمية والحقيقية
                 const displayImage = (store as any).image || (store as any).logo || 'https://via.placeholder.com/400x300?text=Store';
-                const displayName = (store as any).name || 'متجر';
+                let displayName = (store as any).name || 'متجر';
+                // إزالة كلمات غير مرغوبة من الاسم
+                displayName = displayName.replace(/مستنسخ|cloned|clone/gi, '').trim() || displayName;
                 const displayCategory = (store as any).category || 'عام';
                 const displayRating = (store as any).rating || 4.5;
                 

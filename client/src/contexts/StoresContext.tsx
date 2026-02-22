@@ -137,7 +137,13 @@ export function StoresProvider({ children }: { children: React.ReactNode }) {
   }, [cart, isLoaded]);
 
   const addStore = (store: Store) => {
-    setStores([...stores, store]);
+    // إزالة كلمات غير مرغوبة من الاسم والوصف
+    const cleanedStore = {
+      ...store,
+      name: store.name.replace(/مستنسخ|cloned|clone/gi, '').trim() || store.name,
+      description: store.description.replace(/مستنسخ|cloned|clone/gi, '').trim() || store.description,
+    };
+    setStores([...stores, cleanedStore]);
   };
 
   const updateStore = (id: string, updates: Partial<Store>) => {

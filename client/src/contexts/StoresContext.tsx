@@ -18,6 +18,7 @@ export interface Store {
   ownerName: string;
   ownerEmail: string;
   ownerPhone: string;
+  pointsRatio: number;
   products: Product[];
 }
 

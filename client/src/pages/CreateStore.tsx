@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { useStores, Product } from '@/contexts/StoresContext';
+import { useStores, Product, Store } from '@/contexts/StoresContext';
 import { X, Plus } from 'lucide-react';
 
-export default function CreateStore({ onNavigate }: { onNavigate: (page: string) => void }) {
+export default function CreateStore({ onNavigate }: { onNavigate: (page: string, storeId?: string) => void }) {
   const { addStore } = useStores();
   
   const [storeName, setStoreName] = useState('');
@@ -13,13 +13,13 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string)
   const [ownerName, setOwnerName] = useState('');
   const [ownerEmail, setOwnerEmail] = useState('');
   const [ownerPhone, setOwnerPhone] = useState('');
+  const [storePointsRatio, setStorePointsRatio] = useState('');
   
   const [products, setProducts] = useState<Product[]>([]);
   const [showAddProduct, setShowAddProduct] = useState(false);
   
   const [productName, setProductName] = useState('');
   const [productPrice, setProductPrice] = useState('');
-  const [productPoints, setProductPoints] = useState('');
   const [productImage, setProductImage] = useState('');
   const [productDescription, setProductDescription] = useState('');
 
@@ -35,7 +35,7 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string)
   };
 
   const handleAddProduct = () => {
-    if (!productName || !productPrice || !productPoints || !productImage || !productDescription) {
+    if (!productName || !productPrice || !productImage || !productDescription) {
       alert('يرجى ملء جميع حقول المنتج');
       return;
     }
@@ -44,7 +44,6 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string)
       id: Date.now().toString(),
       name: productName,
       price: parseFloat(productPrice),
-      points: parseFloat(productPoints),
       image: productImage,
       description: productDescription,
     };
@@ -52,7 +51,6 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string)
     setProducts([...products, newProduct]);
     setProductName('');
     setProductPrice('');
-    setProductPoints('');
     setProductImage('');
     setProductDescription('');
     setShowAddProduct(false);
@@ -63,7 +61,7 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string)
   };
 
   const handleCreateStore = () => {
-    if (!storeName || !storeDescription || !storeCategory || !storeLogoUrl || !ownerName || !ownerEmail || !ownerPhone) {
+    if (!storeName || !storeDescription || !storeCategory || !storeLogoUrl || !ownerName || !ownerEmail || !ownerPhone || !storePointsRatio) {
       alert('يرجى ملء جميع بيانات المتجر');
       return;
     }
@@ -73,7 +71,7 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string)
       return;
     }
 
-    addStore({
+    const newStore: Store = {
       id: Date.now().toString(),
       name: storeName,
       description: storeDescription,
@@ -82,11 +80,13 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string)
       ownerName,
       ownerEmail,
       ownerPhone,
+      pointsRatio: parseFloat(storePointsRatio),
       products,
-    });
+    };
 
+    addStore(newStore);
     alert('تم إنشاء المتجر بنجاح!');
-    onNavigate('stores-management');
+    onNavigate('home');
   };
 
   return (
@@ -96,7 +96,7 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string)
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-right text-gray-800">إنشاء متجر جديد</h1>
           <Button
-            onClick={() => onNavigate('stores-management')}
+            onClick={() => onNavigate('home')}
             className="bg-gray-500 hover:bg-gray-600 text-white"
           >
             العودة
@@ -186,6 +186,19 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string)
                 <option value="أثاث">أثاث</option>
                 <option value="أخرى">أخرى</option>
               </select>
+            </div>
+
+            {/* Store Points Ratio */}
+            <div className="space-y-2">
+              <label className="block text-lg font-semibold text-gray-700 text-right">نسبة النقاط من السعر (%)</label>
+              <input
+                type="number"
+                value={storePointsRatio}
+                onChange={(e) => setStorePointsRatio(e.target.value)}
+                placeholder="أدخل نسبة النقاط (مثلاً 5 لـ 5%)"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-right"
+                dir="rtl"
+              />
             </div>
           </div>
 
@@ -278,18 +291,6 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string)
                       dir="rtl"
                     />
                   </div>
-
-                  <div className="space-y-2">
-                    <label className="block text-lg font-semibold text-gray-700 text-right">النقاط</label>
-                    <input
-                      type="number"
-                      value={productPoints}
-                      onChange={(e) => setProductPoints(e.target.value)}
-                      placeholder="أدخل النقاط"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-right"
-                      dir="rtl"
-                    />
-                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -348,7 +349,7 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string)
                     </button>
                     <div className="flex-1 text-right pr-4">
                       <p className="font-bold text-gray-800">{product.name}</p>
-                      <p className="text-sm text-gray-600">{product.price} ر.س | {product.points} نقطة</p>
+                      <p className="text-sm text-gray-600">{product.price} ر.س</p>
                     </div>
                   </div>
                 ))
@@ -365,7 +366,7 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string)
               إنشاء المتجر
             </Button>
             <Button
-              onClick={() => onNavigate('stores-management')}
+              onClick={() => onNavigate('home')}
               className="flex-1 bg-gray-400 hover:bg-gray-500 text-white py-3 rounded-lg font-semibold text-lg"
             >
               إلغاء

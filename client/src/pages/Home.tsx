@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
+import { useStores } from '@/contexts/StoresContext';
 import { 
   Users, Briefcase, ShoppingBag, Award, MessageCircle, Info, 
   ChevronRight, MapPin, TrendingUp, Zap, Mail, Phone, AlertCircle,
@@ -293,7 +294,8 @@ const PATHS = [
   },
 ];
 
-export default function Home({ onAdminClick }: { onAdminClick?: () => void }) {
+export default function Home({ onAdminClick, onNavigate }: { onAdminClick?: () => void; onNavigate?: (page: string, storeId?: string) => void }) {
+  const { stores } = useStores();
   const [language, setLanguage] = useState<'ar' | 'en'>('ar');
   const [selectedCountry, setSelectedCountry] = useState('SA');
   const [showCountryMenu, setShowCountryMenu] = useState(false);

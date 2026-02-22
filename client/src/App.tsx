@@ -23,7 +23,7 @@ function App() {
     <StoresProvider>
       <div className="w-full min-h-screen bg-background">
         {currentPage === 'home' && (
-          <Home onAdminClick={() => handleNavigate('admin')} />
+          <Home onAdminClick={() => handleNavigate('admin')} onNavigate={handleNavigate} />
         )}
         {currentPage === 'admin' && (
           <Admin onBack={() => handleNavigate('home')} onNavigate={handleNavigate} />

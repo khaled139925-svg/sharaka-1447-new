@@ -539,6 +539,7 @@ export default function Home({ onAdminClick, onNavigate }: { onAdminClick?: () =
                 const displayCategory = (store as any).category || 'عام';
                 const displayRating = (store as any).rating || 4.5;
                 
+                const pointsRatio = ((store as any).pointsRatio || 0.1) * 100;
                 return (
                   <div key={store.id} onClick={() => onNavigate?.('store-detail', String(store.id))} className="bg-white rounded-lg shadow-md overflow-hidden border border-orange-200 cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-300">
                     <img src={displayImage} alt={displayName} className="w-full h-40 object-cover" />
@@ -546,6 +547,9 @@ export default function Home({ onAdminClick, onNavigate }: { onAdminClick?: () =
                       <h3 className="text-2xl font-bold text-orange-500 mb-1">{displayName}</h3>
                       <p className="text-lg text-blue-600 mb-2 font-semibold">{displayCategory}</p>
                       <p className="text-lg text-yellow-500">★ {displayRating}</p>
+                      <div className="mt-3 pt-3 border-t border-gray-200">
+                        <p className="text-sm text-green-600 font-bold">💰 نسبة النقاط: {pointsRatio.toFixed(0)}%</p>
+                      </div>
                     </div>
                   </div>
                 );

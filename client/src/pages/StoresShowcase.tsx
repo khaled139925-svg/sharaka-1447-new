@@ -1,25 +1,18 @@
 import { useState } from 'react';
-import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { ShoppingCart, Search, ArrowLeft, Star } from 'lucide-react';
 
 interface Store {
   id: number;
   name: string;
-  nameEn: string;
   description: string;
-  descriptionEn: string;
   category: string;
-  categoryEn: string;
   image: string;
   ownerName: string;
   ownerEmail: string;
   ownerPhone: string;
   rating: string;
-  reviewCount: number;
-  isActive: boolean;
 }
 
 interface Product {
@@ -27,28 +20,50 @@ interface Product {
   storeId: number;
   name: string;
   description: string;
-  price: string;
+  price: number;
   image: string;
-  category: string;
   stock: number;
-  isActive: boolean;
 }
+
+const SAMPLE_STORES: Store[] = [
+  {
+    id: 1,
+    name: 'متجر التكنولوجيا',
+    description: 'متجر متخصص في الأجهزة الإلكترونية والتكنولوجيا',
+    category: 'إلكترونيات',
+    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop',
+    ownerName: 'أحمد محمد',
+    ownerEmail: 'ahmed@tech.com',
+    ownerPhone: '+966501234567',
+    rating: '4.8',
+  },
+];
+
+const SAMPLE_PRODUCTS: Product[] = [
+  {
+    id: 1,
+    storeId: 1,
+    name: 'هاتف ذكي',
+    description: 'هاتف ذكي حديث بمواصفات عالية',
+    price: 1500,
+    image: 'https://images.unsplash.com/photo-1511707267537-b85faf00021e?w=400&h=300&fit=crop',
+    stock: 10,
+  },
+];
 
 export default function StoresShowcase({ onBack }: { onBack: () => void }) {
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [cart, setCart] = useState<Product[]>([]);
 
-  const { data: stores = [] } = trpc.stores.getAll.useQuery();
-  const { data: products = [] } = trpc.products.getByStore.useQuery(
-    { storeId: selectedStore?.id || 0 },
-    { enabled: !!selectedStore }
-  );
-
-  const filteredStores = stores.filter((store: Store) =>
+  const filteredStores = SAMPLE_STORES.filter((store) =>
     store.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     store.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const storeProducts = selectedStore
+    ? SAMPLE_PRODUCTS.filter((p) => p.storeId === selectedStore.id)
+    : [];
 
   const addToCart = (product: Product) => {
     setCart([...cart, product]);
@@ -58,7 +73,7 @@ export default function StoresShowcase({ onBack }: { onBack: () => void }) {
     setCart(cart.filter((_, i) => i !== index));
   };
 
-  const totalPrice = cart.reduce((sum, product) => sum + parseFloat(product.price), 0);
+  const totalPrice = cart.reduce((sum, product) => sum + product.price, 0);
 
   if (selectedStore) {
     return (
@@ -90,7 +105,7 @@ export default function StoresShowcase({ onBack }: { onBack: () => void }) {
                   <div className="flex items-center gap-1">
                     <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
                     <span className="font-semibold text-gray-700">
-                      {selectedStore.rating} ({selectedStore.reviewCount} تقييم)
+                      {selectedStore.rating}
                     </span>
                   </div>
                   <span className="text-gray-600">•</span>
@@ -121,7 +136,7 @@ export default function StoresShowcase({ onBack }: { onBack: () => void }) {
             <div className="lg:col-span-3">
               <h2 className="text-2xl font-bold text-purple-900 mb-6">المنتجات</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {products.map((product: Product) => (
+                {storeProducts.map((product) => (
                   <Card key={product.id} className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
                     <img
                       src={product.image}
@@ -146,7 +161,7 @@ export default function StoresShowcase({ onBack }: { onBack: () => void }) {
                       <Button
                         onClick={() => addToCart(product)}
                         disabled={product.stock === 0}
-                        className="w-full bg-purple-600 hover:bg-purple-700 flex items-center justify-center gap-2"
+                        className="w-full bg-purple-600 hover:bg-purple-700 flex items-center justify-center gap-2 text-white font-bold py-2 px-4 rounded-lg"
                       >
                         <ShoppingCart className="w-4 h-4" />
                         أضف للسلة
@@ -201,7 +216,7 @@ export default function StoresShowcase({ onBack }: { onBack: () => void }) {
                         عدد المنتجات: {cart.length}
                       </p>
                     </div>
-                    <Button className="w-full bg-green-600 hover:bg-green-700 mb-2">
+                    <Button className="w-full bg-green-600 hover:bg-green-700 mb-2 text-white font-bold py-2 px-4 rounded-lg">
                       إتمام الشراء
                     </Button>
                   </>
@@ -234,18 +249,18 @@ export default function StoresShowcase({ onBack }: { onBack: () => void }) {
         <div className="mb-8">
           <div className="relative">
             <Search className="absolute left-4 top-3 w-5 h-5 text-gray-400" />
-            <Input
+            <input
               placeholder="ابحث عن متجر أو فئة..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-12 py-3 text-lg"
+              className="w-full pl-12 py-3 text-lg border-2 border-gray-300 rounded-lg focus:outline-none focus:border-purple-600"
             />
           </div>
         </div>
 
         {/* Stores Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredStores.map((store: Store) => (
+          {filteredStores.map((store) => (
             <Card
               key={store.id}
               onClick={() => setSelectedStore(store)}
@@ -272,7 +287,7 @@ export default function StoresShowcase({ onBack }: { onBack: () => void }) {
                     {store.category}
                   </span>
                 </div>
-                <Button className="w-full bg-purple-600 hover:bg-purple-700">
+                <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg">
                   زيارة المتجر
                 </Button>
               </div>

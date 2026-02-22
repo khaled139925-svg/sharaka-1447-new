@@ -64,7 +64,7 @@ const SECTIONS = [
   }
 ];
 
-export default function Admin({ onBack }: { onBack?: () => void }) {
+export default function Admin({ onBack, onNavigate }: { onBack?: () => void; onNavigate?: (page: string) => void }) {
   const [adminUser, setAdminUser] = useState<AdminUser>({ isAuthenticated: false, role: null });
   const [password, setPassword] = useState('');
   const [showPasswordInput, setShowPasswordInput] = useState(false);
@@ -86,8 +86,13 @@ export default function Admin({ onBack }: { onBack?: () => void }) {
     setSelectedSection(null);
   };
 
-  const handleButtonClick = (action: string) => {
-    console.log(`Action: ${action}`);
+  const handleButtonClick = (sectionId: string, action: string) => {
+    if (sectionId === 'stores' && action === 'create') {
+      onNavigate?.('stores-management');
+    } else if (sectionId === 'stores' && action === 'view') {
+      onNavigate?.('stores-showcase');
+    }
+    // سيتم إضافة الأقسام الأخرى لاحقاً
   };
 
   // شاشة تسجيل الدخول
@@ -180,7 +185,7 @@ export default function Admin({ onBack }: { onBack?: () => void }) {
             {section.buttons.map((btn, idx) => (
               <button
                 key={idx}
-                onClick={() => handleButtonClick(btn.action)}
+                onClick={() => handleButtonClick(section.id, btn.action)}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg"
               >
                 {btn.label}
@@ -242,8 +247,8 @@ export default function Admin({ onBack }: { onBack?: () => void }) {
                 <span className="text-5xl">{section.icon}</span>
               </div>
             </button>
-          ))}
-        </div>
+            ))}
+          </div>
 
         {/* زر العودة للرئيسية */}
         {onBack && (

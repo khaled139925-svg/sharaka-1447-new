@@ -60,7 +60,7 @@ export const appRouter = router({
     getByStore: publicProcedure
       .input(z.object({ storeId: z.number() }))
       .query(async ({ input }) => {
-        const result = await db.getStoreProducts(input.storeId);
+        const result = await db.getProductsByStore(input.storeId);
         return result || [];
       }),
 

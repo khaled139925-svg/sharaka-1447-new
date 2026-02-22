@@ -19,7 +19,7 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
   const [ownerName, setOwnerName] = useState('');
   const [ownerEmail, setOwnerEmail] = useState('');
   const [ownerPhone, setOwnerPhone] = useState('');
-  const [storePointsRatio, setStorePointsRatio] = useState('');
+  const [storePointsRatio, setStorePointsRatio] = useState('10');
   
   const [products, setProducts] = useState<Product[]>([]);
   const [showAddProduct, setShowAddProduct] = useState(false);
@@ -113,7 +113,7 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
       ownerName,
       ownerEmail,
       ownerPhone,
-      pointsRatio: parseFloat(storePointsRatio) || 0.1,
+      pointsRatio: parseFloat(storePointsRatio) / 100 || 0.1,
       products
     };
 
@@ -179,7 +179,7 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
                   setStoreName(scrapedStore.name);
                   setStoreDescription(scrapedStore.description);
                   setStoreCategory(scrapedStore.category);
-                  setStorePointsRatio(scrapedStore.pointsRatio.toString());
+                  setStorePointsRatio((scrapedStore.pointsRatio * 100).toString());
                   setStoreLogoUrl(scrapedStore.logo);
                   setOwnerName(scrapedStore.ownerName);
                   setOwnerEmail(scrapedStore.ownerEmail);
@@ -258,15 +258,18 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
                 </select>
               </div>
               <div>
-                <label className="block text-right font-semibold text-gray-700 mb-2">نسبة النقاط</label>
+                <label className="block text-right font-semibold text-gray-700 mb-2">💰 نسبة النقاط (%)</label>
                 <input
                   type="number"
                   value={storePointsRatio}
                   onChange={(e) => setStorePointsRatio(e.target.value)}
-                  placeholder="0.1"
-                  step="0.01"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  placeholder="10"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  className="w-full px-4 py-2 border border-green-300 rounded-lg focus:outline-none focus:border-green-500 bg-green-50"
                 />
+                <p className="text-xs text-green-600 mt-1">مثال: 10 = 10% من سعر المنتج</p>
               </div>
             </div>
 

@@ -1,4 +1,4 @@
-import { mysqlTable, varchar, text, int, decimal, datetime, boolean, enum as mysqlEnum } from 'drizzle-orm/mysql-core';
+import { mysqlTable, varchar, text, int, decimal, boolean, timestamp, mysqlEnum } from 'drizzle-orm/mysql-core';
 import { relations } from 'drizzle-orm';
 
 // جدول المستشارين
@@ -15,8 +15,8 @@ export const consultants = mysqlTable('consultants', {
   phone: varchar('phone', { length: 20 }).notNull(),
   zohoDuration: int('zoho_duration').default(60),
   isActive: boolean('is_active').default(true),
-  createdAt: datetime('created_at').defaultNow(),
-  updatedAt: datetime('updated_at').defaultNow().onUpdateNow(),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
 });
 
 // جدول الحجوزات
@@ -31,8 +31,8 @@ export const bookings = mysqlTable('bookings', {
   bookingTime: varchar('booking_time', { length: 20 }).notNull(),
   status: mysqlEnum('status', ['pending', 'confirmed', 'completed', 'cancelled']).default('pending'),
   notes: text('notes'),
-  createdAt: datetime('created_at').defaultNow(),
-  updatedAt: datetime('updated_at').defaultNow().onUpdateNow(),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
 });
 
 // جدول المتاجر
@@ -51,8 +51,8 @@ export const stores = mysqlTable('stores', {
   rating: decimal('rating', { precision: 3, scale: 1 }).default('0'),
   reviewCount: int('review_count').default(0),
   isActive: boolean('is_active').default(true),
-  createdAt: datetime('created_at').defaultNow(),
-  updatedAt: datetime('updated_at').defaultNow().onUpdateNow(),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
 });
 
 // جدول المنتجات
@@ -66,8 +66,35 @@ export const products = mysqlTable('products', {
   category: varchar('category', { length: 100 }).notNull(),
   stock: int('stock').default(0),
   isActive: boolean('is_active').default(true),
-  createdAt: datetime('created_at').defaultNow(),
-  updatedAt: datetime('updated_at').defaultNow().onUpdateNow(),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
+});
+
+// جدول العروض والخصومات
+export const offers = mysqlTable('offers', {
+  id: int('id').primaryKey().autoincrement(),
+  storeId: int('store_id').notNull(),
+  productId: int('product_id'),
+  title: varchar('title', { length: 255 }).notNull(),
+  description: text('description'),
+  discountType: mysqlEnum('discount_type', ['percentage', 'fixed']).default('percentage'),
+  discountValue: decimal('discount_value', { precision: 10, scale: 2 }).notNull(),
+  startDate: timestamp('start_date').notNull(),
+  endDate: timestamp('end_date').notNull(),
+  isActive: boolean('is_active').default(true),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
+});
+
+// جدول تفاصيل الطلبات
+export const orderItems = mysqlTable('order_items', {
+  id: int('id').primaryKey().autoincrement(),
+  orderId: int('order_id').notNull(),
+  productId: int('product_id').notNull(),
+  quantity: int('quantity').notNull(),
+  unitPrice: decimal('unit_price', { precision: 10, scale: 2 }).notNull(),
+  totalPrice: decimal('total_price', { precision: 10, scale: 2 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
 });
 
 // جدول المستخدمين والنقاط
@@ -80,8 +107,8 @@ export const users = mysqlTable('users', {
   balance: decimal('balance', { precision: 10, scale: 2 }).default('0'),
   role: mysqlEnum('role', ['user', 'admin']).default('user'),
   isActive: boolean('is_active').default(true),
-  createdAt: datetime('created_at').defaultNow(),
-  updatedAt: datetime('updated_at').defaultNow().onUpdateNow(),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
 });
 
 // جدول الطلبات
@@ -92,8 +119,8 @@ export const orders = mysqlTable('orders', {
   totalPrice: decimal('total_price', { precision: 10, scale: 2 }).notNull(),
   pointsEarned: int('points_earned').default(0),
   status: mysqlEnum('status', ['pending', 'processing', 'completed', 'cancelled']).default('pending'),
-  createdAt: datetime('created_at').defaultNow(),
-  updatedAt: datetime('updated_at').defaultNow().onUpdateNow(),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
 });
 
 // جدول رسائل التواصل
@@ -105,7 +132,7 @@ export const contactMessages = mysqlTable('contact_messages', {
   subject: varchar('subject', { length: 500 }).notNull(),
   message: text('message').notNull(),
   status: mysqlEnum('status', ['new', 'read', 'replied']).default('new'),
-  createdAt: datetime('created_at').defaultNow(),
+  createdAt: timestamp('created_at').defaultNow(),
 });
 
 // العلاقات
@@ -132,7 +159,7 @@ export const productsRelations = relations(products, ({ one }) => ({
   }),
 }));
 
-export const ordersRelations = relations(orders, ({ one }) => ({
+export const ordersRelations = relations(orders, ({ one, many }) => ({
   user: one(users, {
     fields: [orders.userId],
     references: [users.id],
@@ -140,5 +167,28 @@ export const ordersRelations = relations(orders, ({ one }) => ({
   store: one(stores, {
     fields: [orders.storeId],
     references: [stores.id],
+  }),
+  items: many(orderItems),
+}));
+
+export const offersRelations = relations(offers, ({ one }) => ({
+  store: one(stores, {
+    fields: [offers.storeId],
+    references: [stores.id],
+  }),
+  product: one(products, {
+    fields: [offers.productId],
+    references: [products.id],
+  }),
+}));
+
+export const orderItemsRelations = relations(orderItems, ({ one }) => ({
+  order: one(orders, {
+    fields: [orderItems.orderId],
+    references: [orders.id],
+  }),
+  product: one(products, {
+    fields: [orderItems.productId],
+    references: [products.id],
   }),
 }));

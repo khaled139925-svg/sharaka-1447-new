@@ -350,3 +350,8 @@
 [2026-02-22T18:33:52.625Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
 [2026-02-22T18:33:53.089Z] [OAuth] Initialized with baseURL: https://api.manus.im
 [2026-02-22T18:33:53.090Z] Server running on http://localhost:3000/
+[2026-02-22T18:48:36.177Z] 1:48:36 PM [tsx] change in ./server/_core/index.ts Restarting...
+[2026-02-22T18:48:36.178Z] SIGTERM received, shutting down gracefully
+[2026-02-22T18:48:36.178Z] Server closed
+[2026-02-22T18:48:36.523Z] c[OAuth] Initialized with baseURL: https://api.manus.im
+[2026-02-22T18:48:36.524Z] Server running on http://localhost:3000/

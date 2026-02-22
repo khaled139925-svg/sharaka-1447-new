@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
+import { setupUploadRoutes } from './upload';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -9,6 +10,10 @@ const DIST_DIR = path.join(process.cwd(), 'dist');
 // Middleware
 app.use(express.json());
 app.use(express.static(DIST_DIR));
+app.use(express.static(path.join(process.cwd(), 'public')));
+
+// Setup upload routes
+setupUploadRoutes(app);
 
 // API Routes
 app.get('/api/health', (req, res) => {

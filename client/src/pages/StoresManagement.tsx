@@ -114,15 +114,12 @@ export default function StoresManagement({ onBack, onNavigate }: { onBack: () =>
                 {/* Action Buttons */}
                 <div className="flex gap-3 pt-4">
                   <Button
-                    onClick={() => onNavigate(`store-detail-${store.id}`)}
+                    onClick={() => onNavigate('store-detail')}
                     className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold"
                   >
                     عرض المتجر
                   </Button>
-                  <Button 
-                    onClick={() => onNavigate(`edit-store-${store.id}`)}
-                    className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-semibold"
-                  >
+                  <Button className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-semibold">
                     تعديل
                   </Button>
                   <Button className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg font-semibold">

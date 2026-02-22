@@ -96,26 +96,13 @@ export function StoresProvider({ children }: { children: React.ReactNode }) {
 
   // تحميل البيانات من localStorage عند التحميل
   useEffect(() => {
-    const savedStores = localStorage.getItem('sharaka_stores');
-    const savedCart = localStorage.getItem('sharaka_cart');
-
-    if (savedStores) {
-      try {
-        let parsedStores = JSON.parse(savedStores);
-        // تنظيف البيانات القديمة: إزالة كلمة "مستنسخ" من جميع المتاجر المحفوظة
-        parsedStores = parsedStores.map((store: Store) => ({
-          ...store,
-          name: store.name.replace(/مستنسخ|cloned|clone/gi, '').trim() || store.name,
-          description: store.description.replace(/مستنسخ|cloned|clone/gi, '').trim() || store.description,
-        }));
-        setStores(parsedStores);
-      } catch (error) {
-        console.error('خطأ في تحميل المتاجر:', error);
-        setStores(DEFAULT_STORES);
-      }
-    } else {
-      setStores(DEFAULT_STORES);
-    }
+    // حذف البيانات القديمة التي تحتوي على كلمة "مستنسخ"
+    localStorage.removeItem('sharaka_stores');
+    localStorage.removeItem('sharaka_cart');
+    
+    // تحميل البيانات الافتراضية النظيفة فقط
+    setStores(DEFAULT_STORES);
+    setCart([]);
 
     if (savedCart) {
       try {

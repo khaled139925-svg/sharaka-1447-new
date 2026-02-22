@@ -100,7 +100,7 @@ export async function scrapeStoreFromUrl(url: string) {
       id: Date.now().toString(),
       name: title.trim(),
       description: description.trim(),
-      category: 'مستنسخ',
+      category: '', // المستخدم سيختار الفئة بنفسه
       logo: logoUrl,
       ownerName: 'مالك الموقع الأصلي',
       ownerEmail: 'contact@example.com',

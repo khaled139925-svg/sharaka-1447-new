@@ -238,14 +238,24 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-right font-semibold text-gray-700 mb-2">الفئة</label>
-                <input
-                  type="text"
+                <select
                   value={storeCategory}
                   onChange={(e) => setStoreCategory(e.target.value)}
-                  placeholder="أدخل فئة المتجر"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                   dir="rtl"
-                />
+                >
+                  <option value="">اختر الفئة</option>
+                  <option value="إلكترونيات">إلكترونيات</option>
+                  <option value="ملابس">ملابس</option>
+                  <option value="طعام">طعام</option>
+                  <option value="العناية بالبشرة">العناية بالبشرة</option>
+                  <option value="الرياضة">الرياضة</option>
+                  <option value="الكتب">الكتب</option>
+                  <option value="الأثاث">الأثاث</option>
+                  <option value="الديكور">الديكور</option>
+                  <option value="الخدمات">الخدمات</option>
+                  <option value="أخرى">أخرى</option>
+                </select>
               </div>
               <div>
                 <label className="block text-right font-semibold text-gray-700 mb-2">نسبة النقاط</label>

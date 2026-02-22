@@ -360,3 +360,8 @@
 [2026-02-22T19:39:15.229Z] Server closed
 [2026-02-22T19:39:15.809Z] c[OAuth] Initialized with baseURL: https://api.manus.im
 [2026-02-22T19:39:15.809Z] Server running on http://localhost:3000/
+[2026-02-22T19:46:40.839Z] 2:46:40 PM [tsx] change in ./server/_core/scrapeStore.ts Restarting...
+[2026-02-22T19:46:40.840Z] SIGTERM received, shutting down gracefully
+[2026-02-22T19:46:40.841Z] Server closed
+[2026-02-22T19:46:41.380Z] c[OAuth] Initialized with baseURL: https://api.manus.im
+[2026-02-22T19:46:41.381Z] Server running on http://localhost:3000/

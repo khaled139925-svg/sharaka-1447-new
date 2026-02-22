@@ -1,17 +1,31 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { useStores, Product } from '@/contexts/StoresContext';
+import { X, Plus } from 'lucide-react';
 
 export default function CreateStore({ onNavigate }: { onNavigate: (page: string) => void }) {
+  const { addStore } = useStores();
+  
   const [storeName, setStoreName] = useState('');
   const [storeDescription, setStoreDescription] = useState('');
   const [storeCategory, setStoreCategory] = useState('');
   const [storeLogoUrl, setStoreLogoUrl] = useState('');
-  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [ownerName, setOwnerName] = useState('');
+  const [ownerEmail, setOwnerEmail] = useState('');
+  const [ownerPhone, setOwnerPhone] = useState('');
+  
+  const [products, setProducts] = useState<Product[]>([]);
+  const [showAddProduct, setShowAddProduct] = useState(false);
+  
+  const [productName, setProductName] = useState('');
+  const [productPrice, setProductPrice] = useState('');
+  const [productPoints, setProductPoints] = useState('');
+  const [productImage, setProductImage] = useState('');
+  const [productDescription, setProductDescription] = useState('');
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setLogoFile(file);
       const reader = new FileReader();
       reader.onload = (event) => {
         setStoreLogoUrl(event.target?.result as string);
@@ -20,18 +34,55 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string)
     }
   };
 
-  const handleCreateStore = () => {
-    if (!storeName || !storeDescription || !storeCategory || !storeLogoUrl) {
-      alert('يرجى ملء جميع الحقول');
+  const handleAddProduct = () => {
+    if (!productName || !productPrice || !productPoints || !productImage || !productDescription) {
+      alert('يرجى ملء جميع حقول المنتج');
       return;
     }
 
-    // هنا سيتم حفظ المتجر في قاعدة البيانات
-    console.log({
-      storeName,
-      storeDescription,
-      storeCategory,
-      storeLogoUrl,
+    const newProduct: Product = {
+      id: Date.now().toString(),
+      name: productName,
+      price: parseFloat(productPrice),
+      points: parseFloat(productPoints),
+      image: productImage,
+      description: productDescription,
+    };
+
+    setProducts([...products, newProduct]);
+    setProductName('');
+    setProductPrice('');
+    setProductPoints('');
+    setProductImage('');
+    setProductDescription('');
+    setShowAddProduct(false);
+  };
+
+  const handleRemoveProduct = (id: string) => {
+    setProducts(products.filter((p) => p.id !== id));
+  };
+
+  const handleCreateStore = () => {
+    if (!storeName || !storeDescription || !storeCategory || !storeLogoUrl || !ownerName || !ownerEmail || !ownerPhone) {
+      alert('يرجى ملء جميع بيانات المتجر');
+      return;
+    }
+
+    if (products.length === 0) {
+      alert('يرجى إضافة منتج واحد على الأقل');
+      return;
+    }
+
+    addStore({
+      id: Date.now().toString(),
+      name: storeName,
+      description: storeDescription,
+      category: storeCategory,
+      logo: storeLogoUrl,
+      ownerName,
+      ownerEmail,
+      ownerPhone,
+      products,
     });
 
     alert('تم إنشاء المتجر بنجاح!');
@@ -40,7 +91,7 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-right text-gray-800">إنشاء متجر جديد</h1>
@@ -53,94 +104,260 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string)
         </div>
 
         {/* Form Card */}
-        <div className="bg-white rounded-lg shadow-lg p-8 space-y-6">
-          {/* Store Logo Upload */}
-          <div className="space-y-3">
-            <label className="block text-lg font-semibold text-gray-700 text-right">
-              شعار المتجر
-            </label>
-            <div className="flex flex-col items-center justify-center border-2 border-dashed border-blue-300 rounded-lg p-6 cursor-pointer hover:bg-blue-50 transition">
+        <div className="bg-white rounded-lg shadow-lg p-8 space-y-8">
+          {/* Section 1: Store Info */}
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-right text-gray-800 border-b-2 border-blue-500 pb-3">
+              📋 بيانات المتجر
+            </h2>
+
+            {/* Store Logo */}
+            <div className="space-y-3">
+              <label className="block text-lg font-semibold text-gray-700 text-right">شعار المتجر</label>
+              <div className="flex flex-col items-center justify-center border-2 border-dashed border-blue-300 rounded-lg p-6 cursor-pointer hover:bg-blue-50 transition">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoUpload}
+                  className="hidden"
+                  id="logo-upload"
+                />
+                <label htmlFor="logo-upload" className="cursor-pointer text-center w-full">
+                  {storeLogoUrl ? (
+                    <div className="space-y-3">
+                      <img
+                        src={storeLogoUrl}
+                        alt="Store Logo"
+                        className="w-32 h-32 object-cover rounded-lg mx-auto"
+                      />
+                      <p className="text-sm text-blue-600">اضغط لتغيير الشعار</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-2xl">📸</p>
+                      <p className="text-gray-600">اضغط لتحميل شعار المتجر</p>
+                    </div>
+                  )}
+                </label>
+              </div>
+            </div>
+
+            {/* Store Name */}
+            <div className="space-y-2">
+              <label className="block text-lg font-semibold text-gray-700 text-right">اسم المتجر</label>
               <input
-                type="file"
-                accept="image/*"
-                onChange={handleLogoUpload}
-                className="hidden"
-                id="logo-upload"
+                type="text"
+                value={storeName}
+                onChange={(e) => setStoreName(e.target.value)}
+                placeholder="أدخل اسم المتجر"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-right"
+                dir="rtl"
               />
-              <label htmlFor="logo-upload" className="cursor-pointer text-center w-full">
-                {storeLogoUrl ? (
-                  <div className="space-y-3">
-                    <img
-                      src={storeLogoUrl}
-                      alt="Store Logo"
-                      className="w-32 h-32 object-cover rounded-lg mx-auto"
-                    />
-                    <p className="text-sm text-blue-600">اضغط لتغيير الشعار</p>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <p className="text-2xl">📸</p>
-                    <p className="text-gray-600">اضغط لتحميل شعار المتجر</p>
-                  </div>
-                )}
-              </label>
+            </div>
+
+            {/* Store Description */}
+            <div className="space-y-2">
+              <label className="block text-lg font-semibold text-gray-700 text-right">وصف المتجر</label>
+              <textarea
+                value={storeDescription}
+                onChange={(e) => setStoreDescription(e.target.value)}
+                placeholder="أدخل وصف المتجر"
+                rows={3}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-right resize-none"
+                dir="rtl"
+              />
+            </div>
+
+            {/* Store Category */}
+            <div className="space-y-2">
+              <label className="block text-lg font-semibold text-gray-700 text-right">فئة المتجر</label>
+              <select
+                value={storeCategory}
+                onChange={(e) => setStoreCategory(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-right"
+                dir="rtl"
+              >
+                <option value="">اختر الفئة</option>
+                <option value="إلكترونيات">إلكترونيات</option>
+                <option value="ملابس">ملابس</option>
+                <option value="ديكور">ديكور</option>
+                <option value="كتب">كتب</option>
+                <option value="أغذية">أغذية</option>
+                <option value="أثاث">أثاث</option>
+                <option value="أخرى">أخرى</option>
+              </select>
             </div>
           </div>
 
-          {/* Store Name */}
-          <div className="space-y-2">
-            <label className="block text-lg font-semibold text-gray-700 text-right">
-              اسم المتجر
-            </label>
-            <input
-              type="text"
-              value={storeName}
-              onChange={(e) => setStoreName(e.target.value)}
-              placeholder="أدخل اسم المتجر"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-right"
-              dir="rtl"
-            />
+          {/* Section 2: Owner Info */}
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-right text-gray-800 border-b-2 border-blue-500 pb-3">
+              👤 بيانات المالك
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="block text-lg font-semibold text-gray-700 text-right">اسم المالك</label>
+                <input
+                  type="text"
+                  value={ownerName}
+                  onChange={(e) => setOwnerName(e.target.value)}
+                  placeholder="أدخل اسم المالك"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-right"
+                  dir="rtl"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-lg font-semibold text-gray-700 text-right">البريد الإلكتروني</label>
+                <input
+                  type="email"
+                  value={ownerEmail}
+                  onChange={(e) => setOwnerEmail(e.target.value)}
+                  placeholder="أدخل البريد الإلكتروني"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-right"
+                  dir="rtl"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-lg font-semibold text-gray-700 text-right">رقم الهاتف</label>
+                <input
+                  type="tel"
+                  value={ownerPhone}
+                  onChange={(e) => setOwnerPhone(e.target.value)}
+                  placeholder="أدخل رقم الهاتف"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-right"
+                  dir="rtl"
+                />
+              </div>
+            </div>
           </div>
 
-          {/* Store Description */}
-          <div className="space-y-2">
-            <label className="block text-lg font-semibold text-gray-700 text-right">
-              وصف المتجر
-            </label>
-            <textarea
-              value={storeDescription}
-              onChange={(e) => setStoreDescription(e.target.value)}
-              placeholder="أدخل وصف المتجر"
-              rows={4}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-right resize-none"
-              dir="rtl"
-            />
-          </div>
+          {/* Section 3: Products */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-right text-gray-800 border-b-2 border-blue-500 pb-3 flex-1">
+                🛍️ الأصناف والمنتجات
+              </h2>
+              <Button
+                onClick={() => setShowAddProduct(!showAddProduct)}
+                className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+              >
+                <Plus className="w-5 h-5" />
+                إضافة منتج
+              </Button>
+            </div>
 
-          {/* Store Category */}
-          <div className="space-y-2">
-            <label className="block text-lg font-semibold text-gray-700 text-right">
-              فئة المتجر
-            </label>
-            <select
-              value={storeCategory}
-              onChange={(e) => setStoreCategory(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-right"
-              dir="rtl"
-            >
-              <option value="">اختر الفئة</option>
-              <option value="إلكترونيات">إلكترونيات</option>
-              <option value="ملابس">ملابس</option>
-              <option value="ديكور">ديكور</option>
-              <option value="كتب">كتب</option>
-              <option value="أغذية">أغذية</option>
-              <option value="أثاث">أثاث</option>
-              <option value="أخرى">أخرى</option>
-            </select>
+            {/* Add Product Form */}
+            {showAddProduct && (
+              <div className="bg-gray-50 rounded-lg p-6 space-y-4 border-2 border-green-300">
+                <h3 className="text-xl font-bold text-right text-gray-800">إضافة منتج جديد</h3>
+
+                <div className="space-y-2">
+                  <label className="block text-lg font-semibold text-gray-700 text-right">اسم المنتج</label>
+                  <input
+                    type="text"
+                    value={productName}
+                    onChange={(e) => setProductName(e.target.value)}
+                    placeholder="أدخل اسم المنتج"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-right"
+                    dir="rtl"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="block text-lg font-semibold text-gray-700 text-right">السعر</label>
+                    <input
+                      type="number"
+                      value={productPrice}
+                      onChange={(e) => setProductPrice(e.target.value)}
+                      placeholder="أدخل السعر"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-right"
+                      dir="rtl"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-lg font-semibold text-gray-700 text-right">النقاط</label>
+                    <input
+                      type="number"
+                      value={productPoints}
+                      onChange={(e) => setProductPoints(e.target.value)}
+                      placeholder="أدخل النقاط"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-right"
+                      dir="rtl"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-lg font-semibold text-gray-700 text-right">صورة المنتج</label>
+                  <input
+                    type="text"
+                    value={productImage}
+                    onChange={(e) => setProductImage(e.target.value)}
+                    placeholder="أدخل رابط صورة المنتج"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-right"
+                    dir="rtl"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-lg font-semibold text-gray-700 text-right">وصف المنتج</label>
+                  <textarea
+                    value={productDescription}
+                    onChange={(e) => setProductDescription(e.target.value)}
+                    placeholder="أدخل وصف المنتج"
+                    rows={2}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-right resize-none"
+                    dir="rtl"
+                  />
+                </div>
+
+                <div className="flex gap-3">
+                  <Button
+                    onClick={handleAddProduct}
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold"
+                  >
+                    إضافة المنتج
+                  </Button>
+                  <Button
+                    onClick={() => setShowAddProduct(false)}
+                    className="flex-1 bg-gray-400 hover:bg-gray-500 text-white py-3 rounded-lg font-semibold"
+                  >
+                    إلغاء
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Products List */}
+            <div className="space-y-3">
+              {products.length === 0 ? (
+                <p className="text-center text-gray-500 py-8">لم تضف أي منتجات بعد</p>
+              ) : (
+                products.map((product) => (
+                  <div key={product.id} className="bg-gray-50 rounded-lg p-4 flex items-center justify-between">
+                    <button
+                      onClick={() => handleRemoveProduct(product.id)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <X className="w-6 h-6" />
+                    </button>
+                    <div className="flex-1 text-right pr-4">
+                      <p className="font-bold text-gray-800">{product.name}</p>
+                      <p className="text-sm text-gray-600">{product.price} ر.س | {product.points} نقطة</p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-4 pt-6">
+          <div className="flex gap-4 pt-6 border-t-2 border-gray-200">
             <Button
               onClick={handleCreateStore}
               className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold text-lg"

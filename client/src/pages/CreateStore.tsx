@@ -322,12 +322,12 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
                 />
 
                 <div className="space-y-2">
-                  <label className="block text-lg font-semibold text-gray-700 text-right">الكمية المتاحة</label>
+                  <label className="block text-lg font-semibold text-gray-700 text-right">الكمية</label>
                   <input
                     type="number"
                     value={productQuantity}
                     onChange={(e) => setProductQuantity(e.target.value)}
-                    placeholder="أدخل الكمية المتاحة"
+                    placeholder="أدخل الكمية"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-right"
                     dir="rtl"
                     min="1"

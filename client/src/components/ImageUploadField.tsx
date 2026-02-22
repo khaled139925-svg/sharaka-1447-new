@@ -1,6 +1,5 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
-import { useImageUpload } from '@/hooks/useImageUpload';
 import { Button } from '@/components/ui/button';
 
 interface ImageUploadFieldProps {
@@ -17,23 +16,63 @@ export function ImageUploadField({
   required = false,
 }: ImageUploadFieldProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { uploading, error, imageUrl, handleFileSelect, resetUpload } = useImageUpload();
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const displayUrl = imageUrl || value;
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    await handleFileSelect(e);
-    if (imageUrl) {
-      onChange?.(imageUrl);
+    // التحقق من نوع الملف
+    if (!file.type.startsWith('image/')) {
+      setError('يرجى اختيار صورة فقط');
+      return;
+    }
+
+    // التحقق من حجم الملف
+    if (file.size > 5 * 1024 * 1024) {
+      setError('حجم الصورة كبير جداً. الحد الأقصى 5MB');
+      return;
+    }
+
+    setUploading(true);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'فشل تحميل الصورة');
+      }
+
+      const data = await response.json();
+      // تأكد من أن الـ URL موجود
+      if (data.url) {
+        onChange?.(data.url);
+      } else {
+        throw new Error('لم يتم الحصول على رابط الصورة');
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'حدث خطأ في تحميل الصورة';
+      setError(message);
+    } finally {
+      setUploading(false);
     }
   };
 
   const handleRemove = () => {
-    resetUpload();
     onChange?.('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+    setError(null);
   };
 
   return (
@@ -43,22 +82,23 @@ export function ImageUploadField({
         {required && <span className="text-red-500 ml-1">*</span>}
       </label>
 
-      <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer"
+      <div
+        className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer"
         onClick={() => fileInputRef.current?.click()}
       >
         <input
           ref={fileInputRef}
           type="file"
           accept="image/*"
-          onChange={handleChange}
+          onChange={handleFileSelect}
           disabled={uploading}
           className="hidden"
         />
 
-        {displayUrl ? (
+        {value ? (
           <div className="space-y-3">
             <img
-              src={displayUrl}
+              src={value}
               alt="معاينة الصورة"
               className="w-32 h-32 object-cover rounded-lg mx-auto"
             />

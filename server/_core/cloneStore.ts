@@ -55,11 +55,11 @@ export async function cloneStoreFromUrl(url: string): Promise<ClonedStoreData> {
 function extractStoreData(html: string, baseUrl: string): ClonedStoreData {
   // استخراج اسم المتجر
   const nameMatch = html.match(/<title>(.*?)<\/title>/i);
-  const name = nameMatch ? nameMatch[1].trim() : 'متجر مستنسخ';
+  const name = nameMatch ? nameMatch[1].trim() : 'متجر جديد';
 
   // استخراج الوصف
   const descriptionMatch = html.match(/<meta\s+name="description"\s+content="([^"]*)"/i);
-  const description = descriptionMatch ? descriptionMatch[1] : 'متجر تم استنساخه';
+  const description = descriptionMatch ? descriptionMatch[1] : 'وصف المتجر';
 
   // استخراج الصورة (الشعار)
   const logoMatch = html.match(/<img[^>]*src="([^"]*)"[^>]*(?:alt="logo"|class="[^"]*logo[^"]*")[^>]*>/i) ||
@@ -113,8 +113,8 @@ function extractStoreData(html: string, baseUrl: string): ClonedStoreData {
     description: description.substring(0, 200),
     logo,
     products: products.slice(0, 20), // تحديد الحد الأقصى للمنتجات
-    category: 'عام',
-    pointsRatio: 1,
+    category: '',
+    pointsRatio: 0.1,
   };
 }
 

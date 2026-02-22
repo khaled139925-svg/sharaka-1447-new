@@ -24,23 +24,27 @@ export async function scrapeStoreFromUrl(url: string) {
     const $ = cheerio.load(html);
 
     // استخراج البيانات الأساسية
-    const title = $('title').text() || $('h1').first().text() || 'متجر مستنسخ';
+    const title = $('title').text() || $('h1').first().text() || 'متجر جديد';
     const description = 
       $('meta[name="description"]').attr('content') ||
       $('meta[property="og:description"]').attr('content') ||
       $('p').first().text() ||
-      'تم استنساخ هذا المتجر من موقع خارجي';
+      'وصف المتجر';
 
     // استخراج الصورة الرئيسية
     let logoUrl = 
       $('meta[property="og:image"]').attr('content') ||
       $('img').first().attr('src') ||
-      'https://via.placeholder.com/200x200?text=' + encodeURIComponent(title);
+      '';
 
     // تحويل الروابط النسبية إلى روابط مطلقة
     if (logoUrl && !logoUrl.startsWith('http')) {
-      const baseUrl = new URL(url);
-      logoUrl = new URL(logoUrl, baseUrl.origin).href;
+      try {
+        const baseUrl = new URL(url);
+        logoUrl = new URL(logoUrl, baseUrl.origin).href;
+      } catch (e) {
+        logoUrl = '';
+      }
     }
 
     // استخراج المنتجات من الموقع

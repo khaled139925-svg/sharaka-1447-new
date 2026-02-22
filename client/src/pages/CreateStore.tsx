@@ -142,17 +142,37 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
               dir="rtl"
             />
             <Button
-              onClick={() => {
+              onClick={async () => {
                 if (!cloneUrl.trim()) {
                   alert('يرجى إدخال رابط المتجر');
                   return;
                 }
-                setStoreName('متجر مستنسخ - ' + Date.now());
-                setStoreDescription('تم استنساخ هذا المتجر من رابط خارجي');
-                setStoreCategory('عام');
-                setStorePointsRatio('1');
-                setCloneUrl('');
-                alert('تم تحميل بيانات المتجر بنجاح!');
+                try {
+                  // محاولة جلب بيانات المتجر من الرابط
+                  const response = await fetch(cloneUrl);
+                  if (!response.ok) {
+                    throw new Error('لم يتم العثور على الرابط');
+                  }
+                  const html = await response.text();
+                  
+                  // استخراج البيانات من HTML
+                  const parser = new DOMParser();
+                  const doc = parser.parseFromString(html, 'text/html');
+                  
+                  // استخراج العنوان والوصف
+                  const title = doc.querySelector('title')?.textContent || 'متجر مستنسخ';
+                  const description = doc.querySelector('meta[name="description"]')?.getAttribute('content') || 'تم استنساخ هذا المتجر من رابط خارجي';
+                  
+                  // تعيين البيانات
+                  setStoreName(title);
+                  setStoreDescription(description);
+                  setStoreCategory('عام');
+                  setStorePointsRatio('1');
+                  setCloneUrl('');
+                  alert('تم تحميل بيانات المتجر بنجاح!');
+                } catch (error) {
+                  alert('خطأ في جلب بيانات المتجر: ' + (error instanceof Error ? error.message : 'خطأ غير معروف'));
+                }
               }}
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold whitespace-nowrap"
             >

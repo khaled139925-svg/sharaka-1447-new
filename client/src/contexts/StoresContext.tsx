@@ -101,7 +101,14 @@ export function StoresProvider({ children }: { children: React.ReactNode }) {
 
     if (savedStores) {
       try {
-        setStores(JSON.parse(savedStores));
+        let parsedStores = JSON.parse(savedStores);
+        // تنظيف البيانات القديمة: إزالة كلمة "مستنسخ" من جميع المتاجر المحفوظة
+        parsedStores = parsedStores.map((store: Store) => ({
+          ...store,
+          name: store.name.replace(/مستنسخ|cloned|clone/gi, '').trim() || store.name,
+          description: store.description.replace(/مستنسخ|cloned|clone/gi, '').trim() || store.description,
+        }));
+        setStores(parsedStores);
       } catch (error) {
         console.error('خطأ في تحميل المتاجر:', error);
         setStores(DEFAULT_STORES);

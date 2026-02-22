@@ -3,13 +3,14 @@ import Admin from '@/pages/Admin';
 import StoresManagement from '@/pages/StoresManagement';
 import StoresShowcase from '@/pages/StoresShowcase';
 import CreateStore from '@/pages/CreateStore';
+import CloneStore from '@/pages/CloneStore';
 import StoreDetail from '@/pages/StoreDetail';
 import ProductDetail from '@/pages/ProductDetail';
 import { useState } from 'react';
 import { StoresProvider } from '@/contexts/StoresContext';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<'home' | 'admin' | 'stores-management' | 'stores-showcase' | 'create-store' | 'store-detail' | 'product-detail'>('home');
+  const [currentPage, setCurrentPage] = useState<'home' | 'admin' | 'stores-management' | 'stores-showcase' | 'create-store' | 'clone-store' | 'store-detail' | 'product-detail'>('home');
   const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
 
@@ -36,6 +37,9 @@ function App() {
         )}
         {currentPage === 'create-store' && (
           <CreateStore onNavigate={handleNavigate} />
+        )}
+        {currentPage === 'clone-store' && (
+          <CloneStore />
         )}
         {currentPage === 'store-detail' && (
           <StoreDetail onNavigate={handleNavigate} storeId={selectedStoreId} />

@@ -42,7 +42,6 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
   };
 
   const handleAddProduct = () => {
-    // التحقق من جميع الحقول
     if (!productName || !productName.trim()) {
       alert('يرجى إدخال اسم المنتج');
       return;
@@ -51,16 +50,8 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
       alert('يرجى إدخال سعر صحيح');
       return;
     }
-    if (!productImage || productImage.trim() === '') {
+    if (!productImage) {
       alert('يرجى تحميل صورة المنتج');
-      return;
-    }
-    if (!productDescription || !productDescription.trim()) {
-      alert('يرجى إدخال وصف المنتج');
-      return;
-    }
-    if (!productQuantity || parseInt(productQuantity) <= 0) {
-      alert('يرجى إدخال كمية صحيحة');
       return;
     }
 
@@ -69,8 +60,9 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
       name: productName,
       price: parseFloat(productPrice),
       image: productImage,
-      description: productDescription,
-      quantity: parseInt(productQuantity),
+      description: productDescription || productName,
+      points: Math.floor(parseFloat(productPrice) * 0.1),
+      quantity: parseInt(productQuantity) || 1
     };
 
     setProducts([...products, newProduct]);
@@ -83,17 +75,32 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
   };
 
   const handleRemoveProduct = (id: string) => {
-    setProducts(products.filter((p) => p.id !== id));
+    setProducts(products.filter(p => p.id !== id));
   };
 
   const handleCreateStore = () => {
-    if (!storeName || !storeDescription || !storeCategory || !storeLogoUrl || !ownerName || !ownerEmail || !ownerPhone || !storePointsRatio) {
-      alert('يرجى ملء جميع بيانات المتجر');
+    if (!storeName.trim()) {
+      alert('يرجى إدخال اسم المتجر');
       return;
     }
-
-    if (products.length === 0) {
-      alert('يرجى إضافة منتج واحد على الأقل');
+    if (!storeDescription.trim()) {
+      alert('يرجى إدخال وصف المتجر');
+      return;
+    }
+    if (!storeCategory.trim()) {
+      alert('يرجى اختيار فئة المتجر');
+      return;
+    }
+    if (!ownerName.trim()) {
+      alert('يرجى إدخال اسم المالك');
+      return;
+    }
+    if (!ownerEmail.trim()) {
+      alert('يرجى إدخال بريد المالك');
+      return;
+    }
+    if (!ownerPhone.trim()) {
+      alert('يرجى إدخال هاتف المالك');
       return;
     }
 
@@ -102,12 +109,12 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
       name: storeName,
       description: storeDescription,
       category: storeCategory,
-      logo: storeLogoUrl,
+      logo: storeLogoUrl || 'https://via.placeholder.com/200x200?text=' + encodeURIComponent(storeName),
       ownerName,
       ownerEmail,
       ownerPhone,
-      pointsRatio: parseFloat(storePointsRatio),
-      products,
+      pointsRatio: parseFloat(storePointsRatio) || 0.1,
+      products
     };
 
     addStore(newStore);
@@ -116,14 +123,14 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-right text-gray-800">إنشاء متجر جديد</h1>
+          <h1 className="text-3xl font-bold text-right text-blue-900">إنشاء متجر جديد</h1>
           <Button
             onClick={() => onNavigate('home')}
-            className="bg-gray-500 hover:bg-gray-600 text-white"
+            className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg"
           >
             العودة
           </Button>
@@ -131,202 +138,179 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
 
         {/* Clone Store Section */}
         <div className="bg-blue-50 rounded-lg border-2 border-blue-300 p-6 mb-8">
-          <h2 className="text-xl font-bold text-right text-blue-900 mb-4">استنسخ متجراً موجوداً</h2>
-          <p className="text-sm text-blue-700 mb-4 text-right">ملاحظة: إذا فشل جلب البيانات من الرابط، يمكنك إدخال البيانات يدويًا في النموذج أدناه</p>
+          <h2 className="text-xl font-bold text-right text-blue-900 mb-4">استنسخ موقعاً خارجياً</h2>
+          <p className="text-sm text-blue-700 mb-4 text-right">أدخل رابط أي موقع وسيتم استنساخه كمتجر جديد تلقائياً (الصور والمنتجات والبيانات)</p>
           <div className="flex gap-2 flex-col sm:flex-row">
             <input
               type="text"
-              placeholder="أدخل رابط المتجر الخارجي (اختياري)"
+              placeholder="أدخل رابط الموقع (مثال: https://example.com)"
               value={cloneUrl}
               onChange={(e) => setCloneUrl(e.target.value)}
               className="flex-1 px-4 py-2 border border-blue-300 rounded-lg focus:outline-none focus:border-blue-500"
               dir="rtl"
+              disabled={cloneLoading}
             />
             <Button
               onClick={async () => {
                 if (!cloneUrl.trim()) {
-                  alert('يرجى إدخال رابط المتجر');
+                  alert('يرجى إدخال رابط الموقع');
                   return;
                 }
                 try {
-                  // محاولة جلب بيانات المتجر من الرابط
-                  const response = await fetch(cloneUrl, {
-                    method: 'GET',
+                  setCloneLoading(true);
+                  setCloneError(null);
+                  
+                  const response = await fetch('/api/scrape-store', {
+                    method: 'POST',
                     headers: {
-                      'Accept': 'text/html',
-                    }
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: cloneUrl })
                   });
+
                   if (!response.ok) {
-                    throw new Error('لم يتم العثور على الرابط أو الموقع لا يسمح بالوصول');
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'فشل استنساخ الموقع');
                   }
-                  const html = await response.text();
-                  
-                  // استخراج البيانات من HTML
-                  const parser = new DOMParser();
-                  const doc = parser.parseFromString(html, 'text/html');
-                  
-                  // استخراج العنوان والوصف
-                  const title = doc.querySelector('title')?.textContent || doc.querySelector('h1')?.textContent || 'متجر مستنسخ';
-                  const description = doc.querySelector('meta[name="description"]')?.getAttribute('content') || doc.querySelector('meta[property="og:description"]')?.getAttribute('content') || 'تم استنساخ هذا المتجر من رابط خارجي';
-                  
-                  // تعيين البيانات
-                  setStoreName(title.trim());
-                  setStoreDescription(description.trim());
-                  setStoreCategory('عام');
-                  setStorePointsRatio('1');
+
+                  const data = await response.json();
+                  const scrapedStore = data.store;
+
+                  setStoreName(scrapedStore.name);
+                  setStoreDescription(scrapedStore.description);
+                  setStoreCategory(scrapedStore.category);
+                  setStorePointsRatio(scrapedStore.pointsRatio.toString());
+                  setStoreLogoUrl(scrapedStore.logo);
+                  setOwnerName(scrapedStore.ownerName);
+                  setOwnerEmail(scrapedStore.ownerEmail);
+                  setOwnerPhone(scrapedStore.ownerPhone);
+                  setProducts(scrapedStore.products);
                   setCloneUrl('');
-                  alert('تم تحميل بيانات المتجر بنجاح! يمكنك الآن تعديل البيانات وإضافة المنتجات');
+                  
+                  alert('✅ تم استنساخ الموقع بنجاح!\n\nالبيانات:\n- الاسم: ' + scrapedStore.name + '\n- المنتجات: ' + scrapedStore.products.length + '\n\nالآن اضغط "إنشاء المتجر" لحفظ المتجر الجديد');
                 } catch (error) {
                   const errorMsg = error instanceof Error ? error.message : 'خطأ غير معروف';
-                  alert('⚠️ لم يتم جلب البيانات من الرابط.\n\nالسبب: ' + errorMsg + '\n\nيمكنك إدخال البيانات يدويًا في النموذج أدناه');
+                  setCloneError(errorMsg);
+                  alert('❌ فشل استنساخ الموقع\n\n' + errorMsg);
+                } finally {
+                  setCloneLoading(false);
                 }
               }}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold whitespace-nowrap"
+              disabled={cloneLoading}
+              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold whitespace-nowrap disabled:bg-gray-400"
             >
-              جرب الاستنساخ
+              {cloneLoading ? <Loader2 className="animate-spin" /> : 'استنسخ الموقع'}
             </Button>
           </div>
+          {cloneError && <p className="text-red-600 text-sm mt-2">خطأ: {cloneError}</p>}
         </div>
 
         {/* Form Card */}
         <div className="bg-white rounded-lg shadow-lg p-8 space-y-8">
           {/* Section 1: Store Info */}
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-right text-gray-800 border-b-2 border-blue-500 pb-3">
-              📋 بيانات المتجر
-            </h2>
-
-            {/* Store Logo */}
-            <div className="space-y-3">
-              <label className="block text-lg font-semibold text-gray-700 text-right">شعار المتجر</label>
-              <div className="flex flex-col items-center justify-center border-2 border-dashed border-blue-300 rounded-lg p-6 cursor-pointer hover:bg-blue-50 transition">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleLogoUpload}
-                  className="hidden"
-                  id="logo-upload"
-                />
-                <label htmlFor="logo-upload" className="cursor-pointer text-center w-full">
-                  {storeLogoUrl ? (
-                    <div className="space-y-3">
-                      <img
-                        src={storeLogoUrl}
-                        alt="Store Logo"
-                        className="w-32 h-32 object-cover rounded-lg mx-auto"
-                      />
-                      <p className="text-sm text-blue-600">اضغط لتغيير الشعار</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <p className="text-2xl">📸</p>
-                      <p className="text-gray-600">اضغط لتحميل شعار المتجر</p>
-                    </div>
-                  )}
-                </label>
-              </div>
-            </div>
-
-            {/* Store Name */}
-            <div className="space-y-2">
-              <label className="block text-lg font-semibold text-gray-700 text-right">اسم المتجر</label>
+            <h2 className="text-2xl font-bold text-right text-gray-800 border-b-2 border-blue-500 pb-3">بيانات المتجر</h2>
+            
+            <div>
+              <label className="block text-right font-semibold text-gray-700 mb-2">اسم المتجر</label>
               <input
                 type="text"
                 value={storeName}
                 onChange={(e) => setStoreName(e.target.value)}
                 placeholder="أدخل اسم المتجر"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-right"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                 dir="rtl"
               />
             </div>
 
-            {/* Store Description */}
-            <div className="space-y-2">
-              <label className="block text-lg font-semibold text-gray-700 text-right">وصف المتجر</label>
+            <div>
+              <label className="block text-right font-semibold text-gray-700 mb-2">وصف المتجر</label>
               <textarea
                 value={storeDescription}
                 onChange={(e) => setStoreDescription(e.target.value)}
                 placeholder="أدخل وصف المتجر"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                 rows={3}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-right resize-none"
                 dir="rtl"
               />
             </div>
 
-            {/* Store Category */}
-            <div className="space-y-2">
-              <label className="block text-lg font-semibold text-gray-700 text-right">فئة المتجر</label>
-              <select
-                value={storeCategory}
-                onChange={(e) => setStoreCategory(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-right"
-                dir="rtl"
-              >
-                <option value="">اختر الفئة</option>
-                <option value="إلكترونيات">إلكترونيات</option>
-                <option value="ملابس">ملابس</option>
-                <option value="ديكور">ديكور</option>
-                <option value="كتب">كتب</option>
-                <option value="أغذية">أغذية</option>
-                <option value="أثاث">أثاث</option>
-                <option value="أخرى">أخرى</option>
-              </select>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-right font-semibold text-gray-700 mb-2">الفئة</label>
+                <input
+                  type="text"
+                  value={storeCategory}
+                  onChange={(e) => setStoreCategory(e.target.value)}
+                  placeholder="أدخل فئة المتجر"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  dir="rtl"
+                />
+              </div>
+              <div>
+                <label className="block text-right font-semibold text-gray-700 mb-2">نسبة النقاط</label>
+                <input
+                  type="number"
+                  value={storePointsRatio}
+                  onChange={(e) => setStorePointsRatio(e.target.value)}
+                  placeholder="0.1"
+                  step="0.01"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                />
+              </div>
             </div>
 
-            {/* Store Points Ratio */}
-            <div className="space-y-2">
-              <label className="block text-lg font-semibold text-gray-700 text-right">نسبة النقاط من السعر (%)</label>
+            <div>
+              <label className="block text-right font-semibold text-gray-700 mb-2">شعار المتجر</label>
               <input
-                type="number"
-                value={storePointsRatio}
-                onChange={(e) => setStorePointsRatio(e.target.value)}
-                placeholder="أدخل نسبة النقاط (مثلاً 5 لـ 5%)"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-right"
-                dir="rtl"
+                type="file"
+                accept="image/*"
+                onChange={handleLogoUpload}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
               />
+              {storeLogoUrl && (
+                <img src={storeLogoUrl} alt="شعار المتجر" className="mt-4 w-32 h-32 object-cover rounded-lg" />
+              )}
             </div>
           </div>
 
           {/* Section 2: Owner Info */}
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-right text-gray-800 border-b-2 border-blue-500 pb-3">
-              👤 بيانات المالك
-            </h2>
+            <h2 className="text-2xl font-bold text-right text-gray-800 border-b-2 border-blue-500 pb-3">بيانات المالك</h2>
+            
+            <div>
+              <label className="block text-right font-semibold text-gray-700 mb-2">اسم المالك</label>
+              <input
+                type="text"
+                value={ownerName}
+                onChange={(e) => setOwnerName(e.target.value)}
+                placeholder="أدخل اسم المالك"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                dir="rtl"
+              />
+            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="block text-lg font-semibold text-gray-700 text-right">اسم المالك</label>
-                <input
-                  type="text"
-                  value={ownerName}
-                  onChange={(e) => setOwnerName(e.target.value)}
-                  placeholder="أدخل اسم المالك"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-right"
-                  dir="rtl"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-lg font-semibold text-gray-700 text-right">البريد الإلكتروني</label>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-right font-semibold text-gray-700 mb-2">البريد الإلكتروني</label>
                 <input
                   type="email"
                   value={ownerEmail}
                   onChange={(e) => setOwnerEmail(e.target.value)}
-                  placeholder="أدخل البريد الإلكتروني"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-right"
-                  dir="rtl"
+                  placeholder="example@email.com"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  dir="ltr"
                 />
               </div>
-
-              <div className="space-y-2">
-                <label className="block text-lg font-semibold text-gray-700 text-right">رقم الهاتف</label>
+              <div>
+                <label className="block text-right font-semibold text-gray-700 mb-2">رقم الهاتف</label>
                 <input
                   type="tel"
                   value={ownerPhone}
                   onChange={(e) => setOwnerPhone(e.target.value)}
-                  placeholder="أدخل رقم الهاتف"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-right"
-                  dir="rtl"
+                  placeholder="+966501234567"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  dir="ltr"
                 />
               </div>
             </div>
@@ -335,91 +319,81 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
           {/* Section 3: Products */}
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-right text-gray-800 border-b-2 border-blue-500 pb-3 flex-1">
-                🛍️ الأصناف والمنتجات
-              </h2>
               <Button
                 onClick={() => setShowAddProduct(!showAddProduct)}
-                className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
               >
-                <Plus className="w-5 h-5" />
+                <Plus size={20} />
                 إضافة منتج
               </Button>
+              <h2 className="text-2xl font-bold text-gray-800 border-b-2 border-blue-500 pb-3">المنتجات ({products.length})</h2>
             </div>
 
-            {/* Add Product Form */}
             {showAddProduct && (
-              <div className="bg-gray-50 rounded-lg p-6 space-y-4 border-2 border-green-300">
-                <h3 className="text-xl font-bold text-right text-gray-800">إضافة منتج جديد</h3>
-
-                <div className="space-y-2">
-                  <label className="block text-lg font-semibold text-gray-700 text-right">اسم المنتج</label>
+              <div className="bg-gray-50 p-6 rounded-lg space-y-4">
+                <div>
+                  <label className="block text-right font-semibold text-gray-700 mb-2">اسم المنتج</label>
                   <input
                     type="text"
                     value={productName}
                     onChange={(e) => setProductName(e.target.value)}
                     placeholder="أدخل اسم المنتج"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-right"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                     dir="rtl"
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="block text-lg font-semibold text-gray-700 text-right">السعر</label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-right font-semibold text-gray-700 mb-2">السعر</label>
                     <input
                       type="number"
                       value={productPrice}
                       onChange={(e) => setProductPrice(e.target.value)}
-                      placeholder="أدخل السعر"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-right"
-                      dir="rtl"
+                      placeholder="0.00"
+                      step="0.01"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-right font-semibold text-gray-700 mb-2">الكمية</label>
+                    <input
+                      type="number"
+                      value={productQuantity}
+                      onChange={(e) => setProductQuantity(e.target.value)}
+                      placeholder="1"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                     />
                   </div>
                 </div>
 
-                <ImageUploadField
-                  label="صورة المنتج"
-                  value={productImage}
-                  onChange={setProductImage}
-                  required
-                />
-
-                <div className="space-y-2">
-                  <label className="block text-lg font-semibold text-gray-700 text-right">الكمية</label>
-                  <input
-                    type="number"
-                    value={productQuantity}
-                    onChange={(e) => setProductQuantity(e.target.value)}
-                    placeholder="أدخل الكمية"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-right"
-                    dir="rtl"
-                    min="1"
-                  />
+                <div>
+                  <label className="block text-right font-semibold text-gray-700 mb-2">صورة المنتج</label>
+                  <ImageUploadField onImageUpload={setProductImage} />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="block text-lg font-semibold text-gray-700 text-right">وصف المنتج</label>
+                <div>
+                  <label className="block text-right font-semibold text-gray-700 mb-2">وصف المنتج</label>
                   <textarea
                     value={productDescription}
                     onChange={(e) => setProductDescription(e.target.value)}
                     placeholder="أدخل وصف المنتج"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                     rows={2}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-right resize-none"
                     dir="rtl"
                   />
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex gap-2">
                   <Button
                     onClick={handleAddProduct}
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold"
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
                   >
-                    إضافة المنتج
+                    إضافة
                   </Button>
                   <Button
                     onClick={() => setShowAddProduct(false)}
-                    className="flex-1 bg-gray-400 hover:bg-gray-500 text-white py-3 rounded-lg font-semibold"
+                    className="flex-1 bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg"
                   >
                     إلغاء
                   </Button>
@@ -428,43 +402,35 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
             )}
 
             {/* Products List */}
-            <div className="space-y-3">
-              {products.length === 0 ? (
-                <p className="text-center text-gray-500 py-8">لم تضف أي منتجات بعد</p>
-              ) : (
-                products.map((product) => (
-                  <div key={product.id} className="bg-gray-50 rounded-lg p-4 flex items-center justify-between">
-                    <button
-                      onClick={() => handleRemoveProduct(product.id)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <X className="w-6 h-6" />
-                    </button>
-                    <div className="flex-1 text-right pr-4">
-                      <p className="font-bold text-gray-800">{product.name}</p>
-                      <p className="text-sm text-gray-600">{product.price} ر.س</p>
-                    </div>
+            <div className="space-y-4">
+              {products.map((product) => (
+                <div key={product.id} className="bg-gray-50 p-4 rounded-lg flex items-start gap-4">
+                  {product.image && (
+                    <img src={product.image} alt={product.name} className="w-20 h-20 object-cover rounded-lg" />
+                  )}
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-800">{product.name}</h3>
+                    <p className="text-sm text-gray-600">{product.description}</p>
+                    <p className="text-sm text-blue-600 font-semibold">السعر: {product.price} ريال</p>
                   </div>
-                ))
-              )}
+                  <Button
+                    onClick={() => handleRemoveProduct(product.id)}
+                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg"
+                  >
+                    <X size={20} />
+                  </Button>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-4 pt-6 border-t-2 border-gray-200">
-            <Button
-              onClick={handleCreateStore}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold text-lg"
-            >
-              إنشاء المتجر
-            </Button>
-            <Button
-              onClick={() => onNavigate('home')}
-              className="flex-1 bg-gray-400 hover:bg-gray-500 text-white py-3 rounded-lg font-semibold text-lg"
-            >
-              إلغاء
-            </Button>
-          </div>
+          {/* Create Store Button */}
+          <Button
+            onClick={handleCreateStore}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold text-lg"
+          >
+            إنشاء المتجر
+          </Button>
         </div>
       </div>
     </div>

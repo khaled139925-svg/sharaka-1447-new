@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import fs from 'fs';
 import { setupUploadRoutes } from './upload';
+import { scrapeStoreFromUrl } from './scrapeStore';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -20,7 +21,27 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+// API لاستنساخ الموقع
+app.post('/api/scrape-store', async (req, res) => {
+  try {
+    const { url } = req.body;
+    
+    if (!url) {
+      return res.status(400).json({ error: 'يرجى إدخال رابط الموقع' });
+    }
+
+    const store = await scrapeStoreFromUrl(url);
+    res.json({ success: true, store });
+  } catch (error) {
+    console.error('خطأ في استنساخ الموقع:', error);
+    res.status(500).json({ 
+      error: error instanceof Error ? error.message : 'خطأ في استنساخ الموقع'
+    });
+  }
+});
+
 // SPA fallback - serve index.html for all other routes
+// يجب أن يكون هذا آخر route
 app.get('/', (req, res) => {
   const indexPath = path.join(DIST_DIR, 'index.html');
   if (fs.existsSync(indexPath)) {

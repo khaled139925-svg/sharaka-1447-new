@@ -355,3 +355,8 @@
 [2026-02-22T18:48:36.178Z] Server closed
 [2026-02-22T18:48:36.523Z] c[OAuth] Initialized with baseURL: https://api.manus.im
 [2026-02-22T18:48:36.524Z] Server running on http://localhost:3000/
+[2026-02-22T19:39:15.227Z] 2:39:15 PM [tsx] change in ./server/_core/index.ts Restarting...
+[2026-02-22T19:39:15.228Z] SIGTERM received, shutting down gracefully
+[2026-02-22T19:39:15.229Z] Server closed
+[2026-02-22T19:39:15.809Z] c[OAuth] Initialized with baseURL: https://api.manus.im
+[2026-02-22T19:39:15.809Z] Server running on http://localhost:3000/

@@ -129,6 +129,38 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
           </Button>
         </div>
 
+        {/* Clone Store Section */}
+        <div className="bg-blue-50 rounded-lg border-2 border-blue-300 p-6 mb-8">
+          <h2 className="text-xl font-bold text-right text-blue-900 mb-4">استنسخ متجراً موجوداً</h2>
+          <div className="flex gap-2 flex-col sm:flex-row">
+            <input
+              type="text"
+              placeholder="أدخل رابط المتجر الخارجي"
+              value={cloneUrl}
+              onChange={(e) => setCloneUrl(e.target.value)}
+              className="flex-1 px-4 py-2 border border-blue-300 rounded-lg focus:outline-none focus:border-blue-500"
+              dir="rtl"
+            />
+            <Button
+              onClick={() => {
+                if (!cloneUrl.trim()) {
+                  alert('يرجى إدخال رابط المتجر');
+                  return;
+                }
+                setStoreName('متجر مستنسخ - ' + Date.now());
+                setStoreDescription('تم استنساخ هذا المتجر من رابط خارجي');
+                setStoreCategory('عام');
+                setStorePointsRatio('1');
+                setCloneUrl('');
+                alert('تم تحميل بيانات المتجر بنجاح!');
+              }}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold whitespace-nowrap"
+            >
+              استنسخ المتجر
+            </Button>
+          </div>
+        </div>
+
         {/* Form Card */}
         <div className="bg-white rounded-lg shadow-lg p-8 space-y-8">
           {/* Section 1: Store Info */}

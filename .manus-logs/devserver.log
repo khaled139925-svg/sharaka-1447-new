@@ -378,3 +378,27 @@
 [2026-02-22T20:10:26.890Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
 [2026-02-22T20:10:27.676Z] [OAuth] Initialized with baseURL: https://api.manus.im
 [2026-02-22T20:10:27.677Z] Server running on http://localhost:3000/
+[2026-02-23T03:40:06.320Z] Dev server process group stopped
+[2026-02-23T03:40:06.321Z] SIGTERM received, shutting down gracefully
+[2026-02-23T03:40:06.322Z] Server closed
+[2026-02-23T03:40:06.336Z] Dev server exited with code -15
+[2026-02-23T03:40:09.328Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-02-23T03:40:10.127Z] [OAuth] Initialized with baseURL: https://api.manus.im
+[2026-02-23T03:40:10.128Z] Server running on http://localhost:3000/
+[2026-02-23T03:50:36.289Z] 10:50:36 PM [tsx] change in ./server/_core/index.ts Restarting...
+[2026-02-23T03:50:36.290Z] SIGTERM received, shutting down gracefully
+[2026-02-23T03:50:36.290Z] Server closed
+[2026-02-23T03:50:36.859Z] c[OAuth] Initialized with baseURL: https://api.manus.im
+[2026-02-23T03:50:36.859Z] Server running on http://localhost:3000/
+[2026-02-23T03:50:49.888Z] 10:50:49 PM [tsx] change in ./server/_core/index.ts Restarting...
+[2026-02-23T03:50:49.889Z] SIGTERM received, shutting down gracefully
+[2026-02-23T03:50:49.889Z] Server closed
+[2026-02-23T03:50:50.455Z] c[OAuth] Initialized with baseURL: https://api.manus.im
+[2026-02-23T03:50:50.455Z] Server running on http://localhost:3000/
+[2026-02-23T03:56:04.162Z] Dev server process group stopped
+[2026-02-23T03:56:04.163Z] SIGTERM received, shutting down gracefully
+[2026-02-23T03:56:04.164Z] Server closed
+[2026-02-23T03:56:04.178Z] Dev server exited with code -15
+[2026-02-23T03:56:07.168Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-02-23T03:56:08.000Z] [OAuth] Initialized with baseURL: https://api.manus.im
+[2026-02-23T03:56:08.001Z] Server running on http://localhost:3000/

@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { useStores } from '@/contexts/StoresContext';
+import { useStores, PurchaseRecord } from '@/contexts/StoresContext';
+import ExternalStoreViewer from './ExternalStoreViewer';
 import { 
   Users, Briefcase, ShoppingBag, Award, MessageCircle, Info, 
   ChevronRight, MapPin, TrendingUp, Zap, Mail, Phone, AlertCircle,
@@ -295,7 +296,7 @@ const PATHS = [
 ];
 
 export default function Home({ onAdminClick, onNavigate }: { onAdminClick?: () => void; onNavigate?: (page: string, storeId?: string) => void }) {
-  const { stores } = useStores();
+  const { stores, recordPurchase } = useStores();
   const [language, setLanguage] = useState<'ar' | 'en'>('ar');
   const [selectedCountry, setSelectedCountry] = useState('SA');
   const [showCountryMenu, setShowCountryMenu] = useState(false);
@@ -303,6 +304,12 @@ export default function Home({ onAdminClick, onNavigate }: { onAdminClick?: () =
   const [showMenu, setShowMenu] = useState(false);
   const [selectedConsultant, setSelectedConsultant] = useState<typeof CONSULTANTS[0] | null>(null);
   const [showConsultantBio, setShowConsultantBio] = useState<typeof CONSULTANTS[0] | null>(null);
+  const [selectedExternalStore, setSelectedExternalStore] = useState<{
+    id: string;
+    name: string;
+    url: string;
+    pointsRatio: number;
+  } | null>(null);
   const [bookingData, setBookingData] = useState({
     name: '',
     email: '',
@@ -315,6 +322,10 @@ export default function Home({ onAdminClick, onNavigate }: { onAdminClick?: () =
   const t = translations[language];
   const currentCountry = COUNTRIES.find(c => c.code === selectedCountry);
   const isRTL = language === 'ar';
+
+  const handlePurchaseRecorded = (purchase: PurchaseRecord) => {
+    recordPurchase(purchase);
+  };
 
   // دالة حفظ الحجز وإرسال البريد
   const handleBookingSubmit = async () => {
@@ -374,7 +385,16 @@ export default function Home({ onAdminClick, onNavigate }: { onAdminClick?: () =
   };
 
   return (
-    <div className={`min-h-screen w-full bg-background ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className={`min-h-screen bg-background ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+      {selectedExternalStore && (
+        <ExternalStoreViewer
+          storeUrl={selectedExternalStore.url}
+          storeName={selectedExternalStore.name}
+          pointsRatio={selectedExternalStore.pointsRatio}
+          onClose={() => setSelectedExternalStore(null)}
+          onPurchaseRecorded={handlePurchaseRecorded}
+        />
+      )}
       <header style={{ position: 'fixed', top: 0, left: 0, right: 0, width: '100%', zIndex: 50, backgroundColor: 'white', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }} className="">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -540,15 +560,36 @@ export default function Home({ onAdminClick, onNavigate }: { onAdminClick?: () =
                 const displayRating = (store as any).rating || 4.5;
                 
                 const pointsRatio = ((store as any).pointsRatio || 0.1) * 100;
+                const storeUrl = (store as any).externalUrl || '';
                 return (
-                  <div key={store.id} onClick={() => onNavigate?.('store-detail', String(store.id))} className="bg-white rounded-lg shadow-md overflow-hidden border border-orange-200 cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-300">
+                  <div key={store.id} className="bg-white rounded-lg shadow-md overflow-hidden border border-orange-200 hover:shadow-lg hover:scale-105 transition-all duration-300">
                     <img src={displayImage} alt={displayName} className="w-full h-40 object-cover" />
                     <div className="p-4">
                       <h3 className="text-2xl font-bold text-orange-500 mb-1">{displayName}</h3>
                       <p className="text-lg text-blue-600 mb-2 font-semibold">{displayCategory}</p>
                       <p className="text-lg text-yellow-500">★ {displayRating}</p>
                       <div className="mt-3 pt-3 border-t border-gray-200">
-                        <p className="text-sm text-green-600 font-bold">💰 نسبة النقاط: {pointsRatio.toFixed(0)}%</p>
+                        <p className="text-sm text-green-600 font-bold mb-3">💰 نسبة النقاط: {pointsRatio.toFixed(0)}%</p>
+                        {storeUrl ? (
+                          <button
+                            onClick={() => setSelectedExternalStore({
+                              id: store.id,
+                              name: displayName,
+                              url: storeUrl,
+                              pointsRatio: (store as any).pointsRatio || 0.1
+                            })}
+                            className="w-full px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors"
+                          >
+                            دخول المتجر
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => onNavigate?.('store-detail', String(store.id))}
+                            className="w-full px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors"
+                          >
+                            عرض التفاصيل
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>

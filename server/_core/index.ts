@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import { setupUploadRoutes } from './upload';
 import { scrapeStoreFromUrl } from './scrapeStore';
+import { cloneFullWebsite, getClonedSite } from './fullSiteClone';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -38,6 +39,37 @@ app.post('/api/scrape-store', async (req, res) => {
       error: error instanceof Error ? error.message : 'خطأ في استنساخ الموقع'
     });
   }
+});
+
+// API لنسخ الموقع كاملاً
+app.post('/api/clone-full-site', async (req, res) => {
+  try {
+    const { url } = req.body;
+    
+    if (!url) {
+      return res.status(400).json({ error: 'يرجى إدخال رابط الموقع' });
+    }
+
+    const clonedSite = await cloneFullWebsite(url);
+    res.json({ success: true, siteId: clonedSite.id, site: clonedSite });
+  } catch (error) {
+    console.error('خطأ في نسخ الموقع:', error);
+    res.status(500).json({ 
+      error: error instanceof Error ? error.message : 'خطأ في نسخ الموقع'
+    });
+  }
+});
+
+// API للحصول على الموقع المستنسخ
+app.get('/api/cloned-site/:siteId', (req, res) => {
+  const { siteId } = req.params;
+  const site = getClonedSite(siteId);
+  
+  if (!site) {
+    return res.status(404).json({ error: 'الموقع غير موجود' });
+  }
+  
+  res.json({ success: true, site });
 });
 
 // SPA fallback - serve index.html for all other routes

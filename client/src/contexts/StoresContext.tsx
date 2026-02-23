@@ -23,6 +23,38 @@ export interface Store {
   ownerPhone: string;
   pointsRatio: number;
   products: Product[];
+  storeBalance: number; // رصيد النقاط للمتجر (هدايا قابلة للتبادل)
+  giftHistory: GiftRecord[]; // سجل الهدايا المعطاة
+}
+
+export interface GiftRecord {
+  id: string;
+  fromStoreId: string;
+  toUserId: string;
+  toUserName: string;
+  points: number;
+  timestamp: number;
+  notes: string;
+}
+
+export interface UserBalance {
+  userId: string;
+  totalPoints: number; // إجمالي النقاط المكتسبة
+  usedPoints: number; // النقاط المستخدمة
+  availablePoints: number; // النقاط المتاحة
+  purchaseHistory: PurchaseRecord[];
+  receivedGifts: GiftRecord[];
+}
+
+export interface PurchaseRecord {
+  id: string;
+  storeName: string;
+  storeId: string;
+  purchaseAmount: number;
+  pointsRatio: number;
+  pointsEarned: number;
+  timestamp: number;
+  notes: string;
 }
 
 export interface CartItem {
@@ -50,6 +82,12 @@ interface StoresContextType {
   clearCart: () => void;
   getCartTotal: () => number;
   getCartPoints: () => number;
+  // نظام النقاط
+  recordPurchase: (purchase: PurchaseRecord) => void;
+  getUserBalance: (userId: string) => UserBalance;
+  giftPointsToUser: (fromStoreId: string, toUserId: string, toUserName: string, points: number, notes: string) => void;
+  getStoreBalance: (storeId: string) => number;
+  getStoreGiftHistory: (storeId: string) => GiftRecord[];
 }
 
 const StoresContext = createContext<StoresContextType | undefined>(undefined);
@@ -93,21 +131,40 @@ export function StoresProvider({ children }: { children: React.ReactNode }) {
   const [stores, setStores] = useState<Store[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [userBalances, setUserBalances] = useState<Map<string, UserBalance>>(new Map());
 
   // تحميل البيانات من localStorage عند التحميل
   useEffect(() => {
     const savedStores = localStorage.getItem('sharaka_stores');
     const savedCart = localStorage.getItem('sharaka_cart');
+    const savedBalances = localStorage.getItem('sharaka_user_balances');
 
     if (savedStores) {
       try {
-        setStores(JSON.parse(savedStores));
+        const parsedStores = JSON.parse(savedStores);
+        // إضافة الحقول الجديدة للمتاجر القديمة
+        const updatedStores = parsedStores.map((store: Store) => ({
+          ...store,
+          storeBalance: store.storeBalance || 0,
+          giftHistory: store.giftHistory || [],
+        }));
+        setStores(updatedStores);
       } catch (error) {
         console.error('خطأ في تحميل المتاجر:', error);
-        setStores(DEFAULT_STORES);
+        const updatedDefaultStores = DEFAULT_STORES.map(store => ({
+          ...store,
+          storeBalance: 0,
+          giftHistory: [],
+        }));
+        setStores(updatedDefaultStores);
       }
     } else {
-      setStores(DEFAULT_STORES);
+      const updatedDefaultStores = DEFAULT_STORES.map(store => ({
+        ...store,
+        storeBalance: 0,
+        giftHistory: [],
+      }));
+      setStores(updatedDefaultStores);
     }
 
     if (savedCart) {
@@ -116,6 +173,16 @@ export function StoresProvider({ children }: { children: React.ReactNode }) {
       } catch (error) {
         console.error('خطأ في تحميل السلة:', error);
         setCart([]);
+      }
+    }
+
+    if (savedBalances) {
+      try {
+        const balances = JSON.parse(savedBalances);
+        setUserBalances(new Map(Object.entries(balances)));
+      } catch (error) {
+        console.error('خطأ في تحميل أرصدة المستخدمين:', error);
+        setUserBalances(new Map());
       }
     }
 
@@ -128,6 +195,14 @@ export function StoresProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('sharaka_stores', JSON.stringify(stores));
     }
   }, [stores, isLoaded]);
+
+  // حفظ أرصدة المستخدمين في localStorage عند التغيير
+  useEffect(() => {
+    if (isLoaded) {
+      const balancesObj = Object.fromEntries(userBalances);
+      localStorage.setItem('sharaka_user_balances', JSON.stringify(balancesObj));
+    }
+  }, [userBalances, isLoaded]);
 
   // حفظ السلة في localStorage عند التغيير
   useEffect(() => {
@@ -271,6 +346,125 @@ export function StoresProvider({ children }: { children: React.ReactNode }) {
     return cart.reduce((points, item) => points + item.product.points * item.quantity, 0);
   };
 
+  // تسجيل عملية شراء وإضافة النقاط للمستخدم والمتجر
+  const recordPurchase = (purchase: PurchaseRecord) => {
+    const userId = 'current-user'; // يمكن تحديثه لاحقاً مع نظام المستخدمين
+    
+    // تحديث رصيد المستخدم
+    const currentBalance = userBalances.get(userId) || {
+      userId,
+      totalPoints: 0,
+      usedPoints: 0,
+      availablePoints: 0,
+      purchaseHistory: [],
+      receivedGifts: [],
+    };
+
+    const updatedBalance: UserBalance = {
+      ...currentBalance,
+      totalPoints: currentBalance.totalPoints + purchase.pointsEarned,
+      availablePoints: currentBalance.availablePoints + purchase.pointsEarned,
+      purchaseHistory: [...currentBalance.purchaseHistory, purchase],
+    };
+
+    setUserBalances(new Map(userBalances).set(userId, updatedBalance));
+
+    // تحديث رصيد المتجر
+    setStores(
+      stores.map((store) =>
+        store.id === purchase.storeId
+          ? {
+              ...store,
+              storeBalance: store.storeBalance + purchase.pointsEarned,
+            }
+          : store
+      )
+    );
+  };
+
+  // الحصول على رصيد المستخدم
+  const getUserBalance = (userId: string): UserBalance => {
+    return (
+      userBalances.get(userId) || {
+        userId,
+        totalPoints: 0,
+        usedPoints: 0,
+        availablePoints: 0,
+        purchaseHistory: [],
+        receivedGifts: [],
+      }
+    );
+  };
+
+  // منح نقاط من المتجر إلى مستخدم آخر
+  const giftPointsToUser = (
+    fromStoreId: string,
+    toUserId: string,
+    toUserName: string,
+    points: number,
+    notes: string
+  ) => {
+    // التحقق من أن المتجر لديه رصيد كافي
+    const store = getStore(fromStoreId);
+    if (!store || store.storeBalance < points) {
+      throw new Error('رصيد المتجر غير كافي');
+    }
+
+    const giftRecord: GiftRecord = {
+      id: `gift-${Date.now()}`,
+      fromStoreId,
+      toUserId,
+      toUserName,
+      points,
+      timestamp: Date.now(),
+      notes,
+    };
+
+    // تحديث رصيد المتجر
+    setStores(
+      stores.map((s) =>
+        s.id === fromStoreId
+          ? {
+              ...s,
+              storeBalance: s.storeBalance - points,
+              giftHistory: [...s.giftHistory, giftRecord],
+            }
+          : s
+      )
+    );
+
+    // تحديث رصيد المستخدم المستقبل
+    const currentBalance = userBalances.get(toUserId) || {
+      userId: toUserId,
+      totalPoints: 0,
+      usedPoints: 0,
+      availablePoints: 0,
+      purchaseHistory: [],
+      receivedGifts: [],
+    };
+
+    const updatedBalance: UserBalance = {
+      ...currentBalance,
+      totalPoints: currentBalance.totalPoints + points,
+      availablePoints: currentBalance.availablePoints + points,
+      receivedGifts: [...currentBalance.receivedGifts, giftRecord],
+    };
+
+    setUserBalances(new Map(userBalances).set(toUserId, updatedBalance));
+  };
+
+  // الحصول على رصيد المتجر
+  const getStoreBalance = (storeId: string): number => {
+    const store = getStore(storeId);
+    return store?.storeBalance || 0;
+  };
+
+  // الحصول على سجل الهدايا للمتجر
+  const getStoreGiftHistory = (storeId: string): GiftRecord[] => {
+    const store = getStore(storeId);
+    return store?.giftHistory || [];
+  };
+
   return (
     <StoresContext.Provider
       value={{
@@ -290,6 +484,11 @@ export function StoresProvider({ children }: { children: React.ReactNode }) {
         clearCart,
         getCartTotal,
         getCartPoints,
+        recordPurchase,
+        getUserBalance,
+        giftPointsToUser,
+        getStoreBalance,
+        getStoreGiftHistory,
       }}
     >
       {children}

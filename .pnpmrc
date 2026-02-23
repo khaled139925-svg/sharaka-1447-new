@@ -1,4 +1,6 @@
-shamefully-hoist=true
+# pnpm configuration for reliable builds
+shamefully-hoist=false
 strict-peer-dependencies=false
 auto-install-peers=true
-prefer-frozen-lockfile=false
+prefer-frozen-lockfile=true
+node-linker=hoisted

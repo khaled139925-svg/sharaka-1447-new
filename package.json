@@ -8,10 +8,11 @@
     "pnpm": ">=8"
   },
   "scripts": {
-    "dev": "vite --host",
-    "build": "npm run build:clean && CI=true vite build",
-    "build:clean": "rm -rf node_modules/.vite",
-    "preview": "vite preview --host"
+    "dev": "NODE_ENV=development tsx watch server/_core/index.ts",
+    "build": "pnpm run build:clean && CI=true vite build && esbuild server/_core/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
+    "build:clean": "rm -rf node_modules/.vite dist",
+    "test": "vitest run",
+    "db:push": "drizzle-kit generate && drizzle-kit migrate"
   },
   "dependencies": {
     "@trpc/client": "^11.10.0",

@@ -178,9 +178,7 @@ export default function Admin({ onBack, onNavigate }: { onBack?: () => void; onN
             </div>
           </div>
         </header>
-        <div className="flex-1 p-6 h-full min-h-0 overflow-hidden">
-          <AdminMessaging />
-        </div>
+        <AdminMessaging />
       </div>
     );
   }

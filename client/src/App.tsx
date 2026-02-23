@@ -2,7 +2,7 @@ import Home from '@/pages/Home';
 import Admin from '@/pages/Admin';
 import StoresManagement from '@/pages/StoresManagement';
 import StoresShowcase from '@/pages/StoresShowcase';
-import CreateStore from '@/pages/CreateStore';
+
 import CloneStore from '@/pages/CloneStore';
 import StoreDetail from '@/pages/StoreDetail';
 import EditStore from '@/pages/EditStore';
@@ -36,9 +36,7 @@ function App() {
         {currentPage === 'stores-showcase' && (
           <StoresShowcase onBack={() => handleNavigate('home')} onNavigate={handleNavigate} />
         )}
-        {currentPage === 'create-store' && (
-          <CreateStore onNavigate={handleNavigate} />
-        )}
+
         {currentPage === 'clone-store' && (
           <CloneStore />
         )}

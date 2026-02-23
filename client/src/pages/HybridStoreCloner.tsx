@@ -358,14 +358,27 @@ export default function HybridStoreCloner({ onClose, onStoreCreated }: { onClose
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">رابط اللوجو</label>
-                    <input
-                      type="url"
-                      value={formData.logo}
-                      onChange={(e) => handleFormChange('logo', e.target.value)}
-                      placeholder="https://example.com/logo.png"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">الشعار (اللوجو)</label>
+                    <div className="space-y-2">
+                      <input
+                        type="url"
+                        value={formData.logo}
+                        onChange={(e) => handleFormChange('logo', e.target.value)}
+                        placeholder="الصق رابط الصورة مباشرة (URL)"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
+                        dir="rtl"
+                      />
+                      {formData.logo && (
+                        <div className="flex items-center justify-center bg-gray-100 rounded-lg p-4 border-2 border-dashed border-gray-300">
+                          <img
+                            src={formData.logo}
+                            alt="معاينة الشعار"
+                            className="max-h-24 max-w-24 object-contain"
+                            onError={() => setError('لم يتمكن تحميل الصورة. تأكد من رابط الصورة')}
+                          />
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 

@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { useStores } from '@/contexts/StoresContext';
 import { Star, Mail, Phone, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
+import ContactUs from '@/components/ContactUs';
 
 interface StoreDetailProps {
   onNavigate: (page: string, storeId?: string, productId?: string) => void;
@@ -171,6 +172,17 @@ export default function StoreDetail({ onNavigate, storeId }: StoreDetailProps) {
               ))}
             </div>
           )}
+        </div>
+
+        {/* Contact Us Section */}
+        <div className="max-w-6xl mx-auto px-4 py-12">
+          <ContactUs
+            contactInfo={store.contactInfo}
+            socialLinks={store.socialLinks}
+            businessHours={store.businessHours}
+            mapLocation={store.mapLocation}
+            welcomeMessage={store.welcomeMessage}
+          />
         </div>
       </div>
     </div>

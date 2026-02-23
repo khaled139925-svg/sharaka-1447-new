@@ -422,7 +422,10 @@ export default function Home({ onAdminClick, onNavigate }: { onAdminClick?: () =
       <header style={{ position: 'fixed', top: 0, left: 0, right: 0, width: '100%', zIndex: 50, backgroundColor: 'white', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }} className="">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={LOGO_URL} alt="Sharaka" className="h-16 w-auto object-contain" />
+            <div>
+              <img src={LOGO_URL} alt="Sharaka" className="h-16 w-auto object-contain" />
+              <p className="text-xs md:text-sm text-orange-500 font-bold text-center">{t.tagline}</p>
+            </div>
             <div className="hidden md:block">
               <p className="text-lg font-bold text-orange-500 leading-tight">منصة الخدمات المتكاملة</p>
               <p className="text-sm text-blue-600 font-semibold">Integrated Services Platform</p>
@@ -578,6 +581,20 @@ export default function Home({ onAdminClick, onNavigate }: { onAdminClick?: () =
           </div>
         </section>
 
+        <section className="py-8 bg-blue-100">
+          <div className="container mx-auto px-4">
+            <div className="bg-blue-50 rounded-lg p-8 border border-blue-200">
+              <div className="flex items-start gap-4">
+                <Info size={32} className="text-blue-600 flex-shrink-0 mt-1" />
+                <div className="flex-1">
+                  <h3 className="text-3xl font-bold text-orange-500 mb-3">{t.commitment}</h3>
+                  <p className="text-xl text-blue-600 leading-relaxed font-semibold">{t.commitmentText}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section id="marketplace" className="py-8 bg-orange-50">
           <div className="container mx-auto px-4">
             <h2 className="text-6xl font-bold text-orange-500 mb-1 text-center">{t.marketplace}</h2>
@@ -697,7 +714,7 @@ export default function Home({ onAdminClick, onNavigate }: { onAdminClick?: () =
           <div className="container mx-auto px-4">
             <h2 className="text-6xl font-bold text-orange-500 mb-4 text-center">{t.about}</h2>
             <div className="bg-white rounded-lg shadow-md p-8 border border-blue-200">
-              <h3 className="text-4xl font-bold text-orange-500 mb-4 text-center">{t.vision}</h3>
+              <h3 className="text-4xl font-bold text-orange-500 mb-4 text-right">{t.vision}</h3>
               <p className="text-2xl text-blue-600 leading-relaxed font-semibold">{t.visionText}</p>
             </div>
           </div>

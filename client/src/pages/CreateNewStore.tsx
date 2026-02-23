@@ -271,13 +271,29 @@ export default function CreateNewStore({ onBack }: CreateNewStoreProps) {
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">الرابط الخارجي</label>
-                <input
-                  type="url"
-                  value={formData.externalUrl}
-                  onChange={(e) => handleFormChange('externalUrl', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="https://example.com"
-                />
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    value={formData.externalUrl}
+                    onChange={(e) => handleFormChange('externalUrl', e.target.value)}
+                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="https://example.com"
+                  />
+                  <Button
+                    onClick={() => {
+                      if (!formData.externalUrl) {
+                        setError('يرجى إدخال رابط الموقع أولاً');
+                        return;
+                      }
+                      // TODO: استنساخ الموقع من الرابط
+                      alert('جاري استنساخ الموقع من: ' + formData.externalUrl);
+                    }}
+                    className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-3 rounded-lg whitespace-nowrap"
+                  >
+                    استنساخ الموقع
+                  </Button>
+                </div>
+                <p className="text-xs text-gray-500 mt-2">أدخل رابط موقعك الخارجي واضغط "استنساخ الموقع" لنسخ المنتجات تلقائياً</p>
               </div>
             </div>
 

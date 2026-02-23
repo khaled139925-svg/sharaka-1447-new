@@ -178,7 +178,7 @@ export default function Admin({ onBack, onNavigate }: { onBack?: () => void; onN
             </div>
           </div>
         </header>
-        <AdminMessaging />
+
       </div>
     );
   }

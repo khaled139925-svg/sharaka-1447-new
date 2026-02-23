@@ -74,7 +74,12 @@ const FEATURES = [
   'دعم العملاء 24/7'
 ];
 
-export default function CreateNewStore() {
+interface CreateNewStoreProps {
+  onBack?: () => void;
+}
+
+export default function CreateNewStore({ onBack }: CreateNewStoreProps) {
+  console.log('CreateNewStore component loaded with props:', { onBack: !!onBack });
   const { addStore } = useStores();
   const [formData, setFormData] = useState<StoreFormData>({
     name: '',
@@ -205,7 +210,15 @@ export default function CreateNewStore() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold text-gray-800 mb-8">إنشاء متجر جديد</h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-800">إنشاء متجر جديد</h1>
+          <Button
+            onClick={onBack || (() => window.history.back())}
+            className="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg"
+          >
+            العودة
+          </Button>
+        </div>
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-6">

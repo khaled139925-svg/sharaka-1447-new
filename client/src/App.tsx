@@ -39,7 +39,7 @@ function App() {
         )}
 
         {currentPage === 'create-new-store' && (
-          <CreateNewStore />
+          <CreateNewStore onBack={() => handleNavigate('home')} onNavigate={handleNavigate} />
         )}
         {currentPage === 'clone-store' && (
           <CloneStore />

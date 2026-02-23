@@ -88,11 +88,17 @@ export default function Admin({ onBack, onNavigate }: { onBack?: () => void; onN
   };
 
   const handleButtonClick = (sectionId: string, action: string) => {
+    console.log('handleButtonClick called:', sectionId, action, 'onNavigate:', !!onNavigate);
     if (sectionId === 'stores' && action === 'view') {
-      onNavigate?.('stores-management');
+      if (onNavigate) {
+        console.log('Calling onNavigate with stores-management');
+        onNavigate('stores-management');
+      }
     } else if (sectionId === 'stores' && action === 'create') {
-      setSelectedSection(null);
-      onNavigate?.('create-new-store');
+      if (onNavigate) {
+        console.log('Calling onNavigate with create-new-store');
+        onNavigate('create-new-store');
+      }
     } else if (sectionId === 'messages' && action === 'view') {
       setSelectedSection('messages-view');
     }

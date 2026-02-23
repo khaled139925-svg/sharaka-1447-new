@@ -298,6 +298,7 @@ const PATHS = [
 ];
 
 export default function Home({ onAdminClick, onNavigate }: { onAdminClick?: () => void; onNavigate?: (page: string, storeId?: string) => void }) {
+  console.log('Home component mounted, onNavigate:', typeof onNavigate);
   const { stores, recordPurchase } = useStores();
   const [language, setLanguage] = useState<'ar' | 'en'>('ar');
   const [selectedCountry, setSelectedCountry] = useState('SA');
@@ -529,7 +530,10 @@ export default function Home({ onAdminClick, onNavigate }: { onAdminClick?: () =
             <h1 className="text-7xl md:text-9xl font-bold text-orange-500 leading-tight">{t.platformName}</h1>
             <p className="text-3xl md:text-4xl text-gray-600 max-w-3xl mx-auto font-semibold">{t.description}</p>
             <button
-              onClick={() => setShowHybridCloner(true)}
+              onClick={() => {
+                console.log('Create store button clicked, onNavigate:', typeof onNavigate);
+                onNavigate && onNavigate('create-new-store');
+              }}
               className="inline-block bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-4 px-8 rounded-lg text-2xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
             >
               ✨ {isRTL ? 'إنشاء متجر جديد' : 'Create New Store'}

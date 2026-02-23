@@ -1,9 +1,14 @@
 # pnpm configuration for CI/CD environments
-# Force pnpm to recognize this as a CI environment
+# This configuration prevents ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY errors
+
+# CRITICAL: Tell pnpm this is a CI environment
 ci-mode=true
 
-# Disable TTY checks completely
+# CRITICAL: Force removal of modules without TTY confirmation
 force=true
+
+# Disable interactive mode completely
+interactive=false
 
 # Installation settings
 shamefully-hoist=false
@@ -22,5 +27,5 @@ recursive-install=true
 # Disable optional dependencies in CI
 optional=false
 
-# Allow installation without TTY
-interactive=false
+# Additional CI-specific settings
+store-dir=.pnpm-store

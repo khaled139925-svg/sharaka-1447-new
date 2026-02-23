@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { useStores, PurchaseRecord } from '@/contexts/StoresContext';
 import ExternalStoreViewer from './ExternalStoreViewer';
+import HybridStoreCloner from './HybridStoreCloner';
 import { 
   Users, Briefcase, ShoppingBag, Award, MessageCircle, Info, 
   ChevronRight, MapPin, TrendingUp, Zap, Mail, Phone, AlertCircle,
@@ -310,6 +311,7 @@ export default function Home({ onAdminClick, onNavigate }: { onAdminClick?: () =
     url: string;
     pointsRatio: number;
   } | null>(null);
+  const [showHybridCloner, setShowHybridCloner] = useState(false);
   const [bookingData, setBookingData] = useState({
     name: '',
     email: '',
@@ -393,6 +395,12 @@ export default function Home({ onAdminClick, onNavigate }: { onAdminClick?: () =
           pointsRatio={selectedExternalStore.pointsRatio}
           onClose={() => setSelectedExternalStore(null)}
           onPurchaseRecorded={handlePurchaseRecorded}
+        />
+      )}
+      {showHybridCloner && (
+        <HybridStoreCloner
+          onClose={() => setShowHybridCloner(false)}
+          onStoreCreated={() => setShowHybridCloner(false)}
         />
       )}
       <header style={{ position: 'fixed', top: 0, left: 0, right: 0, width: '100%', zIndex: 50, backgroundColor: 'white', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }} className="">
@@ -501,10 +509,16 @@ export default function Home({ onAdminClick, onNavigate }: { onAdminClick?: () =
 
       <main style={{ marginTop: '80px' }}>
         <section className="py-8 bg-gradient-to-b from-green-50 to-background">
-          <div className="container mx-auto px-4 text-center space-y-2">
+          <div className="container mx-auto px-4 text-center space-y-6">
             <img src={LOGO_URL} alt="Sharaka" className="h-64 md:h-80 w-auto mx-auto animate-bounce" style={{animationDuration: '3s'}} />
             <h1 className="text-7xl md:text-9xl font-bold text-orange-500 leading-tight">{t.platformName}</h1>
             <p className="text-3xl md:text-4xl text-gray-600 max-w-3xl mx-auto font-semibold">{t.description}</p>
+            <button
+              onClick={() => setShowHybridCloner(true)}
+              className="inline-block bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-4 px-8 rounded-lg text-2xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+            >
+              ✨ {isRTL ? 'إنشاء متجر جديد' : 'Create New Store'}
+            </button>
           </div>
         </section>
 

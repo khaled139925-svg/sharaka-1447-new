@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { useStores, PurchaseRecord } from '@/contexts/StoresContext';
 import ExternalStoreViewer from './ExternalStoreViewer';
-import HybridStoreCloner from './HybridStoreCloner';
+
 import ClientMessaging from '@/components/ClientMessaging';
 import { 
   Users, Briefcase, ShoppingBag, Award, MessageCircle, Info, 
@@ -312,7 +312,7 @@ export default function Home({ onAdminClick, onNavigate }: { onAdminClick?: () =
     url: string;
     pointsRatio: number;
   } | null>(null);
-  const [showHybridCloner, setShowHybridCloner] = useState(false);
+
   const [showMessages, setShowMessages] = useState(false);
   const [bookingData, setBookingData] = useState({
     name: '',
@@ -399,12 +399,7 @@ export default function Home({ onAdminClick, onNavigate }: { onAdminClick?: () =
           onPurchaseRecorded={handlePurchaseRecorded}
         />
       )}
-      {showHybridCloner && (
-        <HybridStoreCloner
-          onClose={() => setShowHybridCloner(false)}
-          onStoreCreated={() => setShowHybridCloner(false)}
-        />
-      )}
+
       {showMessages && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-lg w-full max-w-6xl max-h-96 overflow-y-auto">

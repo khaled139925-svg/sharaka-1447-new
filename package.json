@@ -9,7 +9,8 @@
   },
   "scripts": {
     "dev": "vite --host",
-    "build": "CI=true vite build",
+    "build": "npm run build:clean && CI=true vite build",
+    "build:clean": "rm -rf node_modules/.vite",
     "preview": "vite preview --host"
   },
   "dependencies": {

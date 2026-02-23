@@ -117,7 +117,13 @@ export default function HybridStoreCloner({ onClose, onStoreCreated }: { onClose
     socialLinks: {},
     contactInfo: {},
     paymentMethods: [],
-    shippingOptions: []
+    shippingOptions: [],
+    contactUs: {
+      welcomeMessage: '',
+      businessHours: '',
+      mapLocation: '',
+      quickContactMethods: []
+    }
   });
 
   const handleExtractData = async () => {

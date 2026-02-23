@@ -172,7 +172,7 @@ export default function AdminMessaging() {
         {currentConversation ? (
           <>
             {/* رأس المحادثة */}
-            <div className="flex-shrink-0 p-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-blue-700 text-white flex justify-between items-start">
+            <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-blue-700 text-white flex justify-between items-start">
               <div className="flex-1">
                 <h3 className="font-bold text-lg">{currentConversation.senderName}</h3>
                 <p className="text-sm text-blue-100">{currentConversation.senderEmail}</p>

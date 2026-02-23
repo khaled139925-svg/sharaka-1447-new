@@ -10,7 +10,7 @@
   "packageManager": "pnpm@10.29.2",
   "scripts": {
     "dev": "NODE_ENV=development tsx watch server/_core/index.ts",
-    "build": "vite build",
+    "build": "CI=true pnpm install --no-frozen-lockfile --force && vite build",
     "test": "vitest run",
     "db:push": "drizzle-kit generate && drizzle-kit migrate"
   },

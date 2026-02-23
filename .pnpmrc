@@ -29,3 +29,6 @@ optional=false
 
 # Additional CI-specific settings
 store-dir=.pnpm-store
+
+# Disable TTY checks completely
+enable-pre-post-scripts=false

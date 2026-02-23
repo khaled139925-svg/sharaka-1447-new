@@ -282,15 +282,15 @@ export default function AdminMessaging() {
               {/* حقل الإدخال + زر الحذف */}
               {current && (
                 <div style={{
-                  padding: '16px',
+                  padding: '8px 12px',
                   borderTop: '2px solid #ddd',
                   backgroundColor: '#f9f9f9',
                   flexShrink: 0,
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '10px'
+                  gap: '6px'
                 }}>
-                  <div style={{ display: 'flex', gap: '8px' }}>
+                  <div style={{ display: 'flex', gap: '6px' }}>
                     <input
                       type="text"
                       value={reply}
@@ -301,13 +301,13 @@ export default function AdminMessaging() {
                           handleSend();
                         }
                       }}
-                      placeholder="اكتب ردك هنا..."
+                      placeholder="اكتب..."
                       style={{
                         flex: 1,
-                        padding: '10px 12px',
-                        border: '2px solid #ddd',
-                        borderRadius: '6px',
-                        fontSize: '13px',
+                        padding: '6px 8px',
+                        border: '1px solid #ddd',
+                        borderRadius: '4px',
+                        fontSize: '12px',
                         fontFamily: 'inherit',
                         outline: 'none',
                         boxSizing: 'border-box'
@@ -326,18 +326,19 @@ export default function AdminMessaging() {
                         backgroundColor: reply.trim() ? '#2196f3' : '#ccc',
                         color: 'white',
                         border: 'none',
-                        padding: '10px 16px',
-                        borderRadius: '6px',
+                        padding: '6px 10px',
+                        borderRadius: '4px',
                         cursor: reply.trim() ? 'pointer' : 'not-allowed',
-                        fontSize: '13px',
+                        fontSize: '11px',
                         fontWeight: 'bold',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '6px',
-                        flexShrink: 0
+                        gap: '4px',
+                        flexShrink: 0,
+                        whiteSpace: 'nowrap'
                       }}
                     >
-                      <Send size={16} /> إرسال
+                      <Send size={14} /> إرسال
                     </button>
                   </div>
                   <button
@@ -346,18 +347,18 @@ export default function AdminMessaging() {
                       backgroundColor: '#f44336',
                       color: 'white',
                       border: 'none',
-                      padding: '10px 16px',
-                      borderRadius: '6px',
+                      padding: '6px 10px',
+                      borderRadius: '4px',
                       cursor: 'pointer',
-                      fontSize: '13px',
+                      fontSize: '11px',
                       fontWeight: 'bold',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: '6px'
+                      gap: '4px'
                     }}
                   >
-                    <Trash2 size={16} /> حذف المحادثة
+                    <Trash2 size={14} /> حذف
                   </button>
                 </div>
               )}

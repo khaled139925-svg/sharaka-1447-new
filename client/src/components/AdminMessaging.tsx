@@ -109,11 +109,11 @@ export default function AdminMessaging() {
   const unreadCount = conversations.filter(c => !c.isRead).length;
 
   return (
-    <div className="h-screen flex bg-gray-100">
+    <div className="h-full w-full flex bg-gray-100 rounded-lg overflow-hidden">
       {/* قائمة المحادثات */}
       <div className="w-96 bg-white border-l border-gray-200 flex flex-col">
-        {/* رأس القائمة */}
-        <div className="p-4 border-b border-gray-200">
+        {/* رأس القائمة - لا يتمرير */}
+        <div className="flex-shrink-0 p-4 border-b border-gray-200">
           <h2 className="text-xl font-bold text-gray-800 mb-4">الرسائل المباشرة</h2>
           {unreadCount > 0 && (
             <div className="bg-red-100 text-red-700 px-3 py-2 rounded-lg text-sm font-semibold mb-3">
@@ -132,8 +132,8 @@ export default function AdminMessaging() {
           </div>
         </div>
 
-        {/* قائمة المحادثات */}
-        <div className="flex-1 overflow-y-auto">
+        {/* قائمة المحادثات - قابلة للتمرير */}
+        <div className="flex-1 overflow-y-auto min-h-0">
           {filteredConversations.length === 0 ? (
             <div className="p-4 text-center text-gray-500">
               لا توجد رسائل
@@ -158,7 +158,7 @@ export default function AdminMessaging() {
                     <p className="text-sm text-gray-500">{conv.senderEmail}</p>
                   </div>
                   {!conv.isRead && (
-                    <div className="w-3 h-3 bg-blue-600 rounded-full mt-1"></div>
+                    <div className="w-3 h-3 bg-blue-600 rounded-full mt-1 flex-shrink-0"></div>
                   )}
                 </div>
                 <p className="text-sm text-gray-600 truncate">
@@ -174,11 +174,11 @@ export default function AdminMessaging() {
       </div>
 
       {/* نافذة المحادثة */}
-      <div className="flex-1 flex flex-col bg-white">
+      <div className="flex-1 flex flex-col bg-white overflow-hidden">
         {currentConversation ? (
           <>
-            {/* رأس المحاثة */}
-            <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-blue-700 text-white flex justify-between items-start">
+            {/* رأس المحادثة - لا يتمرير */}
+            <div className="flex-shrink-0 p-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-blue-700 text-white flex justify-between items-start">
               <div className="flex-1">
                 <h3 className="text-lg font-bold">{currentConversation.senderName}</h3>
                 <p className="text-sm text-blue-100">{currentConversation.senderEmail}</p>
@@ -192,8 +192,8 @@ export default function AdminMessaging() {
               </Button>
             </div>
 
-            {/* محتوى المحادثة */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {/* محتوى المحادثة - قابل للتمرير */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
               {currentConversation.messages.map(msg => (
                 <div
                   key={msg.id}
@@ -215,8 +215,8 @@ export default function AdminMessaging() {
               ))}
             </div>
 
-            {/* حقل الرد */}
-            <div className="p-4 border-t border-gray-200 bg-gray-50">
+            {/* حقل الرد - لا يتمرير */}
+            <div className="flex-shrink-0 p-4 border-t border-gray-200 bg-gray-50">
               <div className="flex gap-2">
                 <input
                   type="text"

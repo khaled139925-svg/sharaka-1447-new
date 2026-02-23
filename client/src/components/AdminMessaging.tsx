@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Send, Trash2, Minus, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 interface Message {
   id: string;
@@ -24,26 +23,27 @@ export default function AdminMessaging() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [reply, setReply] = useState('');
   const [isMinimized, setIsMinimized] = useState(false);
-  const [position, setPosition] = useState({ x: 100, y: 100 });
-  const [size, setSize] = useState({ width: 500, height: 600 });
+  const [position, setPosition] = useState({ x: 50, y: 50 });
+  const [size, setSize] = useState({ width: 900, height: 700 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [isResizing, setIsResizing] = useState(false);
   const windowRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem('clientConversation');
     if (saved) {
       try {
         setConversations([JSON.parse(saved)]);
+        const parsed = JSON.parse(saved);
+        setSelectedId(parsed.id);
       } catch (e) {
         console.error('خطأ في تحميل الرسائل:', e);
       }
     }
   }, []);
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('[data-no-drag]')) return;
+  const handleHeaderMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
     setDragOffset({
       x: e.clientX - position.x,
@@ -51,36 +51,29 @@ export default function AdminMessaging() {
     });
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (isDragging) {
-      setPosition({
-        x: e.clientX - dragOffset.x,
-        y: e.clientY - dragOffset.y
-      });
-    }
-    if (isResizing) {
-      setSize({
-        width: Math.max(300, e.clientX - position.x),
-        height: Math.max(300, e.clientY - position.y)
-      });
-    }
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-    setIsResizing(false);
-  };
-
   useEffect(() => {
-    if (isDragging || isResizing) {
-      document.addEventListener('mousemove', handleMouseMove as any);
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging) {
+        setPosition({
+          x: e.clientX - dragOffset.x,
+          y: e.clientY - dragOffset.y
+        });
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
       return () => {
-        document.removeEventListener('mousemove', handleMouseMove as any);
+        document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
       };
     }
-  }, [isDragging, isResizing, position, dragOffset]);
+  }, [isDragging, dragOffset]);
 
   const current = conversations.find(c => c.id === selectedId);
 
@@ -117,43 +110,41 @@ export default function AdminMessaging() {
   return (
     <div
       ref={windowRef}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
       style={{
         position: 'fixed',
         left: `${position.x}px`,
         top: `${position.y}px`,
-        width: isMinimized ? '300px' : `${size.width}px`,
-        height: isMinimized ? '40px' : `${size.height}px`,
+        width: isMinimized ? '350px' : `${size.width}px`,
+        height: isMinimized ? '50px' : `${size.height}px`,
         backgroundColor: '#fff',
-        border: '2px solid #2196f3',
-        borderRadius: '8px',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+        border: '3px solid #2196f3',
+        borderRadius: '12px',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
         display: 'flex',
         flexDirection: 'column',
         zIndex: 9999,
-        cursor: isDragging ? 'grabbing' : 'default'
+        overflow: 'hidden'
       }}
     >
       {/* الرأس - قابل للتحريك */}
       <div
-        onMouseDown={handleMouseDown}
-        data-no-drag="false"
+        ref={headerRef}
+        onMouseDown={handleHeaderMouseDown}
         style={{
-          padding: '12px 16px',
+          padding: '16px 20px',
           backgroundColor: '#2196f3',
           color: 'white',
-          cursor: 'grab',
+          cursor: isDragging ? 'grabbing' : 'grab',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          borderRadius: '6px 6px 0 0',
-          userSelect: 'none'
+          borderRadius: '9px 9px 0 0',
+          userSelect: 'none',
+          flexShrink: 0
         }}
       >
-        <div style={{ fontSize: '14px', fontWeight: 'bold' }}>الرسائل</div>
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ fontSize: '16px', fontWeight: 'bold' }}>الرسائل المباشرة</div>
+        <div style={{ display: 'flex', gap: '12px' }}>
           <button
             onClick={() => setIsMinimized(!isMinimized)}
             style={{
@@ -161,188 +152,217 @@ export default function AdminMessaging() {
               border: 'none',
               color: 'white',
               cursor: 'pointer',
-              padding: '4px'
+              padding: '4px',
+              display: 'flex',
+              alignItems: 'center'
             }}
-            data-no-drag="true"
           >
-            <Minus size={16} />
+            <Minus size={18} />
           </button>
           <button
-            onClick={() => setSelectedId(null)}
+            onClick={() => setConversations([])}
             style={{
               background: 'none',
               border: 'none',
               color: 'white',
               cursor: 'pointer',
-              padding: '4px'
+              padding: '4px',
+              display: 'flex',
+              alignItems: 'center'
             }}
-            data-no-drag="true"
           >
-            <X size={16} />
+            <X size={18} />
           </button>
         </div>
       </div>
 
       {!isMinimized && (
         <>
-          {/* قائمة المحادثات */}
+          {/* المحتوى الرئيسي */}
           <div style={{
-            flex: '0 0 150px',
-            overflowY: 'auto',
-            padding: '8px',
-            borderBottom: '1px solid #ddd'
-          }}>
-            {conversations.map(conv => (
-              <div
-                key={conv.id}
-                onClick={() => setSelectedId(conv.id)}
-                style={{
-                  padding: '8px',
-                  marginBottom: '4px',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  backgroundColor: selectedId === conv.id ? '#e3f2fd' : '#fff',
-                  borderLeft: selectedId === conv.id ? '3px solid #2196f3' : 'none'
-                }}
-              >
-                <div style={{ fontWeight: 'bold', fontSize: '12px', marginBottom: '2px' }}>
-                  {conv.senderName}
-                </div>
-                <div style={{ fontSize: '11px', color: '#666' }}>
-                  {conv.senderEmail}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* محتوى الرسائل */}
-          <div style={{
-            flex: 1,
-            overflowY: 'auto',
-            padding: '12px',
             display: 'flex',
-            flexDirection: 'column',
-            gap: '8px'
+            flex: 1,
+            minHeight: 0,
+            overflow: 'hidden'
           }}>
-            {current ? (
-              current.messages.map(msg => (
-                <div
-                  key={msg.id}
-                  style={{
-                    display: 'flex',
-                    justifyContent: msg.isFromAdmin ? 'flex-end' : 'flex-start'
-                  }}
-                >
+            {/* قائمة المحادثات الجانبية */}
+            <div style={{
+              width: '280px',
+              borderRight: '2px solid #ddd',
+              overflowY: 'auto',
+              padding: '12px',
+              backgroundColor: '#f9f9f9',
+              flexShrink: 0
+            }}>
+              {conversations.length === 0 ? (
+                <div style={{ textAlign: 'center', color: '#999', fontSize: '13px', padding: '20px' }}>
+                  لا توجد رسائل
+                </div>
+              ) : (
+                conversations.map(conv => (
                   <div
+                    key={conv.id}
+                    onClick={() => setSelectedId(conv.id)}
                     style={{
-                      maxWidth: '70%',
-                      padding: '8px 12px',
+                      padding: '12px',
+                      marginBottom: '8px',
+                      border: '2px solid #ddd',
                       borderRadius: '6px',
-                      backgroundColor: msg.isFromAdmin ? '#c8e6c9' : '#bbdefb',
-                      color: msg.isFromAdmin ? '#1b5e20' : '#0d47a1',
-                      fontSize: '13px',
-                      wordWrap: 'break-word'
+                      cursor: 'pointer',
+                      backgroundColor: selectedId === conv.id ? '#e3f2fd' : '#fff',
+                      borderColor: selectedId === conv.id ? '#2196f3' : '#ddd',
+                      transition: 'all 0.2s'
                     }}
                   >
-                    <div>{msg.text}</div>
-                    <div style={{ fontSize: '10px', marginTop: '4px', opacity: 0.7 }}>
-                      {new Date(msg.timestamp).toLocaleTimeString('ar-SA')}
+                    <div style={{ fontWeight: 'bold', fontSize: '13px', marginBottom: '4px' }}>
+                      {conv.senderName}
+                    </div>
+                    <div style={{ fontSize: '11px', color: '#666', marginBottom: '4px' }}>
+                      {conv.senderEmail}
+                    </div>
+                    <div style={{ fontSize: '10px', color: '#999' }}>
+                      {conv.senderPhone}
                     </div>
                   </div>
-                </div>
-              ))
-            ) : (
-              <div style={{ textAlign: 'center', color: '#999', fontSize: '12px' }}>
-                اختر محادثة
-              </div>
-            )}
-          </div>
+                ))
+              )}
+            </div>
 
-          {/* حقل الإدخال + زر الحذف */}
-          {current && (
+            {/* محتوى الرسائل */}
             <div style={{
-              padding: '12px',
-              borderTop: '1px solid #ddd',
+              flex: 1,
               display: 'flex',
               flexDirection: 'column',
-              gap: '8px'
+              minHeight: 0
             }}>
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <input
-                  type="text"
-                  value={reply}
-                  onChange={(e) => setReply(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSend();
-                    }
-                  }}
-                  placeholder="اكتب..."
-                  style={{
-                    flex: 1,
-                    padding: '6px 8px',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px',
-                    fontSize: '12px'
-                  }}
-                  data-no-drag="true"
-                />
-                <button
-                  onClick={handleSend}
-                  disabled={!reply.trim()}
-                  style={{
-                    backgroundColor: '#2196f3',
-                    color: 'white',
-                    border: 'none',
-                    padding: '6px 10px',
-                    borderRadius: '4px',
-                    cursor: reply.trim() ? 'pointer' : 'not-allowed',
-                    opacity: reply.trim() ? 1 : 0.5,
-                    fontSize: '12px'
-                  }}
-                  data-no-drag="true"
-                >
-                  <Send size={14} />
-                </button>
+              {/* الرسائل */}
+              <div style={{
+                flex: 1,
+                overflowY: 'auto',
+                padding: '16px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+                backgroundColor: '#fff'
+              }}>
+                {current ? (
+                  current.messages.map(msg => (
+                    <div
+                      key={msg.id}
+                      style={{
+                        display: 'flex',
+                        justifyContent: msg.isFromAdmin ? 'flex-end' : 'flex-start'
+                      }}
+                    >
+                      <div
+                        style={{
+                          maxWidth: '70%',
+                          padding: '10px 14px',
+                          borderRadius: '8px',
+                          backgroundColor: msg.isFromAdmin ? '#c8e6c9' : '#bbdefb',
+                          color: msg.isFromAdmin ? '#1b5e20' : '#0d47a1',
+                          fontSize: '14px',
+                          wordWrap: 'break-word'
+                        }}
+                      >
+                        <div>{msg.text}</div>
+                        <div style={{ fontSize: '11px', marginTop: '6px', opacity: 0.7 }}>
+                          {new Date(msg.timestamp).toLocaleTimeString('ar-SA')}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div style={{ textAlign: 'center', color: '#999', fontSize: '14px', margin: 'auto' }}>
+                    اختر محادثة
+                  </div>
+                )}
               </div>
-              <button
-                onClick={() => handleDelete(current.id)}
-                style={{
-                  backgroundColor: '#f44336',
-                  color: 'white',
-                  border: 'none',
-                  padding: '6px 10px',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '12px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '4px'
-                }}
-                data-no-drag="true"
-              >
-                <Trash2 size={14} /> حذف
-              </button>
-            </div>
-          )}
 
-          {/* مقبض التقليص */}
-          <div
-            onMouseDown={() => setIsResizing(true)}
-            style={{
-              position: 'absolute',
-              bottom: 0,
-              right: 0,
-              width: '20px',
-              height: '20px',
-              backgroundColor: '#2196f3',
-              cursor: 'nwse-resize',
-              borderRadius: '0 0 6px 0'
-            }}
-          />
+              {/* حقل الإدخال + زر الحذف */}
+              {current && (
+                <div style={{
+                  padding: '16px',
+                  borderTop: '2px solid #ddd',
+                  backgroundColor: '#f9f9f9',
+                  flexShrink: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px'
+                }}>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <input
+                      type="text"
+                      value={reply}
+                      onChange={(e) => setReply(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSend();
+                        }
+                      }}
+                      placeholder="اكتب ردك هنا..."
+                      style={{
+                        flex: 1,
+                        padding: '10px 12px',
+                        border: '2px solid #ddd',
+                        borderRadius: '6px',
+                        fontSize: '13px',
+                        fontFamily: 'inherit',
+                        outline: 'none',
+                        boxSizing: 'border-box'
+                      }}
+                      onFocus={(e) => {
+                        e.currentTarget.style.borderColor = '#2196f3';
+                      }}
+                      onBlur={(e) => {
+                        e.currentTarget.style.borderColor = '#ddd';
+                      }}
+                    />
+                    <button
+                      onClick={handleSend}
+                      disabled={!reply.trim()}
+                      style={{
+                        backgroundColor: reply.trim() ? '#2196f3' : '#ccc',
+                        color: 'white',
+                        border: 'none',
+                        padding: '10px 16px',
+                        borderRadius: '6px',
+                        cursor: reply.trim() ? 'pointer' : 'not-allowed',
+                        fontSize: '13px',
+                        fontWeight: 'bold',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        flexShrink: 0
+                      }}
+                    >
+                      <Send size={16} /> إرسال
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => handleDelete(current.id)}
+                    style={{
+                      backgroundColor: '#f44336',
+                      color: 'white',
+                      border: 'none',
+                      padding: '10px 16px',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontSize: '13px',
+                      fontWeight: 'bold',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <Trash2 size={16} /> حذف المحادثة
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </>
       )}
     </div>

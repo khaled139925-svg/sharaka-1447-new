@@ -289,7 +289,7 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
 
           {/* Section 2: Owner Info */}
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-right text-gray-800 border-b-2 border-blue-500 pb-3">بيانات المالك</h2>
+            <h2 className="text-2xl font-bold text-right text-gray-800 border-b-2 border-blue-500 pb-3">بيانات الاتصال</h2>
             
             <div>
               <label className="block text-right font-semibold text-gray-700 mb-2">اسم المالك</label>

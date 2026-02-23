@@ -4,6 +4,7 @@ import StoresManagement from '@/pages/StoresManagement';
 import StoresShowcase from '@/pages/StoresShowcase';
 
 import CloneStore from '@/pages/CloneStore';
+import CreateNewStore from '@/pages/CreateNewStore';
 import StoreDetail from '@/pages/StoreDetail';
 import EditStore from '@/pages/EditStore';
 import ProductDetail from '@/pages/ProductDetail';
@@ -11,7 +12,7 @@ import { useState } from 'react';
 import { StoresProvider } from '@/contexts/StoresContext';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<'home' | 'admin' | 'stores-management' | 'stores-showcase' | 'create-store' | 'clone-store' | 'store-detail' | 'edit-store' | 'product-detail'>('home');
+  const [currentPage, setCurrentPage] = useState<'home' | 'admin' | 'stores-management' | 'stores-showcase' | 'create-store' | 'create-new-store' | 'clone-store' | 'store-detail' | 'edit-store' | 'product-detail'>('home');
   const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
 
@@ -37,6 +38,9 @@ function App() {
           <StoresShowcase onBack={() => handleNavigate('home')} onNavigate={handleNavigate} />
         )}
 
+        {currentPage === 'create-new-store' && (
+          <CreateNewStore />
+        )}
         {currentPage === 'clone-store' && (
           <CloneStore />
         )}

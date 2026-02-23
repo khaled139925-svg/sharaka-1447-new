@@ -1,7 +1,7 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useStores, Product, Store } from '@/contexts/StoresContext';
-import { X, Plus, Copy, Loader2 } from 'lucide-react';
+import { X, Plus, Loader2 } from 'lucide-react';
 import { ImageUploadField } from '@/components/ImageUploadField';
 
 export default function CreateStore({ onNavigate }: { onNavigate: (page: string, storeId?: string) => void }) {
@@ -10,7 +10,6 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
   const [cloneUrl, setCloneUrl] = useState('');
   const [cloneLoading, setCloneLoading] = useState(false);
   const [cloneError, setCloneError] = useState<string | null>(null);
-  const [showCloneForm, setShowCloneForm] = useState(false);
   
   const [storeName, setStoreName] = useState('');
   const [storeDescription, setStoreDescription] = useState('');
@@ -22,19 +21,12 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
   const [storePointsRatio, setStorePointsRatio] = useState('10');
   
   const [products, setProducts] = useState<Product[]>([]);
-  const [showAddProduct, setShowAddProduct] = useState(false);
   
   const [productName, setProductName] = useState('');
   const [productPrice, setProductPrice] = useState('');
   const [productImage, setProductImage] = useState('');
   const [productDescription, setProductDescription] = useState('');
   const [productQuantity, setProductQuantity] = useState('');
-
-  // Draggable window state
-  const [windowPos, setWindowPos] = useState({ x: 100, y: 100 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const windowRef = useRef<HTMLDivElement>(null);
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -77,7 +69,6 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
     setProductImage('');
     setProductDescription('');
     setProductQuantity('');
-    setShowAddProduct(false);
   };
 
   const handleRemoveProduct = (id: string) => {
@@ -128,29 +119,6 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
 
     addStore(newStore);
     onNavigate('home');
-  };
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('.window-header')) {
-      setIsDragging(true);
-      setDragOffset({
-        x: e.clientX - windowPos.x,
-        y: e.clientY - windowPos.y
-      });
-    }
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (isDragging) {
-      setWindowPos({
-        x: e.clientX - dragOffset.x,
-        y: e.clientY - dragOffset.y
-      });
-    }
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
   };
 
   return (
@@ -361,120 +329,72 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
 
           {/* Section 3: Products */}
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <Button
-                onClick={() => setShowAddProduct(!showAddProduct)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
-              >
-                <Plus size={20} />
-                إضافة منتج
-              </Button>
-              <h2 className="text-2xl font-bold text-gray-800 border-b-2 border-blue-500 pb-3">المنتجات ({products.length})</h2>
-            </div>
+            <h2 className="text-2xl font-bold text-right text-gray-800 border-b-2 border-blue-500 pb-3">المنتجات ({products.length})</h2>
 
-            {/* Draggable Product Form Window */}
-            {showAddProduct && (
-              <div
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
-                style={{
-                  position: 'fixed',
-                  left: `${windowPos.x}px`,
-                  top: `${windowPos.y}px`,
-                  zIndex: 1000,
-                  userSelect: isDragging ? 'none' : 'auto'
-                }}
-                ref={windowRef}
-              >
-                <div className="bg-white rounded-lg shadow-2xl border-2 border-blue-500 w-96">
-                  {/* Window Header */}
-                  <div
-                    className="window-header bg-blue-600 text-white p-4 rounded-t-lg cursor-move flex items-center justify-between"
-                    onMouseDown={handleMouseDown}
-                  >
-                    <span className="font-bold">إضافة منتج جديد</span>
-                    <button
-                      onClick={() => setShowAddProduct(false)}
-                      className="text-white hover:bg-blue-700 p-1 rounded"
-                    >
-                      <X size={20} />
-                    </button>
-                  </div>
+            {/* Product Form */}
+            <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 space-y-4">
+              <h3 className="text-lg font-bold text-right text-gray-800">إضافة منتج جديد</h3>
+              
+              <div>
+                <label className="block text-right font-semibold text-gray-700 mb-2">اسم المنتج</label>
+                <input
+                  type="text"
+                  value={productName}
+                  onChange={(e) => setProductName(e.target.value)}
+                  placeholder="أدخل اسم المنتج"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  dir="rtl"
+                />
+              </div>
 
-                  {/* Window Content */}
-                  <div className="p-6 space-y-4 max-h-96 overflow-y-auto">
-                    <div>
-                      <label className="block text-right font-semibold text-gray-700 mb-2">اسم المنتج</label>
-                      <input
-                        type="text"
-                        value={productName}
-                        onChange={(e) => setProductName(e.target.value)}
-                        placeholder="أدخل اسم المنتج"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                        dir="rtl"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-right font-semibold text-gray-700 mb-2">السعر</label>
-                        <input
-                          type="number"
-                          value={productPrice}
-                          onChange={(e) => setProductPrice(e.target.value)}
-                          placeholder="0.00"
-                          step="0.01"
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-right font-semibold text-gray-700 mb-2">الكمية</label>
-                        <input
-                          type="number"
-                          value={productQuantity}
-                          onChange={(e) => setProductQuantity(e.target.value)}
-                          placeholder="1"
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-right font-semibold text-gray-700 mb-2">صورة المنتج</label>
-                      <ImageUploadField onImageUpload={setProductImage} />
-                    </div>
-
-                    <div>
-                      <label className="block text-right font-semibold text-gray-700 mb-2">وصف المنتج</label>
-                      <textarea
-                        value={productDescription}
-                        onChange={(e) => setProductDescription(e.target.value)}
-                        placeholder="أدخل وصف المنتج"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                        rows={2}
-                        dir="rtl"
-                      />
-                    </div>
-
-                    <div className="flex gap-2 pt-4">
-                      <Button
-                        onClick={handleAddProduct}
-                        className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
-                      >
-                        إضافة
-                      </Button>
-                      <Button
-                        onClick={() => setShowAddProduct(false)}
-                        className="flex-1 bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg"
-                      >
-                        إلغاء
-                      </Button>
-                    </div>
-                  </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-right font-semibold text-gray-700 mb-2">السعر</label>
+                  <input
+                    type="number"
+                    value={productPrice}
+                    onChange={(e) => setProductPrice(e.target.value)}
+                    placeholder="0.00"
+                    step="0.01"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-right font-semibold text-gray-700 mb-2">الكمية</label>
+                  <input
+                    type="number"
+                    value={productQuantity}
+                    onChange={(e) => setProductQuantity(e.target.value)}
+                    placeholder="1"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-right font-semibold text-gray-700 mb-2">الصورة</label>
+                  <ImageUploadField onImageUpload={setProductImage} />
                 </div>
               </div>
-            )}
+
+              <div>
+                <label className="block text-right font-semibold text-gray-700 mb-2">وصف المنتج</label>
+                <textarea
+                  value={productDescription}
+                  onChange={(e) => setProductDescription(e.target.value)}
+                  placeholder="أدخل وصف المنتج"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  rows={2}
+                  dir="rtl"
+                />
+              </div>
+
+              <Button
+                onClick={handleAddProduct}
+                className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold"
+              >
+                <Plus size={20} className="ml-2" />
+                إضافة المنتج
+              </Button>
+            </div>
 
             {/* Products List */}
             <div className="space-y-4">

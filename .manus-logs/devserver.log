@@ -1336,3 +1336,10 @@
 [2026-02-23T10:39:13.559Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
 [2026-02-23T10:39:14.301Z] [OAuth] Initialized with baseURL: https://api.manus.im
 [2026-02-23T10:39:14.302Z] Server running on http://localhost:3000/
+[2026-02-23T10:50:36.030Z] Dev server process group stopped
+[2026-02-23T10:50:36.031Z] SIGTERM received, shutting down gracefully
+[2026-02-23T10:50:36.031Z] Server closed
+[2026-02-23T10:50:36.050Z] Dev server exited with code -15
+[2026-02-23T10:50:39.035Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-02-23T10:50:39.891Z] [OAuth] Initialized with baseURL: https://api.manus.im
+[2026-02-23T10:50:39.892Z] Server running on http://localhost:3000/

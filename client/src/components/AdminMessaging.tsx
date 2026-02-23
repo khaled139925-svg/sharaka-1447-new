@@ -25,22 +25,32 @@ export default function AdminMessaging() {
   const [replyText, setReplyText] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // تحميل الرسائل من localStorage
+  // تحميل الرسالل من localStorage
   useEffect(() => {
-    const savedMessages = localStorage.getItem('directMessages');
-    if (savedMessages) {
-      try {
-        const parsed = JSON.parse(savedMessages);
-        setConversations(parsed);
-      } catch (error) {
-        console.error('خطأ في تحميل الرسائل:', error);
+    const loadMessages = () => {
+      const saved = localStorage.getItem('clientConversation');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setConversations([parsed]);
+        } catch (error) {
+          console.error('خطأ في تحميل الرسالل:', error);
+        }
       }
-    }
+    };
+    
+    loadMessages();
+    
+    // تحديث دوري كل ثانية
+    const interval = setInterval(loadMessages, 1000);
+    return () => clearInterval(interval);
   }, []);
 
-  // حفظ الرسائل في localStorage
+  // حفظ الرسالل في localStorage
   const saveMessages = (updatedConversations: Message[]) => {
-    localStorage.setItem('directMessages', JSON.stringify(updatedConversations));
+    if (updatedConversations.length > 0) {
+      localStorage.setItem('clientConversation', JSON.stringify(updatedConversations[0]));
+    }
     setConversations(updatedConversations);
   };
 

@@ -453,15 +453,6 @@ export default function Home({ onAdminClick, onNavigate }: { onAdminClick?: () =
               )}
             </button>
 
-            <button
-              onClick={() => setShowMessages(!showMessages)}
-              className="flex items-center gap-2 px-4 py-3 rounded-md border border-green-200 bg-green-50 hover:bg-green-100 transition-all duration-300"
-              title="الرسالل المباشرة"
-            >
-              <MessageCircle className="w-5 h-5 text-green-600" />
-              <span className="text-sm font-semibold text-green-600">رسالل</span>
-            </button>
-
             <div className="relative">
             <button
               onClick={() => setShowLanguageMenu(!showLanguageMenu)}

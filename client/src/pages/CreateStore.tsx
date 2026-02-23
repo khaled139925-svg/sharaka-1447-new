@@ -343,7 +343,8 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
             </div>
 
             {showAddProduct && (
-              <div className="bg-gray-50 p-6 rounded-lg space-y-4">
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-lg p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto space-y-4">
                 <div>
                   <label className="block text-right font-semibold text-gray-700 mb-2">اسم المنتج</label>
                   <input
@@ -410,6 +411,7 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
                   >
                     إلغاء
                   </Button>
+                </div>
                 </div>
               </div>
             )}

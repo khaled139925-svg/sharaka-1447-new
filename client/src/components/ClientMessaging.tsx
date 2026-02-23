@@ -43,22 +43,38 @@ export default function ClientMessaging() {
     }
   }, []);
 
+  // تحديث الرسالل من localStorage باستمرار
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const saved = localStorage.getItem('clientConversation');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setConversation(parsed);
+        } catch (error) {
+          console.error('خطأ في تحديث الرسالل:', error);
+        }
+      }
+    }, 1000); // تحديث كل ثانية
+    return () => clearInterval(interval);
+  }, []);
+
   // تمرير تلقائي للرسالة الأخيرة
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [conversation?.messages]);
 
   const handleStartConversation = () => {
-    if (!formData.name.trim() || !formData.email.trim() || !formData.phone.trim()) {
-      alert('يرجى ملء جميع الحقول');
+    if (!formData.name.trim()) {
+      alert('يرجى إدخال اسمك');
       return;
     }
 
     const newConversation: ClientConversation = {
       id: Date.now().toString(),
       senderName: formData.name,
-      senderEmail: formData.email,
-      senderPhone: formData.phone,
+      senderEmail: 'hidden',
+      senderPhone: 'hidden',
       messages: [],
       lastMessageTime: Date.now()
     };
@@ -144,22 +160,7 @@ export default function ClientMessaging() {
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-right"
             dir="rtl"
           />
-          <input
-            type="email"
-            placeholder="بريدك الإلكتروني"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-right"
-            dir="rtl"
-          />
-          <input
-            type="tel"
-            placeholder="رقم الهاتف"
-            value={formData.phone}
-            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-right"
-            dir="rtl"
-          />
+
           <Button
             onClick={handleStartConversation}
             className="w-full bg-green-500 hover:bg-green-600 text-white"
@@ -172,7 +173,6 @@ export default function ClientMessaging() {
           {/* رأس المحادثة */}
           <div className="p-3 border-b border-gray-200 bg-gray-50">
             <p className="text-sm font-semibold text-gray-800">{conversation.senderName}</p>
-            <p className="text-xs text-gray-500">{conversation.senderEmail}</p>
           </div>
 
           {/* محتوى الرسائل */}

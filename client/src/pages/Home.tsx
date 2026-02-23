@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useStores, PurchaseRecord } from '@/contexts/StoresContext';
 import ExternalStoreViewer from './ExternalStoreViewer';
 import HybridStoreCloner from './HybridStoreCloner';
-import Messages from '@/components/Messages';
+import ClientMessaging from '@/components/ClientMessaging';
 import { 
   Users, Briefcase, ShoppingBag, Award, MessageCircle, Info, 
   ChevronRight, MapPin, TrendingUp, Zap, Mail, Phone, AlertCircle,
@@ -903,6 +903,9 @@ export default function Home({ onAdminClick, onNavigate }: { onAdminClick?: () =
         </div>
       )}
       
+      {/* مكون الرسائل الجديد */}
+      <ClientMessaging />
+
       {/* زر الإدارة المخفي */}
       {onAdminClick && (
         <button

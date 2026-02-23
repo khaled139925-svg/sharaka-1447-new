@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Lock, LogOut, ChevronRight, ArrowLeft } from 'lucide-react';
+import AdminMessaging from '@/components/AdminMessaging';
 
 interface AdminUser {
   isAuthenticated: boolean;
@@ -91,6 +92,8 @@ export default function Admin({ onBack, onNavigate }: { onBack?: () => void; onN
       onNavigate?.('create-store');
     } else if (sectionId === 'stores' && action === 'view') {
       onNavigate?.('stores-management');
+    } else if (sectionId === 'messages' && action === 'view') {
+      setSelectedSection('messages-view');
     }
     // سيتم إضافة الأقسام الأخرى لاحقاً
   };
@@ -145,6 +148,38 @@ export default function Admin({ onBack, onNavigate }: { onBack?: () => void; onN
               </div>
             </div>
           )}
+        </div>
+      </div>
+    );
+  }
+
+  // شاشة عرض الرسائل
+  if (selectedSection === 'messages-view') {
+    return (
+      <div className="min-h-screen w-full bg-gray-50 flex flex-col">
+        <header className="w-full bg-white shadow-md">
+          <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 className="text-2xl font-bold text-blue-600">إدارة الرسائل</h1>
+            <div className="flex gap-4">
+              <Button
+                onClick={() => setSelectedSection(null)}
+                className="flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                العودة
+              </Button>
+              <Button
+                onClick={handleAdminLogout}
+                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg"
+              >
+                <LogOut className="w-4 h-4" />
+                تسجيل الخروج
+              </Button>
+            </div>
+          </div>
+        </header>
+        <div className="flex-1 p-6">
+          <AdminMessaging />
         </div>
       </div>
     );

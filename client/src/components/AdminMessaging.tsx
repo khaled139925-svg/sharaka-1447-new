@@ -24,7 +24,7 @@ export default function AdminMessaging() {
   const [reply, setReply] = useState('');
   const [isMinimized, setIsMinimized] = useState(false);
   const [position, setPosition] = useState({ x: 50, y: 50 });
-  const [size, setSize] = useState({ width: 900, height: 700 });
+  const [size, setSize] = useState({ width: 600, height: 500 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const windowRef = useRef<HTMLDivElement>(null);

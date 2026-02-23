@@ -88,14 +88,11 @@ export default function Admin({ onBack, onNavigate }: { onBack?: () => void; onN
   };
 
   const handleButtonClick = (sectionId: string, action: string) => {
-    if (sectionId === 'stores' && action === 'create') {
-      onNavigate?.('create-store');
-    } else if (sectionId === 'stores' && action === 'view') {
+    if (sectionId === 'stores' && action === 'view') {
       onNavigate?.('stores-management');
     } else if (sectionId === 'messages' && action === 'view') {
       setSelectedSection('messages-view');
     }
-    // سيتم إضافة الأقسام الأخرى لاحقاً
   };
 
   // شاشة تسجيل الدخول

@@ -177,16 +177,16 @@ export default function AdminMessaging() {
       <div className="flex-1 flex flex-col bg-white">
         {currentConversation ? (
           <>
-            {/* رأس المحادثة */}
-            <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-blue-700 text-white flex justify-between items-center">
-              <div>
+            {/* رأس المحاثة */}
+            <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-blue-700 text-white flex justify-between items-start">
+              <div className="flex-1">
                 <h3 className="text-lg font-bold">{currentConversation.senderName}</h3>
                 <p className="text-sm text-blue-100">{currentConversation.senderEmail}</p>
                 <p className="text-sm text-blue-100">{currentConversation.senderPhone}</p>
               </div>
               <Button
                 onClick={() => handleDeleteConversation(currentConversation.id)}
-                className="bg-red-600 hover:bg-red-700 text-white"
+                className="bg-red-600 hover:bg-red-700 text-white ml-4 flex-shrink-0"
               >
                 <Trash2 size={18} />
               </Button>

@@ -342,79 +342,7 @@ export default function CreateStore({ onNavigate }: { onNavigate: (page: string,
               <h2 className="text-2xl font-bold text-gray-800 border-b-2 border-blue-500 pb-3">المنتجات ({products.length})</h2>
             </div>
 
-            {showAddProduct && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                <div className="bg-white rounded-lg p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto space-y-4">
-                <div>
-                  <label className="block text-right font-semibold text-gray-700 mb-2">اسم المنتج</label>
-                  <input
-                    type="text"
-                    value={productName}
-                    onChange={(e) => setProductName(e.target.value)}
-                    placeholder="أدخل اسم المنتج"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                    dir="rtl"
-                  />
-                </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-right font-semibold text-gray-700 mb-2">السعر</label>
-                    <input
-                      type="number"
-                      value={productPrice}
-                      onChange={(e) => setProductPrice(e.target.value)}
-                      placeholder="0.00"
-                      step="0.01"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-right font-semibold text-gray-700 mb-2">الكمية</label>
-                    <input
-                      type="number"
-                      value={productQuantity}
-                      onChange={(e) => setProductQuantity(e.target.value)}
-                      placeholder="1"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-right font-semibold text-gray-700 mb-2">صورة المنتج</label>
-                  <ImageUploadField onImageUpload={setProductImage} />
-                </div>
-
-                <div>
-                  <label className="block text-right font-semibold text-gray-700 mb-2">وصف المنتج</label>
-                  <textarea
-                    value={productDescription}
-                    onChange={(e) => setProductDescription(e.target.value)}
-                    placeholder="أدخل وصف المنتج"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                    rows={2}
-                    dir="rtl"
-                  />
-                </div>
-
-                <div className="flex gap-2">
-                  <Button
-                    onClick={handleAddProduct}
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
-                  >
-                    إضافة
-                  </Button>
-                  <Button
-                    onClick={() => setShowAddProduct(false)}
-                    className="flex-1 bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg"
-                  >
-                    إلغاء
-                  </Button>
-                </div>
-                </div>
-              </div>
-            )}
 
             {/* Products List */}
             <div className="space-y-4">

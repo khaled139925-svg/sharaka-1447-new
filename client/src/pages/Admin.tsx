@@ -156,7 +156,7 @@ export default function Admin({ onBack, onNavigate }: { onBack?: () => void; onN
   // شاشة عرض الرسائل
   if (selectedSection === 'messages-view') {
     return (
-      <div className="min-h-screen w-full bg-gray-50 flex flex-col">
+      <div className="h-screen w-full bg-gray-50 flex flex-col">
         <header className="w-full bg-white shadow-md">
           <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
             <h1 className="text-2xl font-bold text-blue-600">إدارة الرسائل</h1>
@@ -178,7 +178,7 @@ export default function Admin({ onBack, onNavigate }: { onBack?: () => void; onN
             </div>
           </div>
         </header>
-        <div className="flex-1 p-6">
+        <div className="flex-1 p-6 h-full min-h-0 overflow-hidden">
           <AdminMessaging />
         </div>
       </div>

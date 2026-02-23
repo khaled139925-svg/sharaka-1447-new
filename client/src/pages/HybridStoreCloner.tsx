@@ -257,16 +257,16 @@ export default function HybridStoreCloner({ onClose, onStoreCreated }: { onClose
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 flex justify-between items-center">
+      <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        {/* Header - قابل للحركة */}
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 flex justify-between items-center flex-shrink-0">
           <h2 className="text-2xl font-bold">استنساخ متجر جديد</h2>
           <button onClick={onClose} className="hover:bg-blue-800 p-2 rounded-lg transition">
             <X size={24} />
           </button>
         </div>
 
-        <div className="p-6">
+        <div className="p-6 overflow-y-auto flex-1">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-4">
               {error}
@@ -360,21 +360,35 @@ export default function HybridStoreCloner({ onClose, onStoreCreated }: { onClose
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">الشعار (اللوجو)</label>
                     <div className="space-y-2">
-                      <input
-                        type="url"
-                        value={formData.logo}
-                        onChange={(e) => handleFormChange('logo', e.target.value)}
-                        placeholder="الصق رابط الصورة مباشرة (URL)"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
-                        dir="rtl"
-                      />
+                      <label className="flex items-center justify-center w-full px-4 py-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition">
+                        <div className="text-center">
+                          <Upload size={24} className="mx-auto mb-2 text-gray-400" />
+                          <p className="text-sm text-gray-600">انقر لتحميل الشعار</p>
+                          <p className="text-xs text-gray-400">أو اسحب الملف</p>
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = (event) => {
+                                const base64 = event.target?.result as string;
+                                handleFormChange('logo', base64);
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                          className="hidden"
+                        />
+                      </label>
                       {formData.logo && (
                         <div className="flex items-center justify-center bg-gray-100 rounded-lg p-4 border-2 border-dashed border-gray-300">
                           <img
                             src={formData.logo}
                             alt="معاينة الشعار"
                             className="max-h-24 max-w-24 object-contain"
-                            onError={() => setError('لم يتمكن تحميل الصورة. تأكد من رابط الصورة')}
                           />
                         </div>
                       )}

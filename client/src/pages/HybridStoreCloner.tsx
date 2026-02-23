@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { useStores } from '@/contexts/StoresContext';
-import { X, Upload, Plus, Trash2, Eye, EyeOff, Clock, MapPin, MessageSquare } from 'lucide-react';
+import { X, Upload, Plus, Trash2, Eye, EyeOff } from 'lucide-react';
 
 interface ExtractedData {
   title?: string;
@@ -88,15 +88,6 @@ const FEATURES = [
   'دعم العملاء 24/7'
 ];
 
-const QUICK_CONTACT_METHODS = [
-  'WhatsApp',
-  'Telegram',
-  'Viber',
-  'Signal',
-  'Email',
-  'Phone'
-];
-
 export default function HybridStoreCloner({ onClose, onStoreCreated }: { onClose: () => void; onStoreCreated?: () => void }) {
   const { addStore } = useStores();
   const [step, setStep] = useState<'url' | 'form' | 'preview'>('url');
@@ -117,13 +108,7 @@ export default function HybridStoreCloner({ onClose, onStoreCreated }: { onClose
     socialLinks: {},
     contactInfo: {},
     paymentMethods: [],
-    shippingOptions: [],
-    contactUs: {
-      welcomeMessage: '',
-      businessHours: '',
-      mapLocation: '',
-      quickContactMethods: []
-    }
+    shippingOptions: []
   });
 
   const handleExtractData = async () => {
@@ -484,87 +469,6 @@ export default function HybridStoreCloner({ onClose, onStoreCreated }: { onClose
                       <span className="text-sm text-gray-700">{option}</span>
                     </label>
                   ))}
-                </div>
-              </div>
-
-              {/* Contact Us Section */}
-              <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-200">
-                <div className="flex items-center gap-2 mb-4">
-                  <MessageSquare size={24} className="text-blue-600" />
-                  <h3 className="text-lg font-bold text-gray-800">اتصل بنا</h3>
-                </div>
-                
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">رسالة الترحيب</label>
-                    <textarea
-                      placeholder="مثال: مرحباً بك في متجرنا. نحن هنا لخدمتك 24/7"
-                      value={formData.contactUs.welcomeMessage || ''}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        contactUs: { ...prev.contactUs, welcomeMessage: e.target.value }
-                      }))}
-                      rows={2}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                      <Clock size={18} /> ساعات العمل
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="مثال: من 9 صباحاً إلى 10 مساءً يومياً"
-                      value={formData.contactUs.businessHours || ''}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        contactUs: { ...prev.contactUs, businessHours: e.target.value }
-                      }))}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                      <MapPin size={18} /> موقع المتجر على الخريطة
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="رابط Google Maps أو العنوان"
-                      value={formData.contactUs.mapLocation || ''}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        contactUs: { ...prev.contactUs, mapLocation: e.target.value }
-                      }))}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-3">طرق التواصل السريع</label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                      {QUICK_CONTACT_METHODS.map(method => (
-                        <label key={method} className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={formData.contactUs.quickContactMethods?.includes(method) || false}
-                            onChange={() => setFormData(prev => ({
-                              ...prev,
-                              contactUs: {
-                                ...prev.contactUs,
-                                quickContactMethods: prev.contactUs.quickContactMethods?.includes(method)
-                                  ? prev.contactUs.quickContactMethods.filter(m => m !== method)
-                                  : [...(prev.contactUs.quickContactMethods || []), method]
-                              }
-                            }))}
-                            className="w-4 h-4 rounded"
-                          />
-                          <span className="text-sm text-gray-700">{method}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
                 </div>
               </div>
 

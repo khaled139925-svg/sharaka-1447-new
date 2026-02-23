@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useStores, PurchaseRecord } from '@/contexts/StoresContext';
 import ExternalStoreViewer from './ExternalStoreViewer';
 import HybridStoreCloner from './HybridStoreCloner';
+import Messages from '@/components/Messages';
 import { 
   Users, Briefcase, ShoppingBag, Award, MessageCircle, Info, 
   ChevronRight, MapPin, TrendingUp, Zap, Mail, Phone, AlertCircle,
@@ -312,6 +313,7 @@ export default function Home({ onAdminClick, onNavigate }: { onAdminClick?: () =
     pointsRatio: number;
   } | null>(null);
   const [showHybridCloner, setShowHybridCloner] = useState(false);
+  const [showMessages, setShowMessages] = useState(false);
   const [bookingData, setBookingData] = useState({
     name: '',
     email: '',
@@ -403,6 +405,24 @@ export default function Home({ onAdminClick, onNavigate }: { onAdminClick?: () =
           onStoreCreated={() => setShowHybridCloner(false)}
         />
       )}
+      {showMessages && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-6xl max-h-96 overflow-y-auto">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 sticky top-0 bg-white">
+              <h2 className="text-xl font-bold text-gray-800">الرسائل المباشرة</h2>
+              <button
+                onClick={() => setShowMessages(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="p-4">
+              <Messages />
+            </div>
+          </div>
+        </div>
+      )}
       <header style={{ position: 'fixed', top: 0, left: 0, right: 0, width: '100%', zIndex: 50, backgroundColor: 'white', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }} className="">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -431,6 +451,15 @@ export default function Home({ onAdminClick, onNavigate }: { onAdminClick?: () =
               ) : (
                 <Menu size={24} className="text-orange-500" />
               )}
+            </button>
+
+            <button
+              onClick={() => setShowMessages(!showMessages)}
+              className="flex items-center gap-2 px-4 py-3 rounded-md border border-green-200 bg-green-50 hover:bg-green-100 transition-all duration-300"
+              title="الرسالل المباشرة"
+            >
+              <MessageCircle className="w-5 h-5 text-green-600" />
+              <span className="text-sm font-semibold text-green-600">رسالل</span>
             </button>
 
             <div className="relative">

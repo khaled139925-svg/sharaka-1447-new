@@ -382,7 +382,7 @@ export default function HybridStoreCloner({ onClose, onStoreCreated }: { onClose
 
               {/* Contact Info */}
               <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-lg font-bold text-gray-800 mb-4">معلومات التواصل</h3>
+                <h3 className="text-lg font-bold text-gray-800 mb-4">بيانات الاتصال</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <input

@@ -16,7 +16,6 @@ coverage/
 # Package files
 npm-debug.log
 yarn-error.log
-pnpm-lock.yaml
 
 # Database
 *.db

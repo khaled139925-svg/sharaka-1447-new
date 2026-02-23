@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Lock, LogOut, ChevronRight, ArrowLeft } from 'lucide-react';
-import AdvancedMessaging from '@/components/AdvancedMessaging';
 
 interface AdminUser {
   isAuthenticated: boolean;
@@ -70,7 +69,6 @@ export default function Admin({ onBack, onNavigate }: { onBack?: () => void; onN
   const [password, setPassword] = useState('');
   const [showPasswordInput, setShowPasswordInput] = useState(false);
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
-  const [showMessaging, setShowMessaging] = useState(false);
 
   const handleAdminLogin = () => {
     if (password === 'tariq') {
@@ -93,23 +91,9 @@ export default function Admin({ onBack, onNavigate }: { onBack?: () => void; onN
       onNavigate?.('create-store');
     } else if (sectionId === 'stores' && action === 'view') {
       onNavigate?.('stores-management');
-    } else if (sectionId === 'messages' && action === 'view') {
-      setShowMessaging(true);
     }
     // سيتم إضافة الأقسام الأخرى لاحقاً
   };
-
-  // عرض المحادثات
-  if (showMessaging) {
-    return (
-      <>
-        <AdvancedMessaging
-          isAdmin={true}
-          onClose={() => setShowMessaging(false)}
-        />
-      </>
-    );
-  }
 
   // شاشة تسجيل الدخول
   if (!adminUser.isAuthenticated) {

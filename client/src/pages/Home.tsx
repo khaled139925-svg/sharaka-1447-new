@@ -6,6 +6,7 @@ import { useStores, PurchaseRecord } from '@/contexts/StoresContext';
 import ExternalStoreViewer from './ExternalStoreViewer';
 import HybridStoreCloner from './HybridStoreCloner';
 import Messages from '@/components/Messages';
+import AdvancedMessaging from '@/components/AdvancedMessaging';
 import { 
   Users, Briefcase, ShoppingBag, Award, MessageCircle, Info, 
   ChevronRight, MapPin, TrendingUp, Zap, Mail, Phone, AlertCircle,
@@ -406,10 +407,18 @@ export default function Home({ onAdminClick, onNavigate }: { onAdminClick?: () =
         />
       )}
       {showMessages && (
+        <AdvancedMessaging
+          isAdmin={false}
+          onClose={() => setShowMessages(false)}
+        />
+      )}
+
+      {/* Old Messages Component - Commented Out */}
+      {false && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-lg w-full max-w-6xl max-h-96 overflow-y-auto">
             <div className="flex items-center justify-between p-4 border-b border-gray-200 sticky top-0 bg-white">
-              <h2 className="text-xl font-bold text-gray-800">الرسائل المباشرة</h2>
+              <h2 className="text-xl font-bold text-gray-800">الرسالل المباشرة</h2>
               <button
                 onClick={() => setShowMessages(false)}
                 className="text-gray-500 hover:text-gray-700"

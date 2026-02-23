@@ -1190,6 +1190,3 @@
 [2026-02-23T04:23:03.433Z] at scrapeStoreFromUrl (/home/ubuntu/sharaka-platform/server/_core/scrapeStore.ts:131:11)
 [2026-02-23T04:23:03.433Z] at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
 [2026-02-23T04:23:03.433Z] at async <anonymous> (/home/ubuntu/sharaka-platform/server/_core/index.ts:34:19)
-[2026-02-23T04:43:53.322Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
-[2026-02-23T04:43:54.115Z] [OAuth] Initialized with baseURL: https://api.manus.im
-[2026-02-23T04:43:54.116Z] Server running on http://localhost:3000/

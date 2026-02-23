@@ -25,21 +25,6 @@ export interface Store {
   products: Product[];
   storeBalance: number; // رصيد النقاط للمتجر (هدايا قابلة للتبادل)
   giftHistory: GiftRecord[]; // سجل الهدايا المعطاة
-  contactInfo?: {
-    phone?: string;
-    email?: string;
-    address?: string;
-  };
-  socialLinks?: {
-    facebook?: string;
-    instagram?: string;
-    twitter?: string;
-    whatsapp?: string;
-    telegram?: string;
-  };
-  businessHours?: string;
-  mapLocation?: string;
-  welcomeMessage?: string;
 }
 
 export interface GiftRecord {

@@ -1,13 +1,26 @@
-# pnpm configuration for reliable builds
+# pnpm configuration for CI/CD environments
+# Force pnpm to recognize this as a CI environment
+ci-mode=true
+
+# Disable TTY checks completely
+force=true
+
+# Installation settings
 shamefully-hoist=false
 strict-peer-dependencies=false
 auto-install-peers=true
-prefer-frozen-lockfile=true
+prefer-frozen-lockfile=false
+
+# Node linker settings
 node-linker=hoisted
 
-# CI environment settings - disable TTY checks
-force=true
+# Build and verification settings
 ignore-scripts=false
 verify-store-integrity=false
-ci-mode=true
 recursive-install=true
+
+# Disable optional dependencies in CI
+optional=false
+
+# Allow installation without TTY
+interactive=false

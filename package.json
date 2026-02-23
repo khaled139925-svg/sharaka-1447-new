@@ -9,11 +9,11 @@
   },
   "packageManager": "pnpm@10.29.2",
   "scripts": {
-    "dev": "CI=true pnpm install && NODE_ENV=development tsx watch server/_core/index.ts",
-    "build": "pnpm run build:clean && CI=true pnpm install --frozen-lockfile --no-optional && CI=true vite build && esbuild server/_core/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
-    "build:clean": "rm -rf --force node_modules/.vite dist 2>/dev/null || true",
-    "test": "CI=true vitest run",
-    "db:push": "CI=true drizzle-kit generate && CI=true drizzle-kit migrate"
+    "dev": "NODE_ENV=development tsx watch server/_core/index.ts",
+    "build": "pnpm run build:clean && pnpm install --no-optional --no-frozen-lockfile && vite build && esbuild server/_core/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
+    "build:clean": "rm -rf node_modules/.vite dist 2>/dev/null || true",
+    "test": "vitest run",
+    "db:push": "drizzle-kit generate && drizzle-kit migrate"
   },
   "dependencies": {
     "@trpc/client": "^11.10.0",

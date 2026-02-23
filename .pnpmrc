@@ -4,3 +4,8 @@ strict-peer-dependencies=false
 auto-install-peers=true
 prefer-frozen-lockfile=true
 node-linker=hoisted
+
+# CI environment settings
+force=true
+ignore-scripts=false
+verify-store-integrity=false

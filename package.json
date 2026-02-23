@@ -8,9 +8,9 @@
     "pnpm": ">=8"
   },
   "scripts": {
-    "dev": "NODE_ENV=development tsx watch server/_core/index.ts",
-    "build": "pnpm run build:clean && CI=true vite build && esbuild server/_core/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
-    "build:clean": "rm -rf node_modules/.vite dist",
+    "dev": "pnpm install && NODE_ENV=development tsx watch server/_core/index.ts",
+    "build": "pnpm run build:clean && CI=true pnpm install --frozen-lockfile && vite build && esbuild server/_core/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
+    "build:clean": "rm -rf --force node_modules/.vite dist || true",
     "test": "vitest run",
     "db:push": "drizzle-kit generate && drizzle-kit migrate"
   },

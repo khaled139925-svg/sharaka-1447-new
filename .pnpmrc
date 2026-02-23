@@ -5,7 +5,9 @@ auto-install-peers=true
 prefer-frozen-lockfile=true
 node-linker=hoisted
 
-# CI environment settings
+# CI environment settings - disable TTY checks
 force=true
 ignore-scripts=false
 verify-store-integrity=false
+ci-mode=true
+recursive-install=true

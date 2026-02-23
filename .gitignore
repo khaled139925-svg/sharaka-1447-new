@@ -1,7 +1,6 @@
 # Dependencies
 node_modules/
 .pnpm-store/
-pnpm-lock.yaml
 
 # Build outputs
 dist/
@@ -15,9 +14,9 @@ out/
 coverage/
 
 # Package files
-package-lock.json
 npm-debug.log
 yarn-error.log
+pnpm-lock.yaml
 
 # Database
 *.db

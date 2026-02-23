@@ -91,6 +91,7 @@ export default function Admin({ onBack, onNavigate }: { onBack?: () => void; onN
     if (sectionId === 'stores' && action === 'view') {
       onNavigate?.('stores-management');
     } else if (sectionId === 'stores' && action === 'create') {
+      setSelectedSection(null);
       onNavigate?.('create-new-store');
     } else if (sectionId === 'messages' && action === 'view') {
       setSelectedSection('messages-view');

@@ -1,43 +1,10 @@
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Star, Users, Clock, Award, Search, ChevronRight, MessageCircle, Globe } from 'lucide-react';
+import { Star, Users, Clock, Award, Search, ChevronRight, MessageCircle } from 'lucide-react';
 
 
 const LOGO_SMALL = 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663333045223/RqiKqWIUsupxHOCa.png';
 const LOGO_LARGE = 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663333045223/RqiKqWIUsupxHOCa.png';
-
-const COUNTRIES = [
-  // دول الخليج
-  { code: 'SA', name: 'السعودية', flag: '🇸🇦' },
-  { code: 'AE', name: 'الإمارات', flag: '🇦🇪' },
-  { code: 'KW', name: 'الكويت', flag: '🇰🇼' },
-  { code: 'QA', name: 'قطر', flag: '🇶🇦' },
-  { code: 'BH', name: 'البحرين', flag: '🇧🇭' },
-  { code: 'OM', name: 'عمان', flag: '🇴🇲' },
-  // دول عربية أخرى
-  { code: 'EG', name: 'مصر', flag: '🇪🇬' },
-  { code: 'JO', name: 'الأردن', flag: '🇯🇴' },
-  { code: 'LB', name: 'لبنان', flag: '🇱🇧' },
-  { code: 'SY', name: 'سوريا', flag: '🇸🇾' },
-  { code: 'IQ', name: 'العراق', flag: '🇮🇶' },
-  { code: 'MA', name: 'المغرب', flag: '🇲🇦' },
-  { code: 'TN', name: 'تونس', flag: '🇹🇳' },
-  { code: 'DZ', name: 'الجزائر', flag: '🇩🇿' },
-  { code: 'PK', name: 'باكستان', flag: '🇵🇰' },
-  { code: 'TR', name: 'تركيا', flag: '🇹🇷' },
-  // دول أوروبية
-  { code: 'GB', name: 'بريطانيا', flag: '🇬🇧' },
-  { code: 'DE', name: 'ألمانيا', flag: '🇩🇪' },
-  { code: 'FR', name: 'فرنسا', flag: '🇫🇷' },
-  { code: 'IT', name: 'إيطاليا', flag: '🇮🇹' },
-  { code: 'ES', name: 'إسبانيا', flag: '🇪🇸' },
-  { code: 'NL', name: 'هولندا', flag: '🇳🇱' },
-  { code: 'SE', name: 'السويد', flag: '🇸🇪' },
-  { code: 'CH', name: 'سويسرا', flag: '🇨🇭' },
-  // أمريكا
-  { code: 'US', name: 'أمريكا', flag: '🇺🇸' },
-  { code: 'CA', name: 'كندا', flag: '🇨🇦' },
-];
 
 const CONSULTANTS = [
   {
@@ -76,8 +43,6 @@ interface HomeProps {
 export default function Home({ onNavigate }: HomeProps) {
   const [language, setLanguage] = useState<'ar' | 'en'>('ar');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCountry, setSelectedCountry] = useState('SA');
-  const [showCountries, setShowCountries] = useState(false);
 
   const isRTL = language === 'ar';
 
@@ -135,7 +100,7 @@ export default function Home({ onNavigate }: HomeProps) {
   return (
     <div className={`min-h-screen bg-white ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white shadow-md">
+      <header className="sticky top-0 z-50 bg-white shadow-md border-b-2" style={{ borderColor: '#1976D2' }}>
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <img src={LOGO_SMALL} alt="Sharaka" className="h-12 w-12 object-contain" />
@@ -144,37 +109,7 @@ export default function Home({ onNavigate }: HomeProps) {
             </h1>
           </div>
 
-          <div className="flex items-center gap-4 relative">
-            {/* Country Selector */}
-            <div className="relative">
-              <button
-                onClick={() => setShowCountries(!showCountries)}
-                className="px-3 py-2 text-sm font-semibold rounded-lg transition flex items-center gap-2"
-                style={{ color: '#1976D2', border: '2px solid #1976D2' }}
-              >
-                <Globe size={16} />
-                <span>{COUNTRIES.find(c => c.code === selectedCountry)?.flag}</span>
-              </button>
-              {showCountries && (
-                <div className="absolute top-full mt-2 right-0 bg-white border-2 border-blue-400 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto w-48">
-                  {COUNTRIES.map((country) => (
-                    <button
-                      key={country.code}
-                      onClick={() => {
-                        setSelectedCountry(country.code);
-                        setShowCountries(false);
-                      }}
-                      className="w-full text-right px-4 py-2 hover:bg-blue-50 transition flex items-center gap-2"
-                    >
-                      <span>{country.flag}</span>
-                      <span className="text-sm">{country.name}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Language Button */}
+          <div className="flex items-center gap-4">
             <button
               onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
               className="px-3 py-2 text-sm font-semibold rounded-lg transition"

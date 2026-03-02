@@ -1,6 +1,0 @@
-tree fa4ea286c9ec4d052c43c438d4be097acc368907
-parent 3f9bf57b1e994fb5dcacf1e6f6cce7854900dba8
-author Manus <dev-agent@manus.ai> 1771845829 -0500
-committer Manus <dev-agent@manus.ai> 1771845829 -0500
-
-Checkpoint: تم إنشاء صفحة CreateNewStore.tsx جديدة بدون أي نوافذ معلقة أو جامدة. جميع المحتوى في الصفحة مباشرة وقابل للتمرير. تم إضافة المسار في App.tsx وربط زر "إنشاء متجر" في Admin.tsx بالصفحة الجديدة.

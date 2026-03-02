@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Star, Users, Clock, Award, Search, ChevronRight, MessageCircle } from 'lucide-react';
 
-const LOGO_URL = 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663333045223/nOdruZWcjEkuqgXg.jpeg';
+const LOGO_SMALL = '/logo-sharaka.png';
+const LOGO_LARGE = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663333045223/LPqWsDAqrBRRgfKZkbJUrr/sharaka-logo-no-black-KiEvvyY8x4vab9fVc6R8YH.webp';
 
 const CONSULTANTS = [
   {
@@ -128,7 +129,7 @@ export default function Home() {
       <header className="sticky top-0 z-50 bg-white shadow-md border-b border-gray-200">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <img src={LOGO_URL} alt="Consulting Platform" className="h-12 w-auto object-contain" />
+            <img src={LOGO_SMALL} alt="Sharaka" className="h-12 w-auto object-contain" />
             <h1 className="text-2xl font-bold text-indigo-600 hidden md:block">{t.title}</h1>
           </div>
 
@@ -143,9 +144,14 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Hero Section */}
+      {/* Hero Section with Large Logo */}
       <section className="py-16 text-center">
         <div className="container mx-auto px-4">
+          {/* Large Logo */}
+          <div className="flex justify-center mb-8 bg-white rounded-2xl p-8 inline-block mx-auto">
+            <img src={LOGO_LARGE} alt="Sharaka" className="h-80 w-auto object-contain" />
+          </div>
+
           <h2 className="text-5xl font-bold text-gray-800 mb-4">{t.subtitle}</h2>
           <p className="text-xl text-gray-600 mb-8">
             {language === 'ar'
@@ -315,6 +321,7 @@ export default function Home() {
                 <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600">
                   <option value="zoom">Zoom</option>
                   <option value="google_meet">Google Meet</option>
+                  <option value="teams">Microsoft Teams</option>
                   <option value="phone">{language === 'ar' ? 'هاتفي' : 'Phone'}</option>
                 </select>
               </div>

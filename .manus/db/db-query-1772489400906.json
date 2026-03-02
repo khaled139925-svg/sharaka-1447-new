@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS `users` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`name` varchar(255) NOT NULL,\n\t`email` varchar(255) NOT NULL UNIQUE,\n\t`phone` varchar(20) NOT NULL,\n\t`password` varchar(500),\n\t`user_type` enum('client','consultant','admin') DEFAULT 'client',\n\t`points` int DEFAULT 0,\n\t`balance` decimal(10,2) DEFAULT '0',\n\t`role` enum('user','admin') DEFAULT 'user',\n\t`is_active` boolean DEFAULT true,\n\t`is_verified` boolean DEFAULT false,\n\t`verification_token` varchar(500),\n\t`created_at` timestamp DEFAULT (now()),\n\t`updated_at` timestamp DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `users_id` PRIMARY KEY(`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33ThN2e87bFnq9B.31df10e13f83 --database LPqWsDAqrBRRgfKZkbJUrr --execute CREATE TABLE IF NOT EXISTS `users` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`name` varchar(255) NOT NULL,\n\t`email` varchar(255) NOT NULL UNIQUE,\n\t`phone` varchar(20) NOT NULL,\n\t`password` varchar(500),\n\t`user_type` enum('client','consultant','admin') DEFAULT 'client',\n\t`points` int DEFAULT 0,\n\t`balance` decimal(10,2) DEFAULT '0',\n\t`role` enum('user','admin') DEFAULT 'user',\n\t`is_active` boolean DEFAULT true,\n\t`is_verified` boolean DEFAULT false,\n\t`verification_token` varchar(500),\n\t`created_at` timestamp DEFAULT (now()),\n\t`updated_at` timestamp DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `users_id` PRIMARY KEY(`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 410
+}

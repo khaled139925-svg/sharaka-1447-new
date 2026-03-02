@@ -1,7 +1,101 @@
-import { mysqlTable, varchar, text, int, decimal, boolean, timestamp, mysqlEnum } from 'drizzle-orm/mysql-core';
+import { mysqlTable, varchar, text, int, decimal, boolean, timestamp, mysqlEnum, datetime } from 'drizzle-orm/mysql-core';
 import { relations } from 'drizzle-orm';
 
-// جدول المستشارين
+// جدول المستخدمين (موحد لجميع الأنواع)
+export const users = mysqlTable('users', {
+  id: int('id').primaryKey().autoincrement(),
+  name: varchar('name', { length: 255 }).notNull(),
+  email: varchar('email', { length: 255 }).notNull().unique(),
+  phone: varchar('phone', { length: 20 }).notNull(),
+  password: varchar('password', { length: 500 }),
+  userType: mysqlEnum('user_type', ['client', 'consultant', 'admin']).default('client'),
+  points: int('points').default(0),
+  balance: decimal('balance', { precision: 10, scale: 2 }).default('0'),
+  role: mysqlEnum('role', ['user', 'admin']).default('user'),
+  isActive: boolean('is_active').default(true),
+  isVerified: boolean('is_verified').default(false),
+  verificationToken: varchar('verification_token', { length: 500 }),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
+});
+
+// جدول بيانات المستشارين الموسعة
+export const consultantProfiles = mysqlTable('consultant_profiles', {
+  id: int('id').primaryKey().autoincrement(),
+  userId: int('user_id').notNull(),
+  specialization: varchar('specialization', { length: 255 }).notNull(),
+  specialization_en: varchar('specialization_en', { length: 255 }),
+  yearsOfExperience: int('years_of_experience').notNull(),
+  bio: text('bio').notNull(),
+  bio_en: text('bio_en'),
+  hourlyRate: decimal('hourly_rate', { precision: 10, scale: 2 }).notNull(),
+  profileImage: varchar('profile_image', { length: 500 }),
+  certifications: text('certifications'), // JSON array
+  languages: varchar('languages', { length: 255 }), // JSON array
+  rating: decimal('rating', { precision: 3, scale: 1 }).default('0'),
+  totalSessions: int('total_sessions').default(0),
+  isAvailable: boolean('is_available').default(true),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
+});
+
+// جدول الجلسات المحجوزة
+export const sessions = mysqlTable('sessions', {
+  id: int('id').primaryKey().autoincrement(),
+  consultantId: int('consultant_id').notNull(),
+  clientId: int('client_id').notNull(),
+  title: varchar('title', { length: 255 }).notNull(),
+  description: text('description'),
+  scheduledDate: datetime('scheduled_date').notNull(),
+  duration: int('duration').notNull(), // بالدقائق
+  status: mysqlEnum('status', ['pending', 'confirmed', 'in_progress', 'completed', 'cancelled']).default('pending'),
+  meetingType: mysqlEnum('meeting_type', ['zoom', 'google_meet', 'teams', 'phone']).default('zoom'),
+  meetingLink: varchar('meeting_link', { length: 500 }),
+  recordingUrl: varchar('recording_url', { length: 500 }),
+  notes: text('notes'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
+});
+
+// جدول الدفعات
+export const payments = mysqlTable('payments', {
+  id: int('id').primaryKey().autoincrement(),
+  sessionId: int('session_id').notNull(),
+  clientId: int('client_id').notNull(),
+  consultantId: int('consultant_id').notNull(),
+  amount: decimal('amount', { precision: 10, scale: 2 }).notNull(),
+  currency: varchar('currency', { length: 10 }).default('SAR'),
+  status: mysqlEnum('status', ['pending', 'completed', 'failed', 'refunded']).default('pending'),
+  stripePaymentId: varchar('stripe_payment_id', { length: 255 }),
+  invoiceNumber: varchar('invoice_number', { length: 50 }),
+  paymentMethod: varchar('payment_method', { length: 50 }),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
+});
+
+// جدول التقييمات
+export const reviews = mysqlTable('reviews', {
+  id: int('id').primaryKey().autoincrement(),
+  sessionId: int('session_id').notNull(),
+  consultantId: int('consultant_id').notNull(),
+  clientId: int('client_id').notNull(),
+  rating: int('rating').notNull(), // 1-5
+  comment: text('comment'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+// جدول الإشعارات
+export const notifications = mysqlTable('notifications', {
+  id: int('id').primaryKey().autoincrement(),
+  userId: int('user_id').notNull(),
+  title: varchar('title', { length: 255 }).notNull(),
+  message: text('message').notNull(),
+  type: varchar('type', { length: 50 }).notNull(), // booking, payment, session, etc
+  isRead: boolean('is_read').default(false),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+// جدول المستشارين (القديم - للتوافقية)
 export const consultants = mysqlTable('consultants', {
   id: int('id').primaryKey().autoincrement(),
   name: varchar('name', { length: 255 }).notNull(),
@@ -19,7 +113,7 @@ export const consultants = mysqlTable('consultants', {
   updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
 });
 
-// جدول الحجوزات
+// جدول الحجوزات (القديم - للتوافقية)
 export const bookings = mysqlTable('bookings', {
   id: int('id').primaryKey().autoincrement(),
   consultantId: int('consultant_id').notNull(),
@@ -97,20 +191,6 @@ export const orderItems = mysqlTable('order_items', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
-// جدول المستخدمين والنقاط
-export const users = mysqlTable('users', {
-  id: int('id').primaryKey().autoincrement(),
-  name: varchar('name', { length: 255 }).notNull(),
-  email: varchar('email', { length: 255 }).notNull().unique(),
-  phone: varchar('phone', { length: 20 }).notNull(),
-  points: int('points').default(0),
-  balance: decimal('balance', { precision: 10, scale: 2 }).default('0'),
-  role: mysqlEnum('role', ['user', 'admin']).default('user'),
-  isActive: boolean('is_active').default(true),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
-});
-
 // جدول الطلبات
 export const orders = mysqlTable('orders', {
   id: int('id').primaryKey().autoincrement(),
@@ -136,6 +216,74 @@ export const contactMessages = mysqlTable('contact_messages', {
 });
 
 // العلاقات
+export const consultantProfilesRelations = relations(consultantProfiles, ({ one, many }) => ({
+  user: one(users, {
+    fields: [consultantProfiles.userId],
+    references: [users.id],
+  }),
+  sessions: many(sessions),
+  reviews: many(reviews),
+}));
+
+export const sessionsRelations = relations(sessions, ({ one, many }) => ({
+  consultant: one(consultantProfiles, {
+    fields: [sessions.consultantId],
+    references: [consultantProfiles.id],
+  }),
+  client: one(users, {
+    fields: [sessions.clientId],
+    references: [users.id],
+  }),
+  payment: one(payments, {
+    fields: [sessions.id],
+    references: [payments.sessionId],
+  }),
+  reviews: many(reviews),
+}));
+
+export const paymentsRelations = relations(payments, ({ one }) => ({
+  session: one(sessions, {
+    fields: [payments.sessionId],
+    references: [sessions.id],
+  }),
+  client: one(users, {
+    fields: [payments.clientId],
+    references: [users.id],
+  }),
+  consultant: one(consultantProfiles, {
+    fields: [payments.consultantId],
+    references: [consultantProfiles.id],
+  }),
+}));
+
+export const reviewsRelations = relations(reviews, ({ one }) => ({
+  session: one(sessions, {
+    fields: [reviews.sessionId],
+    references: [sessions.id],
+  }),
+  consultant: one(consultantProfiles, {
+    fields: [reviews.consultantId],
+    references: [consultantProfiles.id],
+  }),
+  client: one(users, {
+    fields: [reviews.clientId],
+    references: [users.id],
+  }),
+}));
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
+  }),
+}));
+
+export const usersRelations = relations(users, ({ many }) => ({
+  consultantProfile: many(consultantProfiles),
+  sessionsAsClient: many(sessions),
+  notifications: many(notifications),
+}));
+
 export const consultantsRelations = relations(consultants, ({ many }) => ({
   bookings: many(bookings),
 }));

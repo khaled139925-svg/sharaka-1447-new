@@ -1627,3 +1627,6 @@
 [2026-03-02T22:05:12.069Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
 [2026-03-02T22:05:12.794Z] [OAuth] Initialized with baseURL: https://api.manus.im
 [2026-03-02T22:05:12.795Z] Server running on http://localhost:3000/
+[2026-03-02T23:03:36.470Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-03-02T23:03:37.247Z] [OAuth] Initialized with baseURL: https://api.manus.im
+[2026-03-02T23:03:37.247Z] Server running on http://localhost:3000/

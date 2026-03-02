@@ -1,159 +1,8 @@
-import { router, publicProcedure, protectedProcedure } from './_core/trpc';
+import { router, publicProcedure, protectedProcedure, adminProcedure } from './_core/trpc';
 import { z } from 'zod';
 import * as db from './db';
 
 export const appRouter = router({
-  // ==================== المستخدمون والتسجيل ====================
-  auth: router({
-    registerClient: publicProcedure
-      .input(z.object({
-        name: z.string().min(2),
-        email: z.string().email(),
-        phone: z.string().min(10),
-        password: z.string().min(6),
-      }))
-      .mutation(async ({ input }) => {
-        return await db.registerClient(input);
-      }),
-
-    registerConsultant: publicProcedure
-      .input(z.object({
-        name: z.string().min(2),
-        email: z.string().email(),
-        phone: z.string().min(10),
-        password: z.string().min(6),
-        specialization: z.string().min(3),
-        yearsOfExperience: z.number().min(0),
-        bio: z.string().min(10),
-        hourlyRate: z.number().min(1),
-      }))
-      .mutation(async ({ input }) => {
-        return await db.registerConsultant(input);
-      }),
-
-    getUserByEmail: publicProcedure
-      .input(z.object({ email: z.string().email() }))
-      .query(async ({ input }) => {
-        return await db.getUserByEmail(input.email);
-      }),
-  }),
-
-  // ==================== المستشارون ====================
-  consultants: router({
-    getAll: publicProcedure.query(async () => {
-      return await db.getAllConsultantProfiles();
-    }),
-
-    getProfile: publicProcedure
-      .input(z.object({ userId: z.number() }))
-      .query(async ({ input }) => {
-        return await db.getConsultantProfile(input.userId);
-      }),
-
-    updateProfile: protectedProcedure
-      .input(z.object({
-        specialization: z.string().optional(),
-        yearsOfExperience: z.number().optional(),
-        bio: z.string().optional(),
-        hourlyRate: z.number().optional(),
-        profileImage: z.string().optional(),
-        isAvailable: z.boolean().optional(),
-      }))
-      .mutation(async ({ input, ctx }) => {
-        return await db.updateConsultantProfile(ctx.user.id, input);
-      }),
-  }),
-
-  // ==================== الجلسات ====================
-  sessions: router({
-    create: protectedProcedure
-      .input(z.object({
-        consultantId: z.number(),
-        title: z.string().min(3),
-        description: z.string().optional(),
-        scheduledDate: z.date(),
-        duration: z.number().min(15),
-        meetingType: z.enum(['zoom', 'google_meet', 'teams', 'phone']),
-      }))
-      .mutation(async ({ input, ctx }) => {
-        return await db.createSession({
-          ...input,
-          clientId: ctx.user.id,
-        });
-      }),
-
-    getByConsultant: protectedProcedure.query(async ({ ctx }) => {
-      return await db.getSessionsByConsultant(ctx.user.id);
-    }),
-
-    getByClient: protectedProcedure.query(async ({ ctx }) => {
-      return await db.getSessionsByClient(ctx.user.id);
-    }),
-
-    updateStatus: protectedProcedure
-      .input(z.object({
-        sessionId: z.number(),
-        status: z.enum(['pending', 'confirmed', 'in_progress', 'completed', 'cancelled']),
-      }))
-      .mutation(async ({ input }) => {
-        return await db.updateSessionStatus(input.sessionId, input.status);
-      }),
-  }),
-
-  // ==================== الدفعات ====================
-  payments: router({
-    create: protectedProcedure
-      .input(z.object({
-        sessionId: z.number(),
-        consultantId: z.number(),
-        amount: z.number().min(1),
-        currency: z.string().optional(),
-        stripePaymentId: z.string().optional(),
-      }))
-      .mutation(async ({ input, ctx }) => {
-        return await db.createPayment({
-          ...input,
-          clientId: ctx.user.id,
-        });
-      }),
-
-    getByClient: protectedProcedure.query(async ({ ctx }) => {
-      return await db.getPaymentsByClient(ctx.user.id);
-    }),
-
-    updateStatus: protectedProcedure
-      .input(z.object({
-        paymentId: z.number(),
-        status: z.enum(['pending', 'completed', 'failed', 'refunded']),
-      }))
-      .mutation(async ({ input }) => {
-        return await db.updatePaymentStatus(input.paymentId, input.status);
-      }),
-  }),
-
-  // ==================== التقييمات ====================
-  reviews: router({
-    create: protectedProcedure
-      .input(z.object({
-        sessionId: z.number(),
-        consultantId: z.number(),
-        rating: z.number().min(1).max(5),
-        comment: z.string().optional(),
-      }))
-      .mutation(async ({ input, ctx }) => {
-        return await db.createReview({
-          ...input,
-          clientId: ctx.user.id,
-        });
-      }),
-
-    getByConsultant: publicProcedure
-      .input(z.object({ consultantId: z.number() }))
-      .query(async ({ input }) => {
-        return await db.getReviewsByConsultant(input.consultantId);
-      }),
-  }),
-
   // ==================== المتاجر ====================
   stores: router({
     getAll: publicProcedure.query(async () => {
@@ -258,115 +107,73 @@ export const appRouter = router({
       }),
   }),
 
-  // ==================== المستشارون (القديم) ====================
-  consultantsList: router({
-    getAll: publicProcedure.query(async () => {
-      const result = await db.getAllConsultants();
-      return result || [];
-    }),
-
-    getById: publicProcedure
-      .input(z.object({ id: z.number() }))
+  // ==================== العروض ====================
+  offers: router({
+    getByStore: publicProcedure
+      .input(z.object({ storeId: z.number() }))
       .query(async ({ input }) => {
-        return await db.getConsultantById(input.id);
+        const result = await db.getStoreOffers(input.storeId);
+        return result || [];
       }),
 
     create: protectedProcedure
       .input(z.object({
-        name: z.string(),
-        nameEn: z.string(),
-        specialty: z.string(),
-        specialtyEn: z.string(),
-        bio: z.string(),
-        bioEn: z.string(),
-        image: z.string(),
-        email: z.string(),
-        phone: z.string(),
-        zohoDuration: z.number().optional(),
+        storeId: z.number(),
+        productId: z.number().optional(),
+        title: z.string(),
+        description: z.string().optional(),
+        discountType: z.enum(['percentage', 'fixed']),
+        discountValue: z.string(),
+        startDate: z.date(),
+        endDate: z.date(),
       }))
       .mutation(async ({ input }) => {
-        return await db.createConsultant(input);
+        return await db.createOffer(input);
       }),
 
     update: protectedProcedure
       .input(z.object({
         id: z.number(),
         data: z.object({
-          name: z.string().optional(),
-          specialty: z.string().optional(),
-          bio: z.string().optional(),
-          image: z.string().optional(),
+          title: z.string().optional(),
+          discountValue: z.string().optional(),
+          endDate: z.date().optional(),
         }),
       }))
       .mutation(async ({ input }) => {
-        return await db.updateConsultant(input.id, input.data);
+        return await db.updateOffer(input.id, input.data);
       }),
 
     delete: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
-        return await db.deleteConsultant(input.id);
-      }),
-  }),
-
-  // ==================== الحجوزات ====================
-  bookings: router({
-    getAll: publicProcedure
-      .input(z.object({
-        consultantId: z.number().optional(),
-        status: z.string().optional(),
-      }))
-      .query(async ({ input }) => {
-        return await db.getBookings(input);
-      }),
-
-    create: publicProcedure
-      .input(z.object({
-        consultantId: z.number(),
-        clientName: z.string(),
-        clientEmail: z.string(),
-        clientPhone: z.string(),
-        subject: z.string(),
-        bookingDate: z.string(),
-        bookingTime: z.string(),
-        notes: z.string().optional(),
-      }))
-      .mutation(async ({ input }) => {
-        return await db.createBooking(input);
-      }),
-
-    updateStatus: protectedProcedure
-      .input(z.object({
-        id: z.number(),
-        status: z.string(),
-      }))
-      .mutation(async ({ input }) => {
-        return await db.updateBookingStatus(input.id, input.status);
+        return await db.deleteOffer(input.id);
       }),
   }),
 
   // ==================== الطلبات ====================
   orders: router({
-    getAll: protectedProcedure
-      .input(z.object({
-        storeId: z.number().optional(),
-        status: z.string().optional(),
-      }))
-      .query(async ({ input, ctx }) => {
-        return await db.getOrders({
-          userId: ctx.user.id,
-          storeId: input.storeId,
-          status: input.status,
-        });
+    getByUser: protectedProcedure.query(async ({ ctx }) => {
+      if (!ctx.user?.id) return [];
+      const result = await db.getUserOrders(ctx.user.id);
+      return result || [];
+    }),
+
+    getByStore: protectedProcedure
+      .input(z.object({ storeId: z.number() }))
+      .query(async ({ input }) => {
+        const result = await db.getStoreOrders(input.storeId);
+        return result || [];
       }),
 
     create: protectedProcedure
       .input(z.object({
         storeId: z.number(),
         totalPrice: z.string(),
-        pointsEarned: z.number().optional(),
+        pointsEarned: z.number(),
       }))
       .mutation(async ({ input, ctx }) => {
+        if (!ctx.user?.id) throw new Error('Unauthorized');
         return await db.createOrder({
           userId: ctx.user.id,
           storeId: input.storeId,

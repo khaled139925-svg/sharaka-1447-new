@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Mail, Lock, Phone, User, ArrowLeft, Briefcase, DollarSign } from 'lucide-react';
-import { trpc } from '@/lib/trpc';
-
 interface ConsultantSignupProps {
   onNavigate?: (page: 'home' | 'client-signup' | 'consultant-signup') => void;
 }
@@ -10,22 +8,25 @@ interface ConsultantSignupProps {
 export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
+    // Basic Info
     name: '',
     email: '',
     phone: '',
     password: '',
     confirmPassword: '',
+    // Professional Info
     specialization: '',
     yearsOfExperience: '',
     hourlyRate: '',
     bio: '',
+    certifications: '',
+    languages: '',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState<'ar' | 'en'>('ar');
 
   const isRTL = language === 'ar';
-  const registerMutation = trpc.auth.registerConsultant.useMutation();
 
   const translations = {
     ar: {
@@ -42,6 +43,8 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
       yearsOfExperience: 'سنوات الخبرة',
       hourlyRate: 'السعر بالساعة (ريال)',
       bio: 'السيرة الذاتية',
+      certifications: 'الشهادات والتراخيص',
+      languages: 'اللغات',
       signup: 'إنشاء حساب',
       next: 'التالي',
       previous: 'السابق',
@@ -68,6 +71,8 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
       yearsOfExperience: 'Years of Experience',
       hourlyRate: 'Hourly Rate (SAR)',
       bio: 'Biography',
+      certifications: 'Certifications & Licenses',
+      languages: 'Languages',
       signup: 'Create Account',
       next: 'Next',
       previous: 'Previous',
@@ -124,20 +129,12 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
 
     setLoading(true);
     try {
-      await registerMutation.mutateAsync({
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        password: formData.password,
-        specialization: formData.specialization,
-        yearsOfExperience: parseInt(formData.yearsOfExperience),
-        bio: formData.bio,
-        hourlyRate: parseFloat(formData.hourlyRate),
-      });
+      // TODO: Call API to register consultant
+      console.log('Consultant signup:', formData);
       alert(t.signupSuccess);
-      onNavigate?.('home');
-    } catch (err: any) {
-      setError(err.message || 'حدث خطأ في التسجيل');
+      navigate('/');
+    } catch (err) {
+      setError('حدث خطأ في التسجيل');
     } finally {
       setLoading(false);
     }
@@ -190,6 +187,7 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
                 <>
                   <h2 className="text-lg font-semibold text-gray-800 mb-4">{t.step1}</h2>
 
+                  {/* Name Field */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       <div className="flex items-center gap-2">
@@ -207,6 +205,7 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
                     />
                   </div>
 
+                  {/* Email Field */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       <div className="flex items-center gap-2">
@@ -224,6 +223,7 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
                     />
                   </div>
 
+                  {/* Phone Field */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       <div className="flex items-center gap-2">
@@ -241,6 +241,7 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
                     />
                   </div>
 
+                  {/* Password Field */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       <div className="flex items-center gap-2">
@@ -258,6 +259,7 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
                     />
                   </div>
 
+                  {/* Confirm Password Field */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       <div className="flex items-center gap-2">
@@ -275,6 +277,7 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
                     />
                   </div>
 
+                  {/* Next Button */}
                   <Button
                     type="button"
                     onClick={handleNext}
@@ -290,6 +293,7 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
                 <>
                   <h2 className="text-lg font-semibold text-gray-800 mb-4">{t.step2}</h2>
 
+                  {/* Specialization Field */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       <div className="flex items-center gap-2">
@@ -307,12 +311,10 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
                     />
                   </div>
 
+                  {/* Years of Experience */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      <div className="flex items-center gap-2">
-                        <Briefcase size={16} />
-                        {t.yearsOfExperience}
-                      </div>
+                      {t.yearsOfExperience}
                     </label>
                     <input
                       type="number"
@@ -324,6 +326,7 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
                     />
                   </div>
 
+                  {/* Hourly Rate */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       <div className="flex items-center gap-2">
@@ -341,6 +344,7 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
                     />
                   </div>
 
+                  {/* Bio */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       {t.bio}
@@ -350,11 +354,42 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
                       value={formData.bio}
                       onChange={handleChange}
                       placeholder={t.bio}
-                      rows={4}
+                      rows={3}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
                     />
                   </div>
 
+                  {/* Certifications */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {t.certifications}
+                    </label>
+                    <input
+                      type="text"
+                      name="certifications"
+                      value={formData.certifications}
+                      onChange={handleChange}
+                      placeholder={t.certifications}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                    />
+                  </div>
+
+                  {/* Languages */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {t.languages}
+                    </label>
+                    <input
+                      type="text"
+                      name="languages"
+                      value={formData.languages}
+                      onChange={handleChange}
+                      placeholder={t.languages}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                    />
+                  </div>
+
+                  {/* Buttons */}
                   <div className="flex gap-3">
                     <Button
                       type="button"
@@ -375,6 +410,7 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
               )}
             </form>
 
+            {/* Login Link */}
             <div className="mt-6 text-center">
               <p className="text-gray-600">
                 {t.haveAccount}{' '}

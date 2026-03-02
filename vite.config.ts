@@ -15,14 +15,4 @@ export default defineConfig({
     port: 3000,
     allowedHosts: ['3000-i9xyjg9fsfv2qdhp6bm9i-d47e4446.us1.manus.computer'],
   },
-  build: {
-    rollupOptions: {
-      external: ['@trpc/react-query'],
-      output: {
-        globals: {
-          '@trpc/react-query': 'trpcReactQuery',
-        },
-      },
-    },
-  },
 })

@@ -47,6 +47,7 @@ const COUNTRIES = [
   { code: 'QA', name: 'قطر', flag: '🇶🇦' },
   { code: 'BH', name: 'البحرين', flag: '🇧🇭' },
   { code: 'OM', name: 'عمان', flag: '🇴🇲' },
+  { code: 'YE', name: 'اليمن', flag: '🇾🇪' },
   { code: 'EG', name: 'مصر', flag: '🇪🇬' },
   { code: 'JO', name: 'الأردن', flag: '🇯🇴' },
   { code: 'LB', name: 'لبنان', flag: '🇱🇧' },

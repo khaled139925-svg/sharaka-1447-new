@@ -1,13 +1,11 @@
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Mail, Lock, Phone, User, ArrowLeft } from 'lucide-react';
-import { useLanguage } from '@/contexts/LanguageContext';
 interface ClientSignupProps {
   onNavigate?: (page: 'home' | 'client-signup' | 'consultant-signup') => void;
 }
 
 export default function ClientSignup({ onNavigate }: ClientSignupProps) {
-  const { language, setLanguage, isRTL } = useLanguage();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -17,6 +15,9 @@ export default function ClientSignup({ onNavigate }: ClientSignupProps) {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [language, setLanguage] = useState<'ar' | 'en'>('ar');
+
+  const isRTL = language === 'ar';
 
   const translations = {
     ar: {
@@ -111,7 +112,7 @@ export default function ClientSignup({ onNavigate }: ClientSignupProps) {
             onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
             className="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition"
           >
-            {language === 'ar' ? 'English' : 'العربية'}
+            {language === 'ar' ? t.english : t.arabic}
           </button>
         </div>
       </header>

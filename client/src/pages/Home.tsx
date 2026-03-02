@@ -37,7 +37,7 @@ const CONSULTANTS = [
 ];
 
 interface HomeProps {
-  onNavigate?: (page: 'home' | 'client-signup' | 'consultant-signup') => void;
+  onNavigate?: (page: string, data?: any) => void;
 }
 
 export default function Home({ onNavigate }: HomeProps) {
@@ -260,7 +260,7 @@ export default function Home({ onNavigate }: HomeProps) {
 
                     {/* Book Button */}
                     <button
-                      onClick={() => onNavigate?.('client-signup')}
+                      onClick={() => onNavigate?.('booking', { consultantId: consultant.id })}
                       className="w-full py-3 font-bold rounded-lg text-white transition hover:shadow-lg"
                       style={{ backgroundColor: '#FF9800' }}
                     >

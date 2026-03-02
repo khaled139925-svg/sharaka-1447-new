@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Mail, Lock, Phone, User, ArrowLeft } from 'lucide-react';
+import { trpc } from '@/lib/trpc';
+
 interface ClientSignupProps {
   onNavigate?: (page: 'home' | 'client-signup' | 'consultant-signup') => void;
 }
@@ -18,6 +20,7 @@ export default function ClientSignup({ onNavigate }: ClientSignupProps) {
   const [language, setLanguage] = useState<'ar' | 'en'>('ar');
 
   const isRTL = language === 'ar';
+  const registerMutation = trpc.auth.registerClient.useMutation();
 
   const translations = {
     ar: {
@@ -84,12 +87,16 @@ export default function ClientSignup({ onNavigate }: ClientSignupProps) {
 
     setLoading(true);
     try {
-      // TODO: Call API to register client
-      console.log('Client signup:', formData);
+      await registerMutation.mutateAsync({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password,
+      });
       alert(t.signupSuccess);
-      navigate('/');
-    } catch (err) {
-      setError('حدث خطأ في التسجيل');
+      onNavigate?.('home');
+    } catch (err: any) {
+      setError(err.message || 'حدث خطأ في التسجيل');
     } finally {
       setLoading(false);
     }

@@ -351,3 +351,263 @@ export async function deductBalance(userId: number, amount: number) {
     throw error;
   }
 }
+
+
+// ==================== المستخدمون والتسجيل ====================
+
+export async function registerClient(data: {
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+}) {
+  try {
+    const db = getDatabase();
+    // التحقق من عدم وجود بريد إلكتروني مكرر
+    const existing = await db.select().from(users).where(eq(users.email, data.email)).limit(1);
+    if (existing.length > 0) {
+      throw new Error('Email already registered');
+    }
+    
+    const result = await db.insert(users).values({
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      password: data.password,
+      userType: 'client',
+    });
+    
+    return { id: result.insertId, ...data, userType: 'client' };
+  } catch (error) {
+    console.error('Error registering client:', error);
+    throw error;
+  }
+}
+
+export async function registerConsultant(data: {
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+  specialization: string;
+  yearsOfExperience: number;
+  bio: string;
+  hourlyRate: number;
+}) {
+  try {
+    const db = getDatabase();
+    // التحقق من عدم وجود بريد إلكتروني مكرر
+    const existing = await db.select().from(users).where(eq(users.email, data.email)).limit(1);
+    if (existing.length > 0) {
+      throw new Error('Email already registered');
+    }
+    
+    // إنشاء المستخدم
+    const userResult = await db.insert(users).values({
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      password: data.password,
+      userType: 'consultant',
+    });
+    
+    // إنشاء ملف المستشار
+    await db.insert(consultantProfiles).values({
+      userId: userResult.insertId,
+      specialization: data.specialization,
+      yearsOfExperience: data.yearsOfExperience,
+      bio: data.bio,
+      hourlyRate: data.hourlyRate.toString(),
+    });
+    
+    return { id: userResult.insertId, ...data, userType: 'consultant' };
+  } catch (error) {
+    console.error('Error registering consultant:', error);
+    throw error;
+  }
+}
+
+export async function getUserByEmail(email: string) {
+  try {
+    const db = getDatabase();
+    const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+    return result[0] || null;
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    return null;
+  }
+}
+
+export async function getUserById(id: number) {
+  try {
+    const db = getDatabase();
+    const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    return result[0] || null;
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    return null;
+  }
+}
+
+// ==================== ملفات المستشارين ====================
+
+export async function getConsultantProfile(userId: number) {
+  try {
+    const db = getDatabase();
+    const result = await db.select().from(consultantProfiles).where(eq(consultantProfiles.userId, userId)).limit(1);
+    return result[0] || null;
+  } catch (error) {
+    console.error('Error fetching consultant profile:', error);
+    return null;
+  }
+}
+
+export async function getAllConsultantProfiles() {
+  try {
+    const db = getDatabase();
+    return await db.select().from(consultantProfiles).where(eq(consultantProfiles.isAvailable, true));
+  } catch (error) {
+    console.error('Error fetching consultant profiles:', error);
+    return [];
+  }
+}
+
+export async function updateConsultantProfile(userId: number, data: Partial<typeof consultantProfiles>) {
+  try {
+    const db = getDatabase();
+    await db.update(consultantProfiles).set(data).where(eq(consultantProfiles.userId, userId));
+    return { userId, ...data };
+  } catch (error) {
+    console.error('Error updating consultant profile:', error);
+    throw error;
+  }
+}
+
+// ==================== الجلسات ====================
+
+export async function createSession(data: {
+  consultantId: number;
+  clientId: number;
+  title: string;
+  description?: string;
+  scheduledDate: Date;
+  duration: number;
+  meetingType: 'zoom' | 'google_meet' | 'teams' | 'phone';
+}) {
+  try {
+    const db = getDatabase();
+    const result = await db.insert(sessions).values({
+      ...data,
+      scheduledDate: data.scheduledDate,
+    });
+    return { id: result.insertId, ...data };
+  } catch (error) {
+    console.error('Error creating session:', error);
+    throw error;
+  }
+}
+
+export async function getSessionsByConsultant(consultantId: number) {
+  try {
+    const db = getDatabase();
+    return await db.select().from(sessions).where(eq(sessions.consultantId, consultantId)).orderBy(desc(sessions.scheduledDate));
+  } catch (error) {
+    console.error('Error fetching sessions:', error);
+    return [];
+  }
+}
+
+export async function getSessionsByClient(clientId: number) {
+  try {
+    const db = getDatabase();
+    return await db.select().from(sessions).where(eq(sessions.clientId, clientId)).orderBy(desc(sessions.scheduledDate));
+  } catch (error) {
+    console.error('Error fetching sessions:', error);
+    return [];
+  }
+}
+
+export async function updateSessionStatus(sessionId: number, status: string) {
+  try {
+    const db = getDatabase();
+    await db.update(sessions).set({ status: status as any }).where(eq(sessions.id, sessionId));
+    return { sessionId, status };
+  } catch (error) {
+    console.error('Error updating session:', error);
+    throw error;
+  }
+}
+
+// ==================== الدفعات ====================
+
+export async function createPayment(data: {
+  sessionId: number;
+  clientId: number;
+  consultantId: number;
+  amount: number;
+  currency?: string;
+  stripePaymentId?: string;
+}) {
+  try {
+    const db = getDatabase();
+    const result = await db.insert(payments).values({
+      ...data,
+      amount: data.amount.toString(),
+      currency: data.currency || 'SAR',
+    });
+    return { id: result.insertId, ...data };
+  } catch (error) {
+    console.error('Error creating payment:', error);
+    throw error;
+  }
+}
+
+export async function getPaymentsByClient(clientId: number) {
+  try {
+    const db = getDatabase();
+    return await db.select().from(payments).where(eq(payments.clientId, clientId)).orderBy(desc(payments.createdAt));
+  } catch (error) {
+    console.error('Error fetching payments:', error);
+    return [];
+  }
+}
+
+export async function updatePaymentStatus(paymentId: number, status: string) {
+  try {
+    const db = getDatabase();
+    await db.update(payments).set({ status: status as any }).where(eq(payments.id, paymentId));
+    return { paymentId, status };
+  } catch (error) {
+    console.error('Error updating payment:', error);
+    throw error;
+  }
+}
+
+// ==================== التقييمات ====================
+
+export async function createReview(data: {
+  sessionId: number;
+  consultantId: number;
+  clientId: number;
+  rating: number;
+  comment?: string;
+}) {
+  try {
+    const db = getDatabase();
+    const result = await db.insert(reviews).values(data);
+    return { id: result.insertId, ...data };
+  } catch (error) {
+    console.error('Error creating review:', error);
+    throw error;
+  }
+}
+
+export async function getReviewsByConsultant(consultantId: number) {
+  try {
+    const db = getDatabase();
+    return await db.select().from(reviews).where(eq(reviews.consultantId, consultantId)).orderBy(desc(reviews.createdAt));
+  } catch (error) {
+    console.error('Error fetching reviews:', error);
+    return [];
+  }
+}

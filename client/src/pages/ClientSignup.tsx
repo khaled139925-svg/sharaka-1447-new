@@ -89,7 +89,7 @@ export default function ClientSignup({ onNavigate }: ClientSignupProps) {
       alert(t.signupSuccess);
       navigate('/');
     } catch (err) {
-      setError('حدث خطأ في التسجيل');
+      setError(language === 'ar' ? 'حدث خطأ في التسجيل' : 'Registration error occurred');
     } finally {
       setLoading(false);
     }
@@ -227,7 +227,7 @@ export default function ClientSignup({ onNavigate }: ClientSignupProps) {
                 disabled={loading}
                 className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-lg transition"
               >
-                {loading ? 'جاري التسجيل...' : t.signup}
+                {loading ? (language === 'ar' ? 'جاري التسجيل...' : 'Registering...') : t.signup}
               </Button>
             </form>
 

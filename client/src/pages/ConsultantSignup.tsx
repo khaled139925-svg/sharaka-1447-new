@@ -134,7 +134,7 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
       alert(t.signupSuccess);
       navigate('/');
     } catch (err) {
-      setError('حدث خطأ في التسجيل');
+      setError(language === 'ar' ? 'حدث خطأ في التسجيل' : 'Registration error occurred');
     } finally {
       setLoading(false);
     }

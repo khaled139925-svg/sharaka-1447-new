@@ -150,7 +150,7 @@ export default function Home({ onNavigate }: HomeProps) {
                 {COUNTRIES.find(c => c.code === selectedCountry)?.flag}
               </button>
               {showCountries && (
-                <div className="absolute top-full right-0 mt-2 bg-white border-2 rounded-lg shadow-lg z-50" style={{ borderColor: '#1976D2', maxHeight: '300px', overflowY: 'auto', minWidth: '200px' }}>
+                <div className={`absolute top-full mt-2 bg-white border-2 rounded-lg shadow-lg z-50 ${isRTL ? 'left-0' : 'right-0'}`} style={{ borderColor: '#1976D2', maxHeight: '300px', overflowY: 'auto', minWidth: '200px' }}>
                   {COUNTRIES.map(country => (
                     <button
                       key={country.code}

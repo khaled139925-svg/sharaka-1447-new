@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Star, Users, Clock, Award, Search, ChevronRight, MessageCircle } from 'lucide-react';
 
-const LOGO_SMALL = '/logo-sharaka.png';
-const LOGO_LARGE = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663333045223/LPqWsDAqrBRRgfKZkbJUrr/sharaka-logo-no-black-KiEvvyY8x4vab9fVc6R8YH.webp';
+const LOGO_SMALL = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663333045223/LPqWsDAqrBRRgfKZkbJUrr/logo-sharaka_e9dbc5e2.png';
+const LOGO_LARGE = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663333045223/LPqWsDAqrBRRgfKZkbJUrr/logo-sharaka_e9dbc5e2.png';
 
 const CONSULTANTS = [
   {
@@ -148,8 +148,8 @@ export default function Home() {
       <section className="py-16 text-center">
         <div className="container mx-auto px-4">
           {/* Large Logo */}
-          <div className="flex justify-center mb-8">
-            <img src={LOGO_LARGE} alt="Sharaka" className="h-96 w-auto" />
+          <div className="flex justify-center mb-8 bg-white rounded-full p-8 inline-block mx-auto shadow-lg">
+            <img src={LOGO_LARGE} alt="Sharaka" className="h-72 w-72 object-contain" />
           </div>
 
           <h2 className="text-5xl font-bold text-gray-800 mb-4">{t.subtitle}</h2>

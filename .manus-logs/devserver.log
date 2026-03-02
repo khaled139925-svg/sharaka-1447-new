@@ -1526,3 +1526,13 @@
 [2026-02-23T20:30:15.943Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
 [2026-02-23T20:30:17.157Z] [OAuth] Initialized with baseURL: https://api.manus.im
 [2026-02-23T20:30:17.159Z] Server running on http://localhost:3000/
+[2026-03-01T22:25:48.356Z] Dev server process group stopped
+[2026-03-01T22:25:51.363Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-03-01T22:25:53.056Z] [OAuth] Initialized with baseURL: https://api.manus.im
+[2026-03-01T22:25:53.057Z] Server running on http://localhost:3000/
+[2026-03-01T22:26:03.901Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-03-01T22:26:04.635Z] [OAuth] Initialized with baseURL: https://api.manus.im
+[2026-03-01T22:26:04.636Z] Server running on http://localhost:3000/
+[2026-03-02T19:48:00.355Z] Starting dev server with command: NODE_ENV=development tsx watch server/_core/index.ts
+[2026-03-02T19:48:01.102Z] [OAuth] Initialized with baseURL: https://api.manus.im
+[2026-03-02T19:48:01.102Z] Server running on http://localhost:3000/

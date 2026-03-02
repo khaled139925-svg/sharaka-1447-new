@@ -148,8 +148,8 @@ export default function Home() {
       <section className="py-16 text-center">
         <div className="container mx-auto px-4">
           {/* Large Logo */}
-          <div className="flex justify-center mb-8 bg-white rounded-2xl p-8 inline-block mx-auto">
-            <img src={LOGO_LARGE} alt="Sharaka" className="h-80 w-auto object-contain" />
+          <div className="flex justify-center mb-8">
+            <img src={LOGO_LARGE} alt="Sharaka" className="h-96 w-auto" />
           </div>
 
           <h2 className="text-5xl font-bold text-gray-800 mb-4">{t.subtitle}</h2>

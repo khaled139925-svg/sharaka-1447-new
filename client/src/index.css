@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+* {
+  font-family: 'Arabic Typesetting', Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #f5f5f5;
+}
+
+html[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+}
+
+
+/* Fixed Header */
+header {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 50 !important;
+  width: 100% !important;
+}
+
+/* Main content spacing handled via inline style */

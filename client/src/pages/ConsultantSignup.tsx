@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Mail, Lock, Phone, User, ArrowLeft, Briefcase, DollarSign } from 'lucide-react';
 interface ConsultantSignupProps {
@@ -8,20 +9,29 @@ interface ConsultantSignupProps {
 export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    // Basic Info
-    name: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: '',
-    // Professional Info
-    specialization: '',
-    yearsOfExperience: '',
-    hourlyRate: '',
-    bio: '',
-    certifications: '',
-    languages: '',
-  });
+  // Basic Info
+  name: '',
+  email: '',
+  phone: '',
+  password: '',
+  confirmPassword: '',
+
+  // Professional Info
+  specialization: '',
+  yearsOfExperience: '',
+  hourlyRate: '',
+  bio: '',
+  certifications: '',
+  languages: '',
+
+  // Business Info
+  entityType: '',
+  entityName: '',
+  website: '',
+
+  // Media
+  photo: null,
+});
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState<'ar' | 'en'>('ar');
@@ -98,24 +108,8 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
   };
 
   const validateStep = () => {
-    if (step === 1) {
-      if (!formData.name || !formData.email || !formData.phone || !formData.password || !formData.confirmPassword) {
-        setError(t.fillAllFields);
-        return false;
-      }
-      if (formData.password !== formData.confirmPassword) {
-        setError(t.passwordMismatch);
-        return false;
-      }
-    } else if (step === 2) {
-      if (!formData.specialization || !formData.yearsOfExperience || !formData.hourlyRate || !formData.bio) {
-        setError(t.fillAllFields);
-        return false;
-      }
-    }
-    setError('');
-    return true;
-  };
+  return true;
+};
 
   const handleNext = () => {
     if (validateStep()) {
@@ -124,13 +118,38 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateStep()) return;
+  e.preventDefault();
 
-    setLoading(true);
-    try {
+  // if (!validateStep()) return;
+
+  setLoading(true);
+
+  try {
       // TODO: Call API to register consultant
-      console.log('Consultant signup:', formData);
+    const { error } = await supabase
+  .from("consultants")
+  .insert([
+    {
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      specialization: formData.specialization,
+      years_of_experience: formData.yearsOfExperience,
+      hourly_rate: formData.hourlyRate,
+      bio: formData.bio,
+      certifications: formData.certifications,
+      languages: formData.languages,
+      entity_type: formData.entityType,
+      entity_name: formData.entityName,
+      country: formData.country,
+      city: formData.city,
+      website: formData.website
+    }
+  ]);
+
+if (error) {
+  throw error;
+}
       alert(t.signupSuccess);
       navigate('/');
     } catch (err) {
@@ -388,7 +407,117 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
                     />
                   </div>
+{/* Profile Photo */}
+<div className="mb-4">
+  <label className="block text-sm font-medium text-gray-700 mb-2">
+    الصورة الشخصية
+  </label>
 
+  <input
+    type="file"
+    accept="image/*"
+    capture="environment"
+    onChange={(e) =>
+      setFormData({
+        ...formData,
+        photo: e.target.files?.[0] || null
+      })
+    }
+    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+  />
+</div>
+
+{/* Entity Type */}
+<div className="mb-4">
+  <label className="block text-sm font-medium text-gray-700 mb-2">
+    نوع النشاط المهني
+  </label>
+
+  <select
+    value={formData.entityType}
+    onChange={(e) =>
+      setFormData({ ...formData, entityType: e.target.value })
+    }
+    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+  >
+    <option value="">اختر نوع النشاط</option>
+    <option value="independent">مستشار مستقل</option>
+<option value="company">شركة</option>
+<option value="consulting_office">مكتب استشارات</option>
+<option value="store">متجر</option>
+<option value="ecommerce">متجر إلكتروني</option>
+<option value="training_center">مركز تدريب</option>
+<option value="organization">مؤسسة</option>
+<option value="other">أخرى</option>
+  </select>
+</div>
+
+{/* Entity Name */}
+<div className="mb-4">
+  <label className="block text-sm font-medium text-gray-700 mb-2">
+    اسم النشاط المهني
+  </label>
+
+  <input
+    type="text"
+    value={formData.entityName}
+    onChange={(e) =>
+      setFormData({ ...formData, entityName: e.target.value })
+    }
+    placeholder="مثال: شركة الريادة للاستشارات"
+    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+  />
+</div>
+{/* Country */}
+<div className="mb-4">
+  <label className="block text-sm font-medium text-gray-700 mb-2">
+    الدولة
+  </label>
+
+  <input
+    type="text"
+    value={formData.country || ""}
+    onChange={(e) =>
+      setFormData({ ...formData, country: e.target.value })
+    }
+    placeholder="مثال: السعودية"
+    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+  />
+</div>
+
+{/* City */}
+<div className="mb-4">
+  <label className="block text-sm font-medium text-gray-700 mb-2">
+    المدينة
+  </label>
+
+  <input
+    type="text"
+    value={formData.city || ""}
+    onChange={(e) =>
+      setFormData({ ...formData, city: e.target.value })
+    }
+    placeholder="مثال: الرياض"
+    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+  />
+</div>
+
+{/* Website */}
+<div className="mb-4">
+  <label className="block text-sm font-medium text-gray-700 mb-2">
+    الموقع الإلكتروني
+  </label>
+
+  <input
+    type="text"
+    value={formData.website}
+    onChange={(e) =>
+      setFormData({ ...formData, website: e.target.value })
+    }
+    placeholder="https://example.com"
+    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+  />
+</div>
                   {/* Buttons */}
                   <div className="flex gap-3">
                     <Button

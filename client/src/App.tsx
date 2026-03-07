@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
+import About from "@/pages/About";
 import Dashboard from "./pages/Dashboard";
 import ClientSignup from "./pages/ClientSignup";
 import ConsultantSignup from "./pages/ConsultantSignup";
@@ -11,6 +12,8 @@ export default function App() {
 
   const renderPage = () => {
     switch (page) {
+      case "about":
+  return <About />;
       case "login":
         return <Login onNavigate={setPage} />;
 

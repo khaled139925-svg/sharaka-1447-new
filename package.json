@@ -1,6 +1,7 @@
 {
   "name": "sharaka-platform",
   "version": "1.0.0",
+  "packageManager": "npm@10",
   "private": true,
   "type": "module",
   "main": "dist/index.js",

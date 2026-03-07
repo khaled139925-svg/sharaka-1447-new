@@ -119,113 +119,100 @@ const [showSpecialties, setShowSpecialties] = useState(false);
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
 
           {/* LOGO */}
-          <div  className="flex items-center gap-8 text-2xl font-semibold">
-            <img src={LOGO_SMALL} alt="Sharaka" style={{ height: '80px', width: '80px' }} />
-            <div className="flex flex-col">
-              <h1 className="text-2xl font-bold" style={{ color: '#FF9800' }}>
-                {language === 'ar' ? 'شراكة' : 'Sharaka'}
-              </h1>
-              <span style={{ fontSize: '13px', color: '#1976D2' }}>
-                {language === 'ar' ? 'شريك نجاحك' : 'Your Partner in Success'}
-              </span>
-            </div>
-          </div>
+          <div className="flex items-center gap-3">
+
+  <img
+    src={LOGO_SMALL}
+    alt="Sharaka"
+    style={{ height: '80px', width: '80px' }}
+  />
+
+  <div className="flex flex-col">
+    <h1 className="text-2xl font-bold" style={{ color: '#FF9800' }}>
+      {language === 'ar' ? 'شراكة' : 'Sharaka'}
+    </h1>
+
+    <span style={{ fontSize: '13px', color: '#1976D2' }}>
+      {language === 'ar' ? 'شريك نجاحك' : 'Your Partner in Success'}
+    </span>
+  </div>
+
+</div>
 
           {/* MENU */}
-          <div className="flex items-center gap-6 text-sm font-semibold">
-            <span
-  onClick={() => setShowSpecialties(!showSpecialties)}
-  className="cursor-pointer text-[#1976D2] hover:text-[#FF9800] text-xl font-semibold"
->
-  التخصصات
-</span>
-{showSpecialties && (
-<div
-className="absolute left-1/2 -translate-x-1/2 top-full mt-4 bg-white border rounded-lg shadow-lg p-6 grid grid-cols-4 gap-8"
->
+<div className="flex items-center gap-6 text-sm font-semibold">
 
-<div>
-<h3 className="font-bold mb-2 text-[#FF9800]">الأعمال</h3>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">إدارة المشاريع</p>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">تأسيس الشركات</p>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">تطوير الأعمال</p>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">إدارة الفرق</p>
-</div>
+  <span
+    onClick={() => onNavigate?.("about")}
+    className="cursor-pointer text-[#1976D2] hover:text-[#FF9800] text-xl font-semibold"
+  >
+    من نحن
+  </span>
 
-<div>
-<h3 className="font-bold mb-2 text-[#FF9800]">التسويق</h3>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">التسويق الرقمي</p>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">إدارة وسائل التواصل</p>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">تحسين محركات البحث</p>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">الإعلانات المدفوعة</p>
-</div>
+  <span
+    onClick={() => setShowSpecialties(!showSpecialties)}
+    className="cursor-pointer text-[#1976D2] hover:text-[#FF9800] text-xl font-semibold"
+  >
+    التخصصات
+  </span>
 
-<div>
-<h3 className="font-bold mb-2 text-[#FF9800]">التقنية</h3>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">تطوير المواقع</p>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">تطوير التطبيقات</p>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">الذكاء الاصطناعي</p>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">الأمن السيبراني</p>
-</div>
+  {showSpecialties && (
+    <div className="absolute left-1/2 -translate-x-1/2 top-full mt-4 bg-white border rounded-lg shadow-lg p-6 grid grid-cols-4 gap-8">
 
-<div>
-<h3 className="font-bold mb-2 text-[#FF9800]">التعليم</h3>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">اللغة الإنجليزية</p>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">الدورات التدريبية</p>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">التطوير المهني</p>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">التعلم عن بعد</p>
-</div>
+      <div>
+        <h3 className="font-bold mb-2 text-[#FF9800]">الأعمال</h3>
+        <p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">إدارة المشاريع</p>
+        <p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">تأسيس الشركات</p>
+        <p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">تطوير الأعمال</p>
+      </div>
 
-<div>
-<h3 className="font-bold mb-2 text-[#FF9800]">الصحة</h3>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">التغذية</p>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">اللياقة البدنية</p>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">الصحة النفسية</p>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">العلاج الطبيعي</p>
-</div>
+      <div>
+        <h3 className="font-bold mb-2 text-[#FF9800]">التسويق</h3>
+        <p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">التسويق الرقمي</p>
+        <p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">إدارة العلامات التجارية</p>
+        <p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">الإعلانات</p>
+      </div>
 
-<div>
-<h3 className="font-bold mb-2 text-[#FF9800]">الرياضة</h3>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">كرة القدم</p>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">السباحة</p>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">الرماية</p>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">اللياقة البدنية</p>
-</div>
+      <div>
+        <h3 className="font-bold mb-2 text-[#FF9800]">التقنية</h3>
+        <p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">البرمجة</p>
+        <p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">الذكاء الاصطناعي</p>
+        <p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">الأمن السيبراني</p>
+      </div>
 
-<div>
-<h3 className="font-bold mb-2 text-[#FF9800]">الاستثمار</h3>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">الاستثمار العقاري</p>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">الأسهم</p>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">ريادة الأعمال</p>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">التجارة الإلكترونية</p>
-</div>
+      <div>
+        <h3 className="font-bold mb-2 text-[#FF9800]">الرياضة</h3>
+        <p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">كرة القدم</p>
+        <p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">السباحة</p>
+        <p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">اللياقة البدنية</p>
+      </div>
 
-<div>
-<h3 className="font-bold mb-2 text-[#FF9800]">الهوايات</h3>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">التصوير</p>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">الرسم</p>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">الطبخ</p>
-<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">تربية الحيوانات</p>
-</div>
+    </div>
+  )}
+
+  <span className="cursor-pointer text-[#1976D2] hover:text-[#FF9800] text-xl font-semibold">
+    المستشارون
+  </span>
+
+  <span
+    onClick={() => onNavigate?.("consultant-signup")}
+    className="cursor-pointer text-[#1976D2] hover:text-[#FF9800] text-xl font-semibold"
+  >
+    كن مستشاراً
+  </span>
+
+  <span
+    onClick={() => onNavigate?.("client-signup")}
+    className="cursor-pointer text-[#1976D2] hover:text-[#FF9800] text-xl font-semibold"
+  >
+    التسجيل
+  </span>
+
+  <span className="cursor-pointer text-[#1976D2] hover:text-[#FF9800] text-xl font-semibold">
+    تسجيل الدخول
+  </span>
 
 </div>
-)}
-            <span className="cursor-pointer text-[#1976D2] hover:text-[#FF9800] text-xl font-semibold">المستشارون</span>
-            <span
-  onClick={() => onNavigate?.('consultant-signup')}
-  className="cursor-pointer text-[#1976D2] hover:text-[#FF9800] text-xl font-semibold"
->
-  كن مستشاراً
-</span>
-            <span
-  onClick={() => onNavigate?.('client-signup')}
-  className="cursor-pointer text-[#1976D2] hover:text-[#FF9800] text-xl font-semibold"
->
-  التسجيل
-</span>
-            <span className="cursor-pointer text-[#1976D2] hover:text-[#FF9800] text-xl font-semibold">تسجيل الدخول</span>
-          </div>
-
           {/* COUNTRY + LANGUAGE */}
           <div className="flex items-center gap-4">
 
@@ -278,20 +265,32 @@ className="absolute left-1/2 -translate-x-1/2 top-full mt-4 bg-white border roun
 
         </div>
       </header>
-      <section className="pt-32 pb-10 text-center" style={{ backgroundColor: '#F5F5F5' }}>
+      <section className="pt-24 pb-10 text-center" style={{ backgroundColor: '#F5F5F5' }}>
   <div className="container mx-auto px-4">
+    <style>
+{`
+@keyframes slowBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.slow-bounce {
+  animation: slowBounce 4s ease-in-out infinite;
+}
+`}
+</style>
 
     <div className="flex justify-center mb-2">
       <img
-        src={LOGO_LARGE}
-        alt="Sharaka"
-        style={{ height: '250px', width: '250px' }}
-        className="object-contain"
-      />
+  src={LOGO_LARGE}
+  alt="Sharaka"
+  style={{ height: '250px', width: '250px', animationDuration: '5s' }}
+  className="object-contain slow-bounce"
+/>
     </div>
 
-    <h2 className="text-5xl font-bold mb-1" style={{ color: '#FF9800' }}>
-      {t.title}
+    <h2 className="text-5xl font-bold mb-1 -mt-6" style={{ color: '#FF9800' }}>
+  {t.title}
     </h2>
 
     <p className="text-2xl mb-4" style={{ color: '#1976D2' }}>
@@ -306,7 +305,7 @@ className="absolute left-1/2 -translate-x-1/2 top-full mt-4 bg-white border roun
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
 
       <div className="bg-white p-6 rounded-lg shadow-lg">
-        <div className="flex justify-center mb-4">
+       <div className="flex justify-center mt-12 mb-4">
           <div className="p-3 rounded-full" style={{ backgroundColor: '#E3F2FD' }}>
             <Award size={32} style={{ color: '#1976D2' }} />
           </div>

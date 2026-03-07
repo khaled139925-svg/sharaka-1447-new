@@ -13,7 +13,7 @@ export default function App() {
   const renderPage = () => {
     switch (page) {
       case "about":
-  return <About />;
+  return <About onNavigate={setPage} />;
       case "login":
         return <Login onNavigate={setPage} />;
 

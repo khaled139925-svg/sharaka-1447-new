@@ -157,7 +157,7 @@ const [showSpecialties, setShowSpecialties] = useState(false);
   </span>
 
   {showSpecialties && (
-    <div className="absolute left-1/2 -translate-x-1/2 top-full mt-4 bg-white border rounded-lg shadow-lg p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+    <div className="absolute left-1/2 -translate-x-1/2 top-full mt-4 bg-white border rounded-lg shadow-lg p-6 grid grid-cols-4 gap-8 max-h-[70vh] overflow-y-auto">
 
       <div>
         <h3 className="font-bold mb-2 text-[#FF9800]">الأعمال</h3>

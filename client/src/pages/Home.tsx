@@ -68,6 +68,7 @@ export default function Home({ onNavigate }: HomeProps) {
   const [selectedCountry, setSelectedCountry] = useState('SA');
   const [showCountries, setShowCountries] = useState(false);
 const [showSpecialties, setShowSpecialties] = useState(false);
+const [showMenu, setShowMenu] = useState(false);
   const isRTL = language === 'ar';
 
   const translations = {
@@ -140,7 +141,16 @@ const [showSpecialties, setShowSpecialties] = useState(false);
 </div>
 
           {/* MENU */}
-<div className="flex items-center gap-6 text-sm font-semibold">
+<div className="flex items-center gap-6 text-sm font-semibold relative">
+
+
+<button
+className="md:hidden text-3xl text-[#1976D2]"
+onClick={() => setShowMenu(!showMenu)}
+>
+☰
+</button>
+<div className="hidden md:flex items-center gap-6"></div>
 
   <span
     onClick={() => onNavigate?.("about")}
@@ -157,38 +167,70 @@ const [showSpecialties, setShowSpecialties] = useState(false);
   </span>
 
   {showSpecialties && (
-    <div className="absolute left-1/2 -translate-x-1/2 top-full mt-4 bg-white border rounded-lg shadow-lg p-6 grid grid-cols-4 gap-8 max-h-[70vh] overflow-y-auto">
+<div className="absolute left-1/2 -translate-x-1/2 top-full mt-4 bg-white border rounded-lg shadow-lg p-6 grid grid-cols-3 gap-8 max-h-[70vh] overflow-y-auto">
 
-      <div>
-        <h3 className="font-bold mb-2 text-[#FF9800]">الأعمال</h3>
-        <p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">إدارة المشاريع</p>
-        <p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">تأسيس الشركات</p>
-        <p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">تطوير الأعمال</p>
-      </div>
+<div>
+<h3 className="font-bold mb-2 text-[#FF9800]">الأعمال</h3>
+<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">إدارة المشاريع</p>
+<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">تأسيس الشركات</p>
+<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">تطوير الأعمال</p>
+<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">الاستشارات الإدارية</p>
+</div>
 
-      <div>
-        <h3 className="font-bold mb-2 text-[#FF9800]">التسويق</h3>
-        <p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">التسويق الرقمي</p>
-        <p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">إدارة العلامات التجارية</p>
-        <p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">الإعلانات</p>
-      </div>
+<div>
+<h3 className="font-bold mb-2 text-[#FF9800]">التسويق</h3>
+<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">التسويق الرقمي</p>
+<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">إدارة العلامات التجارية</p>
+<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">الإعلانات</p>
+<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">أبحاث السوق</p>
+</div>
 
-      <div>
-        <h3 className="font-bold mb-2 text-[#FF9800]">التقنية</h3>
-        <p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">البرمجة</p>
-        <p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">الذكاء الاصطناعي</p>
-        <p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">الأمن السيبراني</p>
-      </div>
+<div>
+<h3 className="font-bold mb-2 text-[#FF9800]">التقنية</h3>
+<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">البرمجة</p>
+<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">الذكاء الاصطناعي</p>
+<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">الأمن السيبراني</p>
+<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">تطوير المواقع</p>
+</div>
 
-      <div>
-        <h3 className="font-bold mb-2 text-[#FF9800]">الرياضة</h3>
-        <p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">كرة القدم</p>
-        <p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">السباحة</p>
-        <p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">اللياقة البدنية</p>
-      </div>
+<div>
+<h3 className="font-bold mb-2 text-[#FF9800]">التعليم واللغات</h3>
+<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">تعلم الإنجليزية</p>
+<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">تعلم البرمجة</p>
+<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">الدورات التدريبية</p>
+</div>
 
-    </div>
-  )}
+<div>
+<h3 className="font-bold mb-2 text-[#FF9800]">الصحة والجمال</h3>
+<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">التغذية الصحية</p>
+<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">العناية بالبشرة</p>
+<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">اللياقة البدنية</p>
+</div>
+
+<div>
+<h3 className="font-bold mb-2 text-[#FF9800]">الاستشارات</h3>
+<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">استشارات قانونية</p>
+<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">استشارات أسرية</p>
+<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">استشارات مالية</p>
+</div>
+
+<div>
+<h3 className="font-bold mb-2 text-[#FF9800]">الرياضة</h3>
+<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">كرة القدم</p>
+<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">السباحة</p>
+<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">ركوب الخيل</p>
+<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">الرماية</p>
+</div>
+
+<div>
+<h3 className="font-bold mb-2 text-[#FF9800]">المهارات الحياتية</h3>
+<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">الطبخ</p>
+<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">المكياج</p>
+<p className="cursor-pointer text-[#1976D2] hover:text-[#FF9800]">التصوير</p>
+</div>
+
+</div>
+)}
 
   <span className="cursor-pointer text-[#1976D2] hover:text-[#FF9800] text-xl font-semibold">
     المستشارون
@@ -213,6 +255,47 @@ const [showSpecialties, setShowSpecialties] = useState(false);
   </span>
 
 </div>
+{showMenu && (
+<div className="md:hidden absolute top-16 right-0 w-full bg-white shadow-lg flex flex-col text-center text-lg font-semibold z-50">
+
+<span
+onClick={() => onNavigate?.("about")}
+className="p-4 border-b hover:bg-gray-100"
+>
+من نحن
+</span>
+
+<span
+onClick={() => setShowSpecialties(!showSpecialties)}
+className="p-4 border-b hover:bg-gray-100"
+>
+التخصصات
+</span>
+
+<span className="p-4 border-b hover:bg-gray-100">
+المستشارون
+</span>
+
+<span
+onClick={() => onNavigate?.("consultant-signup")}
+className="p-4 border-b hover:bg-gray-100"
+>
+كن مستشاراً
+</span>
+
+<span
+onClick={() => onNavigate?.("client-signup")}
+className="p-4 border-b hover:bg-gray-100"
+>
+التسجيل
+</span>
+
+<span className="p-4 hover:bg-gray-100">
+تسجيل الدخول
+</span>
+
+</div>
+)}
           {/* COUNTRY + LANGUAGE */}
           <div className="flex items-center gap-4">
 

@@ -144,7 +144,7 @@ const [showMenu, setShowMenu] = useState(false);
 <div className="flex items-center gap-6 text-sm font-semibold relative">
 
 <button
-className="md:hidden text-3xl text-[#1976D2]"
+className="md:hidden text-3xl text-[#1976D2] absolute right-4"
 onClick={() => setShowMenu(!showMenu)}
 >
 ☰
@@ -191,6 +191,54 @@ className="cursor-pointer text-[#1976D2] hover:text-[#FF9800] text-xl font-semib
 </div>
 
 </div>
+{showMenu && (
+<div className="md:hidden fixed top-0 right-0 w-3/4 h-full bg-white shadow-2xl flex flex-col text-right text-lg font-semibold z-50 p-6">
+
+<button
+onClick={() => setShowMenu(false)}
+className="text-2xl mb-6"
+>
+✕
+</button>
+
+<span
+onClick={() => onNavigate?.("about")}
+className="py-3 border-b"
+>
+من نحن
+</span>
+
+<span
+onClick={() => setShowSpecialties(!showSpecialties)}
+className="py-3 border-b"
+>
+التخصصات
+</span>
+
+<span className="py-3 border-b">
+المستشارون
+</span>
+
+<span
+onClick={() => onNavigate?.("consultant-signup")}
+className="py-3 border-b"
+>
+كن مستشاراً
+</span>
+
+<span
+onClick={() => onNavigate?.("client-signup")}
+className="py-3 border-b"
+>
+التسجيل
+</span>
+
+<span className="py-3">
+تسجيل الدخول
+</span>
+
+</div>
+)}
           {/* COUNTRY + LANGUAGE */}
           <div className="flex items-center gap-4">
 

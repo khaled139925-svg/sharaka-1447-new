@@ -72,7 +72,7 @@ export default function Home({ onNavigate }: HomeProps) {
     ar: {
       title: "منصة الاستشارات المتخصصة",
       subtitle: "احصل على استشارات احترافية من أفضل الخبراء",
-      consultants: "المستشارين",
+      consultants: "المستشارون",
       bookSession: "حجز جلسة",
       experience: "سنوات الخبرة",
       price: "السعر بالساعة",
@@ -112,25 +112,7 @@ export default function Home({ onNavigate }: HomeProps) {
           </button>
 
           {/* LOGO */}
-          <div className="flex items-center gap-3">
-            <img
-              src={LOGO_SMALL}
-              alt="Sharaka"
-              style={{ height: "70px", width: "70px" }}
-            />
-
-            <div className="flex flex-col">
-              <h1 className="text-xl font-bold text-[#FF9800]">
-                {language === "ar" ? "شراكة" : "Sharaka"}
-              </h1>
-
-              <span className="text-sm text-[#1976D2]">
-                {language === "ar"
-                  ? "شريك نجاحك"
-                  : "Your Partner in Success"}
-              </span>
-            </div>
-          </div>
+          <div className="flex items-center"></div>
 
           <div className="flex-1"></div>
 
@@ -252,8 +234,8 @@ export default function Home({ onNavigate }: HomeProps) {
           </h2>
 
           <p className="text-xl" style={{ color: "#1976D2" }}>
-            {t.subtitle}
-          </p>
+  شريك نجاحك
+</p>
         </div>
         
       </section>

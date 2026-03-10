@@ -1,6 +1,36 @@
 import { useState } from "react";
-import { Star, Clock, Award, Globe } from "lucide-react";
-
+import {
+  Star,
+  Clock,
+  Award,
+  Globe,
+  Dumbbell,
+  Heart,
+  GraduationCap,
+  Code,
+  Palette,
+  Camera,
+  Utensils,
+  ShoppingCart,
+  Briefcase,
+  Scale,
+  Plane,
+  Leaf,
+  Users,
+  Music,
+  BookOpen,
+  Home as HomeIcon,
+  Sparkles,
+  Baby,
+  Rocket,
+  Store,
+  Ship,
+  TrendingUp,
+  Brain,
+  Stethoscope,
+  Hotel,
+  Gavel
+} from "lucide-react";
 const LOGO_SMALL =
   "https://files.manuscdn.com/user_upload_by_module/session_file/310519663333045223/RqiKqWIUsupxHOCa.png";
 const LOGO_LARGE =
@@ -39,7 +69,322 @@ const CONSULTANTS = [
 interface HomeProps {
   onNavigate?: (page: "home" | "about" | "client-signup" | "consultant-signup") => void;
 }
+const SPECIALTIES = [
 
+{
+name:"الرياضة",
+icon:Dumbbell,
+subs:[
+"كرة القدم",
+"كرة السلة",
+"السباحة",
+"الجري",
+"كمال الأجسام",
+"الفنون القتالية",
+"الرماية",
+"الرمي بالقوس",
+"ركوب الخيل"
+]
+},
+
+{
+name:"الصحة والطب",
+icon:Stethoscope,
+subs:[
+"الطب العام",
+"التغذية الصحية",
+"العلاج الطبيعي",
+"الصحة النفسية",
+"العيادات الطبية",
+"التحاليل الطبية",
+"التمريض"
+]
+},
+
+{
+name:"الجمال والعناية",
+icon:Sparkles,
+subs:[
+"العناية بالبشرة",
+"العناية بالشعر",
+"المكياج",
+"التجميل",
+"العناية الشخصية"
+]
+},
+
+{
+name:"التعليم",
+icon:GraduationCap,
+subs:[
+"الدروس الخصوصية",
+"تعليم اللغات",
+"التعليم الإلكتروني",
+"الإرشاد الأكاديمي",
+"التدريب المهني"
+]
+},
+
+{
+name:"التقنية",
+icon:Code,
+subs:[
+"البرمجة",
+"تطوير المواقع",
+"تطوير التطبيقات",
+"الذكاء الاصطناعي",
+"الأمن السيبراني",
+"تحليل البيانات"
+]
+},
+
+{
+name:"التصميم",
+icon:Palette,
+subs:[
+"تصميم الجرافيك",
+"تصميم الشعارات",
+"الهوية البصرية",
+"تصميم الواجهات"
+]
+},
+
+{
+name:"التصوير والإعلام",
+icon:Camera,
+subs:[
+"التصوير الفوتوغرافي",
+"تصوير الفيديو",
+"المونتاج",
+"صناعة المحتوى"
+]
+},
+
+{
+name:"الطبخ وفنون الطعام",
+icon:Utensils,
+subs:[
+"الطبخ العربي",
+"الطبخ العالمي",
+"الحلويات",
+"المخبوزات",
+"تنسيق الموائد"
+]
+},
+
+{
+name:"التجارة",
+icon:ShoppingCart,
+subs:[
+"التجارة المحلية",
+"التجارة الإلكترونية",
+"البيع بالتجزئة",
+"إدارة المتاجر"
+]
+},
+
+{
+name:"الأعمال وريادة الأعمال",
+icon:Briefcase,
+subs:[
+"ريادة الأعمال",
+"إدارة المشاريع",
+"إدارة الشركات",
+"الموارد البشرية"
+]
+},
+
+{
+name:"القانون والمحاماة",
+icon:Scale,
+subs:[
+"الاستشارات القانونية",
+"المحاماة",
+"القانون التجاري",
+"القانون المدني"
+]
+},
+
+{
+name:"السفر والسياحة",
+icon:Plane,
+subs:[
+"تنظيم الرحلات",
+"السياحة الداخلية",
+"السياحة الخارجية",
+"الإرشاد السياحي"
+]
+},
+
+{
+name:"الحج والعمرة",
+icon:Gavel,
+subs:[
+"خدمات الحج",
+"خدمات العمرة",
+"الإرشاد للحجاج"
+]
+},
+
+{
+name:"الزراعة",
+icon:Leaf,
+subs:[
+"الزراعة المنزلية",
+"الزراعة الحديثة",
+"زراعة الخضروات",
+"زراعة الفواكه"
+]
+},
+
+{
+name:"تربية الحيوانات",
+icon:Leaf,
+subs:[
+"تربية الأغنام",
+"تربية الأبقار",
+"تربية الدواجن",
+"تربية الطيور",
+"تربية النحل"
+]
+},
+
+{
+name:"الأسرة",
+icon:Users,
+subs:[
+"العلاقات الأسرية",
+"الإرشاد الأسري",
+"الحياة الزوجية",
+"التربية"
+]
+},
+
+{
+name:"الأطفال",
+icon:Baby,
+subs:[
+"تعليم الأطفال",
+"تنمية المهارات",
+"الأنشطة التعليمية"
+]
+},
+
+{
+name:"الشباب",
+icon:Rocket,
+subs:[
+"تطوير الذات",
+"المهارات المهنية",
+"المبادرات الشبابية"
+]
+},
+
+{
+name:"ربات البيوت",
+icon:HomeIcon,
+subs:[
+"إدارة المنزل",
+"تنظيم المنزل",
+"الاقتصاد المنزلي",
+"الطبخ المنزلي"
+]
+},
+
+{
+name:"الهوايات",
+icon:Music,
+subs:[
+"القراءة",
+"الألعاب",
+"الهوايات المنزلية",
+"التخييم"
+]
+},
+
+{
+name:"الفنون",
+icon:Palette,
+subs:[
+"الرسم",
+"النحت",
+"الحرف اليدوية",
+"الخط العربي"
+]
+},
+
+{
+name:"الأدب والشعر",
+icon:BookOpen,
+subs:[
+"الشعر",
+"الروايات",
+"القصص",
+"الكتابة الأدبية"
+]
+},
+
+{
+name:"المتاجر",
+icon:Store,
+subs:[
+"المتاجر التقليدية",
+"المتاجر الإلكترونية",
+"عرض المنتجات"
+]
+},
+
+{
+name:"الاستيراد والتصدير",
+icon:Ship,
+subs:[
+"الاستيراد",
+"التصدير",
+"الشحن الدولي"
+]
+},
+
+{
+name:"الاستثمار",
+icon:TrendingUp,
+subs:[
+"الاستثمار المالي",
+"الأسهم",
+"إدارة الأموال"
+]
+},
+
+{
+name:"التنمية البشرية",
+icon:Brain,
+subs:[
+"تطوير الذات",
+"إدارة الوقت",
+"تحقيق الأهداف"
+]
+},
+
+{
+name:"الخدمات",
+icon:Users,
+subs:[
+"الخدمات المهنية",
+"الخدمات المنزلية",
+"الصيانة"
+]
+},
+
+{
+name:"الفنادق والضيافة",
+icon:Hotel,
+subs:[
+"الفنادق",
+"دور الضيافة",
+"تنظيم الفعاليات"
+]
+}
+
+];
 const COUNTRIES = [
   { code: "SA", name: "السعودية", flag: "🇸🇦" },
   { code: "AE", name: "الإمارات", flag: "🇦🇪" },
@@ -64,7 +409,7 @@ export default function Home({ onNavigate }: HomeProps) {
   const [selectedCountry, setSelectedCountry] = useState("SA");
   const [showCountries, setShowCountries] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-
+const [openSpecialty, setOpenSpecialty] = useState<number | null>(null);
   const isRTL = language === "ar";
 
   const translations = {
@@ -244,7 +589,73 @@ export default function Home({ onNavigate }: HomeProps) {
         </div>
         
       </section>
+{/* SPECIALTIES */}
 
+<section className="py-16 bg-gray-50">
+
+<div className="container mx-auto px-4">
+
+<h2 className="text-3xl font-bold text-center mb-12 text-[#FF9800]">
+التخصصات
+</h2>
+
+<div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+
+{SPECIALTIES.map((s,i)=>{
+
+const Icon=s.icon;
+const open=openSpecialty===i;
+
+return(
+
+<div key={i} className="bg-white rounded-xl shadow-md hover:shadow-xl transition">
+
+<button
+onClick={()=>setOpenSpecialty(open?null:i)}
+className="w-full p-5 text-center"
+>
+
+<div className="flex justify-center mb-3">
+
+<div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center">
+
+<Icon size={30} className="text-[#1976D2]" />
+
+</div>
+
+</div>
+
+<h3 className="font-bold text-[#FF9800]">
+
+{s.name}
+
+</h3>
+
+</button>
+
+{open && (
+
+<div className="px-5 pb-5 text-sm text-gray-700">
+
+{s.subs.map((sub,index)=>(
+<div key={index}>• {sub}</div>
+))}
+
+</div>
+
+)}
+
+</div>
+
+)
+
+})}
+
+</div>
+
+</div>
+
+</section>
       {/* CONSULTANTS */}
       <section className="py-16">
         <div className="container mx-auto px-4">

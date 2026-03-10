@@ -27,3 +27,23 @@ header {
 }
 
 /* Main content spacing handled via inline style */
+
+/* حركة الشعار */
+
+.logo-float {
+  animation: logoFloat 4s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-12px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}

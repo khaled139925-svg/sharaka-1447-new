@@ -64,35 +64,33 @@ export default function Home({ onNavigate }: HomeProps) {
   const [selectedCountry, setSelectedCountry] = useState("SA");
   const [showCountries, setShowCountries] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  
 
   const isRTL = language === "ar";
 
   const translations = {
-    ar: {
-      title: "منصة الاستشارات المتخصصة",
-      subtitle: "احصل على استشارات احترافية من أفضل الخبراء",
-      consultants: "المستشارون",
-      bookSession: "حجز جلسة",
-      experience: "سنوات الخبرة",
-      price: "السعر بالساعة",
-      rating: "التقييم",
-      english: "English",
-      arabic: "العربية",
-    },
-    en: {
-      title: "Professional Consulting Platform",
-      subtitle: "Get professional consultations from the best experts",
-      consultants: "Consultants",
-      bookSession: "Book Session",
-      experience: "Years of Experience",
-      price: "Price per Hour",
-      rating: "Rating",
-      english: "English",
-      arabic: "العربية",
-    },
-  };
-
+  ar: {
+    title: "اعرض ما لديك… واحصل على ما تريد",
+    subtitle: "شريك نجاحك",
+    consultants: "المستشارون",
+    bookSession: "حجز جلسة",
+    experience: "سنوات الخبرة",
+    price: "السعر بالساعة",
+    rating: "التقييم",
+    english: "English",
+    arabic: "العربية",
+  },
+  en: {
+    title: "Show what you have… get what you want",
+    subtitle: "Your Partner in Success",
+    consultants: "Consultants",
+    bookSession: "Book Session",
+    experience: "Years of Experience",
+    price: "Price per Hour",
+    rating: "Rating",
+    english: "English",
+    arabic: "Arabic",
+  },
+};
   const t = translations[language];
 
   return (
@@ -177,7 +175,13 @@ export default function Home({ onNavigate }: HomeProps) {
 من نحن
 </button>
 
-<button className="py-3 border-b text-right hover:text-[#FF9800]">
+<button
+  onClick={() => {
+    setShowMenu(false);
+    onNavigate?.("specialties");
+  }}
+  className="py-3 border-b text-right hover:text-[#FF9800]"
+>
 التخصصات
 </button>
 
@@ -220,10 +224,11 @@ export default function Home({ onNavigate }: HomeProps) {
         <div className="container mx-auto px-4">
           <div className="flex justify-center mb-2">
             <img
-              src={LOGO_LARGE}
-              alt="Sharaka"
-              style={{ height: "200px" }}
-            />
+  src={LOGO_LARGE}
+  alt="Sharaka"
+  className="logo-float"
+  style={{ height: "200px" }}
+/>
           </div>
 
           <h2

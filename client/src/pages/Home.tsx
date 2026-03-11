@@ -29,7 +29,10 @@ import {
   Brain,
   Stethoscope,
   Hotel,
-  Gavel
+  Gavel,
+  Info,
+  UserPlus,
+  LogIn
 } from "lucide-react";
 const LOGO_SMALL =
   "https://files.manuscdn.com/user_upload_by_module/session_file/310519663333045223/RqiKqWIUsupxHOCa.png";
@@ -72,315 +75,335 @@ interface HomeProps {
 const SPECIALTIES = [
 
 {
-name:"الرياضة",
-icon:Dumbbell,
+name:"الاستشارات",
+icon: Brain,
 subs:[
-"كرة القدم",
-"كرة السلة",
-"السباحة",
-"الجري",
-"كمال الأجسام",
-"الفنون القتالية",
-"الرماية",
-"الرمي بالقوس",
-"ركوب الخيل"
+"استشارات إدارية",
+"استشارات مالية",
+"استشارات قانونية",
+"استشارات مهنية",
+"استشارات أسرية"
 ]
 },
 
 {
-name:"الصحة والطب",
-icon:Stethoscope,
+name:"التعليم والتدريب",
+icon: GraduationCap,
 subs:[
-"الطب العام",
-"التغذية الصحية",
-"العلاج الطبيعي",
-"الصحة النفسية",
-"العيادات الطبية",
-"التحاليل الطبية",
-"التمريض"
+"الدورات التدريبية",
+"التعليم الأكاديمي",
+"التعليم عن بعد",
+"التدريب المهني",
+"التدريب القيادي"
 ]
 },
 
 {
-name:"الجمال والعناية",
-icon:Sparkles,
+name:"التقنية والبرمجة",
+icon: Code,
 subs:[
-"العناية بالبشرة",
-"العناية بالشعر",
-"المكياج",
-"التجميل",
-"العناية الشخصية"
-]
-},
-
-{
-name:"التعليم",
-icon:GraduationCap,
-subs:[
-"الدروس الخصوصية",
-"تعليم اللغات",
-"التعليم الإلكتروني",
-"الإرشاد الأكاديمي",
-"التدريب المهني"
-]
-},
-
-{
-name:"التقنية",
-icon:Code,
-subs:[
-"البرمجة",
 "تطوير المواقع",
 "تطوير التطبيقات",
 "الذكاء الاصطناعي",
-"الأمن السيبراني",
+"أمن المعلومات",
 "تحليل البيانات"
 ]
 },
 
 {
-name:"التصميم",
-icon:Palette,
+name:"التصميم والإبداع",
+icon: Palette,
 subs:[
 "تصميم الجرافيك",
 "تصميم الشعارات",
-"الهوية البصرية",
-"تصميم الواجهات"
+"تصميم واجهات المستخدم",
+"التصميم الإعلاني"
 ]
 },
 
 {
-name:"التصوير والإعلام",
-icon:Camera,
+name:"الإعلام وصناعة المحتوى",
+icon: Camera,
 subs:[
+"إنتاج الفيديو",
 "التصوير الفوتوغرافي",
-"تصوير الفيديو",
-"المونتاج",
-"صناعة المحتوى"
+"صناعة المحتوى",
+"إدارة القنوات"
 ]
 },
 
 {
-name:"الطبخ وفنون الطعام",
-icon:Utensils,
+name:"التسويق والتجارة",
+icon: TrendingUp,
 subs:[
-"الطبخ العربي",
-"الطبخ العالمي",
-"الحلويات",
-"المخبوزات",
-"تنسيق الموائد"
+"التسويق الرقمي",
+"إدارة الحملات الإعلانية",
+"التسويق عبر السوشيال ميديا",
+"تحليل السوق"
 ]
 },
 
 {
-name:"التجارة",
-icon:ShoppingCart,
+name:"الإدارة وريادة الأعمال",
+icon: Briefcase,
 subs:[
-"التجارة المحلية",
-"التجارة الإلكترونية",
-"البيع بالتجزئة",
-"إدارة المتاجر"
-]
-},
-
-{
-name:"الأعمال وريادة الأعمال",
-icon:Briefcase,
-subs:[
-"ريادة الأعمال",
 "إدارة المشاريع",
-"إدارة الشركات",
-"الموارد البشرية"
+"ريادة الأعمال",
+"تطوير الأعمال",
+"التخطيط الاستراتيجي"
 ]
 },
 
 {
 name:"القانون والمحاماة",
-icon:Scale,
+icon: Scale,
 subs:[
 "الاستشارات القانونية",
-"المحاماة",
-"القانون التجاري",
-"القانون المدني"
+"القضايا التجارية",
+"القضايا المدنية",
+"التحكيم"
 ]
 },
 
 {
-name:"السفر والسياحة",
-icon:Plane,
+name:"الطب والصحة",
+icon: Stethoscope,
 subs:[
-"تنظيم الرحلات",
-"السياحة الداخلية",
-"السياحة الخارجية",
-"الإرشاد السياحي"
+"الاستشارات الطبية",
+"الصحة العامة",
+"الطب الوقائي",
+"التوجيه الصحي"
 ]
 },
 
 {
-name:"الحج والعمرة",
-icon:Gavel,
+name:"الصحة النفسية",
+icon: Brain,
 subs:[
-"خدمات الحج",
-"خدمات العمرة",
-"الإرشاد للحجاج"
+"العلاج النفسي",
+"الإرشاد النفسي",
+"تنمية الشخصية",
+"الدعم النفسي"
 ]
 },
 
 {
-name:"الزراعة",
-icon:Leaf,
+name:"الرياضة واللياقة",
+icon: Dumbbell,
 subs:[
-"الزراعة المنزلية",
-"الزراعة الحديثة",
-"زراعة الخضروات",
-"زراعة الفواكه"
+"التدريب الرياضي",
+"اللياقة البدنية",
+"التغذية الرياضية",
+"التأهيل البدني"
 ]
 },
 
 {
-name:"تربية الحيوانات",
-icon:Leaf,
+name:"التغذية والطبخ",
+icon: Utensils,
 subs:[
-"تربية الأغنام",
-"تربية الأبقار",
-"تربية الدواجن",
-"تربية الطيور",
-"تربية النحل"
+"الطبخ الاحترافي",
+"التغذية الصحية",
+"إعداد الوجبات",
+"المطابخ العالمية"
 ]
 },
 
 {
-name:"الأسرة",
-icon:Users,
+name:"الجمال والعناية",
+icon: Sparkles,
 subs:[
-"العلاقات الأسرية",
+"العناية بالبشرة",
+"العناية بالشعر",
+"التجميل",
+"الصحة الجمالية"
+]
+},
+
+{
+name:"الأسرة والتربية",
+icon: Users,
+subs:[
 "الإرشاد الأسري",
-"الحياة الزوجية",
-"التربية"
+"التربية",
+"العلاقات الأسرية",
+"تنمية الأطفال"
 ]
 },
 
 {
-name:"الأطفال",
-icon:Baby,
+name:"الطفولة",
+icon: Baby,
 subs:[
+"تنمية الطفل",
 "تعليم الأطفال",
-"تنمية المهارات",
-"الأنشطة التعليمية"
+"أنشطة الأطفال",
+"تربية الأطفال"
 ]
 },
 
 {
 name:"الشباب",
-icon:Rocket,
+icon: Rocket,
 subs:[
-"تطوير الذات",
-"المهارات المهنية",
-"المبادرات الشبابية"
+"تطوير المهارات",
+"العمل الحر",
+"بناء المستقبل",
+"التوجيه المهني"
 ]
 },
 
 {
-name:"ربات البيوت",
-icon:HomeIcon,
-subs:[
-"إدارة المنزل",
-"تنظيم المنزل",
-"الاقتصاد المنزلي",
-"الطبخ المنزلي"
-]
-},
-
-{
-name:"الهوايات",
-icon:Music,
-subs:[
-"القراءة",
-"الألعاب",
-"الهوايات المنزلية",
-"التخييم"
-]
-},
-
-{
-name:"الفنون",
-icon:Palette,
+name:"الهوايات والفنون",
+icon: Palette,
 subs:[
 "الرسم",
-"النحت",
+"الموسيقى",
 "الحرف اليدوية",
-"الخط العربي"
+"الفنون الإبداعية"
 ]
 },
 
 {
 name:"الأدب والشعر",
-icon:BookOpen,
+icon: BookOpen,
 subs:[
 "الشعر",
-"الروايات",
-"القصص",
-"الكتابة الأدبية"
+"الكتابة الأدبية",
+"النقد الأدبي",
+"تطوير مهارات الكتابة"
 ]
 },
 
 {
-name:"المتاجر",
-icon:Store,
+name:"السفر والسياحة",
+icon: Plane,
 subs:[
-"المتاجر التقليدية",
-"المتاجر الإلكترونية",
-"عرض المنتجات"
+"التخطيط للسفر",
+"السياحة العالمية",
+"المرشدون السياحيون",
+"برامج الرحلات"
 ]
 },
 
 {
-name:"الاستيراد والتصدير",
-icon:Ship,
+name:"الحج والعمرة",
+icon:"🕋",
 subs:[
-"الاستيراد",
-"التصدير",
-"الشحن الدولي"
-]
-},
-
-{
-name:"الاستثمار",
-icon:TrendingUp,
-subs:[
-"الاستثمار المالي",
-"الأسهم",
-"إدارة الأموال"
-]
-},
-
-{
-name:"التنمية البشرية",
-icon:Brain,
-subs:[
-"تطوير الذات",
-"إدارة الوقت",
-"تحقيق الأهداف"
-]
-},
-
-{
-name:"الخدمات",
-icon:Users,
-subs:[
-"الخدمات المهنية",
-"الخدمات المنزلية",
-"الصيانة"
+"تنظيم رحلات الحج",
+"تنظيم رحلات العمرة",
+"الإرشاد الديني",
+"خدمات المعتمرين"
 ]
 },
 
 {
 name:"الفنادق والضيافة",
-icon:Hotel,
+icon: Hotel,
 subs:[
-"الفنادق",
-"دور الضيافة",
-"تنظيم الفعاليات"
+"إدارة الفنادق",
+"الضيافة",
+"تنظيم الفعاليات",
+"خدمات الضيافة"
+]
+},
+
+{
+name:"التجارة الدولية",
+icon: Globe,
+subs:[
+"الاستيراد والتصدير",
+"التجارة العالمية",
+"الشحن الدولي",
+"الأسواق العالمية"
+]
+},
+
+{
+name:"الزراعة",
+icon: Leaf,
+subs:[
+"الزراعة الحديثة",
+"المزارع",
+"الإنتاج الزراعي",
+"التقنيات الزراعية"
+]
+},
+
+{
+name:"تربية الحيوانات",
+icon: Heart,
+subs:[
+"تربية المواشي",
+"تربية الطيور",
+"رعاية الحيوانات",
+"الإنتاج الحيواني"
+]
+},
+
+{
+name:"البيئة والطبيعة",
+icon: Leaf,
+subs:[
+"الحفاظ على البيئة",
+"الاستدامة",
+"المشاريع البيئية",
+"الطبيعة"
+]
+},
+
+{
+name:"المتاجر والتجارة الإلكترونية",
+icon: ShoppingCart,
+subs:[
+"إنشاء المتاجر",
+"إدارة المتاجر",
+"التجارة الإلكترونية",
+"التسويق الإلكتروني"
+]
+},
+
+{
+name:"النقل والخدمات اللوجستية",
+icon: Ship,
+subs:[
+"الشحن",
+"النقل",
+"الخدمات اللوجستية",
+"إدارة سلاسل الإمداد"
+]
+},
+
+{
+name:"الاستثمار والمال",
+icon: TrendingUp,
+subs:[
+"الاستثمار",
+"الأسواق المالية",
+"التخطيط المالي",
+"إدارة الأموال"
+]
+},
+
+{
+name:"العقار",
+icon: HomeIcon,
+subs:[
+"بيع وشراء العقارات",
+"التأجير",
+"التطوير العقاري",
+"الاستثمار العقاري"
+]
+},
+
+{
+name:"أنشطة متنوعة",
+icon: Sparkles,
+subs:[
+"أفكار ومشاريع",
+"مبادرات مجتمعية",
+"أنشطة ثقافية",
+"أنشطة عامة"
 ]
 }
 
@@ -409,7 +432,11 @@ export default function Home({ onNavigate }: HomeProps) {
   const [selectedCountry, setSelectedCountry] = useState("SA");
   const [showCountries, setShowCountries] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-const [openSpecialty, setOpenSpecialty] = useState<number | null>(null);
+
+  const [showContact, setShowContact] = useState(false);
+
+  const [openSpecialty, setOpenSpecialty] = useState<number | null>(null);
+
   const isRTL = language === "ar";
 
   const translations = {
@@ -501,66 +528,73 @@ const [openSpecialty, setOpenSpecialty] = useState<number | null>(null);
         </div>
 
         {/* MOBILE MENU */}
-        {showMenu && (
-          <div className={`fixed top-0 ${language === "ar" ? "right-0" : "left-0"} w-72 h-full bg-white shadow-2xl z-50 p-6 flex flex-col text-right`}>
-            <button
-              onClick={() => setShowMenu(false)}
-              className="text-2xl mb-6"
-            >
-              ✕
-            </button>
-
-            <button
-  onClick={() => {
-    setShowMenu(false);
-    onNavigate?.("about");
-  }}
-  className="py-3 border-b text-right hover:text-[#FF9800]"
+{showMenu && (
+<div
+className="fixed inset-0 bg-black/40 z-50"
+onClick={() => setShowMenu(false)}
 >
-من نحن
-</button>
+
+<div
+onClick={(e)=>e.stopPropagation()}
+className={`fixed top-0 ${
+language === "ar" ? "right-0" : "left-0"
+} w-80 h-full bg-white shadow-2xl p-6 flex flex-col`}
+
+>
+
+<div className="flex items-center justify-between mb-8">
+
+<h2 className="text-xl font-bold text-[#FF9800]">
+القائمة
+</h2>
 
 <button
-  onClick={() => {
-    setShowMenu(false);
-    onNavigate?.("specialties");
-  }}
-  className="py-3 border-b text-right hover:text-[#FF9800]"
+onClick={()=>setShowMenu(false)}
+className="text-2xl hover:text-red-500"
 >
-التخصصات
+✕
 </button>
 
-<button className="py-3 border-b text-right hover:text-[#FF9800]">
-المستشارون
-</button>
+</div>
+
 
 <button
-  onClick={() => {
-    setShowMenu(false);
-    onNavigate?.("consultant-signup");
-  }}
-  className="py-3 border-b text-right hover:text-[#FF9800]"
+onClick={()=>{
+setShowMenu(false);
+onNavigate?.("about");
+}}
+className="flex items-center gap-3 py-4 px-3 rounded-lg hover:bg-gray-100 transition"
 >
-كن مستشاراً
+<Info size={20} className="text-[#1976D2]" />
+<span className="font-medium">من نحن</span>
 </button>
+
 
 <button
-  onClick={() => {
-    setShowMenu(false);
-    onNavigate?.("client-signup");
-  }}
-  className="py-3 border-b text-right hover:text-[#FF9800]"
+onClick={()=>{
+setShowMenu(false);
+onNavigate?.("consultant-signup");
+}}
+className="flex items-center gap-3 py-4 px-3 rounded-lg hover:bg-gray-100 transition"
 >
-التسجيل
+<UserPlus size={20} className="text-[#FF9800]" />
+<span className="font-medium">انضم إلينا</span>
 </button>
 
-<button className="py-3 text-right hover:text-[#FF9800]">
-تسجيل الدخول
-</button>
-          </div>
-        )}
-      </header>
 
+<button
+className="flex items-center gap-3 py-4 px-3 rounded-lg hover:bg-gray-100 transition"
+>
+<LogIn size={20} className="text-[#1976D2]" />
+<span className="font-medium">تسجيل الدخول</span>
+</button>
+
+</div>
+
+</div>
+)}
+       
+</header>
       {/* HERO */}
       <section
         className="pt-24 pb-10 text-center"
@@ -586,6 +620,13 @@ const [openSpecialty, setOpenSpecialty] = useState<number | null>(null);
           <p className="text-xl" style={{ color: "#1976D2" }}>
   شريك نجاحك
 </p>
+<button
+onClick={() => onNavigate?.("consultant-signup")}
+className="mt-6 px-8 py-3 rounded-lg text-white text-lg font-bold"
+style={{ backgroundColor: "#FF9800" }}
+>
+انضم الآن وابدأ بعرض ما لديك
+</button>
         </div>
         
       </section>
@@ -619,7 +660,10 @@ className="w-full p-5 text-center"
 
 <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center">
 
-<Icon size={30} className="text-[#1976D2]" />
+{s.icon === "🕋"
+? <span className="text-3xl">🕋</span>
+: <Icon size={30} className="text-[#1976D2]" />
+}
 
 </div>
 
@@ -656,46 +700,79 @@ className="w-full p-5 text-center"
 </div>
 
 </section>
-      {/* CONSULTANTS */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <h2
-            className="text-3xl font-bold text-center mb-10"
-            style={{ color: "#FF9800" }}
-          >
-            {t.consultants}
-          </h2>
+      <section className="py-20 bg-[#1976D2] text-center text-white">
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {CONSULTANTS.map((c) => (
-              <div
-                key={c.id}
-                className="bg-white rounded-lg shadow-lg p-6"
-              >
-                <h3 className="text-xl font-bold text-[#FF9800]">
-                  {c.name}
-                </h3>
+<div className="max-w-3xl mx-auto px-6">
 
-                <p className="text-[#1976D2] mb-2">{c.specialty}</p>
+<h2 className="text-3xl font-bold mb-6">
+شراكة… منصة تجمع الخبرة والخدمة والفرص
+</h2>
 
-                <p className="text-gray-600 mb-4">{c.bio}</p>
+<p className="text-lg leading-8 mb-8">
+في شراكة يستطيع الأفراد والمؤسسات عرض ما لديهم من معرفة أو خدمة أو منتج،
+كما يمكنهم الوصول إلى ما يحتاجون إليه من خبرة أو خدمة أو فرصة في مكان واحد.
+</p>
 
-                <div className="text-sm text-gray-600">
-                  ⭐ {c.rating} | {c.experience} سنة
-                </div>
+<button
+onClick={()=>setShowContact(true)}
+className="bg-[#FF9800] hover:bg-orange-500 text-white font-bold py-4 px-8 rounded-lg text-lg transition"
+>
+تواصل معنا
+</button>
 
-                <button
-                  onClick={() => onNavigate?.("client-signup")}
-                  className="mt-4 w-full py-2 rounded-lg text-white"
-                  style={{ backgroundColor: "#FF9800" }}
-                >
-                  {t.bookSession}
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+</div>
+
+</section>
+{showContact && (
+
+<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+
+<div className="bg-white w-full max-w-lg p-8 rounded-xl shadow-2xl text-right">
+
+<div className="flex justify-between items-center mb-6">
+
+<h3 className="text-xl font-bold text-[#1976D2]">
+تواصل معنا
+</h3>
+
+<button
+onClick={()=>setShowContact(false)}
+className="text-xl hover:text-red-500"
+>
+✕
+</button>
+
+</div>
+
+<input
+type="text"
+placeholder="الاسم"
+className="w-full border p-3 rounded mb-4"
+/>
+
+<input
+type="email"
+placeholder="البريد الإلكتروني"
+className="w-full border p-3 rounded mb-4"
+/>
+
+<textarea
+placeholder="الرسالة"
+rows={4}
+className="w-full border p-3 rounded mb-6"
+/>
+
+<button
+className="w-full bg-[#FF9800] text-white py-3 rounded hover:bg-orange-500 transition"
+>
+إرسال
+</button>
+
+</div>
+
+</div>
+
+)}
     </div>
   );
 }

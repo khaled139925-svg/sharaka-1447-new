@@ -617,7 +617,10 @@ className="flex items-center gap-3 py-4 px-3 rounded-lg hover:bg-gray-100 transi
   src={logo}
   alt="Sharaka"
   className="logo-float"
-  style={{ height: "200px" }}
+  style={{
+    height: "200px",
+    mixBlendMode: "multiply"
+  }}
 />
           </div>
 

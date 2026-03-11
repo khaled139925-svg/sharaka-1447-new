@@ -1,4 +1,5 @@
 import { useState } from "react";
+import logo from "../assets/globe-icon.png";
 import {
   Star,
   Clock,
@@ -34,10 +35,7 @@ import {
   UserPlus,
   LogIn
 } from "lucide-react";
-const LOGO_SMALL =
-  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663333045223/RqiKqWIUsupxHOCa.png";
-const LOGO_LARGE =
-  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663333045223/RqiKqWIUsupxHOCa.png";
+
 
 const CONSULTANTS = [
   {
@@ -435,6 +433,9 @@ export default function Home({ onNavigate }: HomeProps) {
 
   const [showContact, setShowContact] = useState(false);
 
+  const [showAdForm, setShowAdForm] = useState(false);
+const [isMember, setIsMember] = useState<boolean | null>(null);
+
   const [openSpecialty, setOpenSpecialty] = useState<number | null>(null);
 
   const isRTL = language === "ar";
@@ -588,6 +589,16 @@ className="flex items-center gap-3 py-4 px-3 rounded-lg hover:bg-gray-100 transi
 <LogIn size={20} className="text-[#1976D2]" />
 <span className="font-medium">تسجيل الدخول</span>
 </button>
+<button
+onClick={()=>{
+setShowMenu(false);
+onNavigate?.("admin");
+}}
+className="flex items-center gap-3 py-4 px-3 rounded-lg hover:bg-gray-100 transition"
+>
+<span className="text-xl">⚙️</span>
+<span className="font-medium">الإدارة</span>
+</button>
 
 </div>
 
@@ -603,7 +614,7 @@ className="flex items-center gap-3 py-4 px-3 rounded-lg hover:bg-gray-100 transi
         <div className="container mx-auto px-4">
           <div className="flex justify-center mb-2">
             <img
-  src={LOGO_LARGE}
+  src={logo}
   alt="Sharaka"
   className="logo-float"
   style={{ height: "200px" }}
@@ -620,32 +631,41 @@ className="flex items-center gap-3 py-4 px-3 rounded-lg hover:bg-gray-100 transi
           <p className="text-xl" style={{ color: "#1976D2" }}>
   شريك نجاحك
 </p>
+<div className="mt-6 flex flex-col items-center gap-4">
+
 <button
-onClick={() => onNavigate?.("consultant-signup")}
-className="mt-6 px-8 py-3 rounded-lg text-white text-lg font-bold"
-style={{ backgroundColor: "#FF9800" }}
+onClick={()=>onNavigate?.("consultant-signup")}
+className="w-60 bg-[#FF9800] hover:bg-orange-500 text-white font-bold py-4 rounded-lg text-lg transition"
 >
-انضم الآن وابدأ بعرض ما لديك
+انضم الآن
 </button>
+
+<button
+onClick={()=>onNavigate?.("consultants")}
+className="w-60 flex items-center justify-center gap-2 bg-[#1976D2] hover:bg-blue-700 text-white font-bold py-4 rounded-lg text-lg transition"
+>
+👥 تصفح الجميع
+</button>
+
+</div>
         </div>
         
       </section>
+      
 {/* SPECIALTIES */}
 
-<section className="py-16 bg-gray-50">
+{/* SPECIALTIES */}
+
+<section id="specialties" className="py-16 bg-gray-50">
 
 <div className="container mx-auto px-4">
-
-<h2 className="text-3xl font-bold text-center mb-12 text-[#FF9800]">
-التخصصات
-</h2>
 
 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
 
 {SPECIALTIES.map((s,i)=>{
 
-const Icon=s.icon;
-const open=openSpecialty===i;
+const Icon = s.icon;
+const open = openSpecialty === i;
 
 return(
 
@@ -660,8 +680,8 @@ className="w-full p-5 text-center"
 
 <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center">
 
-{s.icon === "🕋"
-? <span className="text-3xl">🕋</span>
+{typeof s.icon === "string"
+? <span className="text-2xl">{s.icon}</span>
 : <Icon size={30} className="text-[#1976D2]" />
 }
 
@@ -670,9 +690,7 @@ className="w-full p-5 text-center"
 </div>
 
 <h3 className="font-bold text-[#FF9800]">
-
 {s.name}
-
 </h3>
 
 </button>
@@ -700,6 +718,87 @@ className="w-full p-5 text-center"
 </div>
 
 </section>
+
+
+{/* SOUQ SHARAKA */}
+
+<section className="py-20 bg-white">
+
+<div className="max-w-6xl mx-auto px-6 text-center">
+
+<h2 className="text-3xl font-bold mb-10 text-[#FF9800]">
+سوق شراكة
+</h2>
+
+<div className="flex flex-col items-center gap-4 mb-12">
+
+<button
+onClick={()=>setShowAdForm(true)}
+className="w-60 bg-[#FF9800] hover:bg-orange-500 text-white font-bold py-4 rounded-lg text-lg transition"
+>
+أضف إعلانك مجانًا
+</button>
+
+<button
+onClick={()=>onNavigate?.("market")}
+className="w-60 bg-[#1976D2] hover:bg-blue-700 text-white font-bold py-4 rounded-lg text-lg transition"
+>
+تصفح الإعلانات
+</button>
+
+</div>
+
+<div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+
+{[
+{icon:"🏠",name:"عقار"},
+{icon:"🚗",name:"سيارات"},
+{icon:"📱",name:"أجهزة"},
+{icon:"💼",name:"وظائف"},
+{icon:"🛒",name:"بيع"},
+{icon:"🛍",name:"شراء"},
+{icon:"📈",name:"استثمار"},
+{icon:"🏪",name:"تجارة"},
+{icon:"🧰",name:"خدمات"},
+{icon:"➕",name:"أخرى"}
+].map((s,i)=>{
+
+return(
+
+<div key={i} className="bg-white rounded-xl shadow-md hover:shadow-xl transition">
+
+<button className="w-full p-5 text-center">
+
+<div className="flex justify-center mb-3">
+
+<div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center text-2xl">
+
+{s.icon}
+
+</div>
+
+</div>
+
+<h3 className="font-bold text-[#FF9800]">
+{s.name}
+</h3>
+
+</button>
+
+</div>
+
+)
+
+})}
+
+</div>
+
+</div>
+
+</section>
+{/* SOUQ SHARAKA */}
+
+
       <section className="py-20 bg-[#1976D2] text-center text-white">
 
 <div className="max-w-3xl mx-auto px-6">
@@ -723,6 +822,125 @@ className="bg-[#FF9800] hover:bg-orange-500 text-white font-bold py-4 px-8 round
 </div>
 
 </section>
+{showAdForm && (
+
+<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+
+<div className="bg-white w-full max-w-xl p-8 rounded-xl shadow-2xl text-right">
+
+<div className="flex justify-between items-center mb-6">
+
+<h3 className="text-xl font-bold text-[#1976D2]">
+إضافة إعلان
+</h3>
+
+<button
+onClick={()=>{
+setShowAdForm(false);
+setIsMember(null);
+}}
+className="text-xl hover:text-red-500"
+>
+✕
+</button>
+
+</div>
+
+
+{/* سؤال العضوية */}
+
+{isMember === null && (
+
+<div className="text-center space-y-4">
+
+<p className="text-lg font-semibold">
+هل لديك عضوية في منصة شراكة؟
+</p>
+
+<div className="flex justify-center gap-4">
+
+<button
+onClick={()=>setIsMember(true)}
+className="bg-[#1976D2] text-white px-6 py-3 rounded-lg"
+>
+نعم
+</button>
+
+<button
+onClick={()=>onNavigate?.("consultant-signup")}
+className="bg-[#FF9800] text-white px-6 py-3 rounded-lg"
+>
+لا — انضم الآن
+</button>
+
+</div>
+
+</div>
+
+)}
+
+
+{/* استمارة الإعلان */}
+
+{isMember === true && (
+
+<div className="space-y-4">
+
+<input
+type="text"
+placeholder="عنوان الإعلان"
+className="w-full border p-3 rounded"
+/>
+
+<select className="w-full border p-3 rounded">
+
+<option>اختر القسم</option>
+<option>عقار</option>
+<option>سيارات</option>
+<option>أجهزة</option>
+<option>وظائف</option>
+<option>بيع</option>
+<option>شراء</option>
+<option>استثمار</option>
+<option>تجارة</option>
+<option>خدمات</option>
+<option>أخرى</option>
+
+</select>
+
+<textarea
+placeholder="وصف الإعلان"
+rows={4}
+className="w-full border p-3 rounded"
+/>
+
+<input
+type="text"
+placeholder="السعر (اختياري)"
+className="w-full border p-3 rounded"
+/>
+
+<input
+type="text"
+placeholder="رقم التواصل"
+className="w-full border p-3 rounded"
+/>
+
+<button
+className="w-full bg-[#FF9800] text-white py-3 rounded hover:bg-orange-500 transition"
+>
+نشر الإعلان
+</button>
+
+</div>
+
+)}
+
+</div>
+
+</div>
+
+)}
 {showContact && (
 
 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">

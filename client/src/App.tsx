@@ -7,6 +7,7 @@ import Dashboard from "./pages/Dashboard";
 import ClientSignup from "./pages/ClientSignup";
 import ConsultantSignup from "./pages/ConsultantSignup";
 import Specialties from "./pages/Specialties";
+import Admin from "./pages/Admin";
 export default function App() {
   const [page, setPage] = useState("home");
 
@@ -27,6 +28,8 @@ export default function App() {
         return <ConsultantSignup onNavigate={setPage} />;
         case "specialties":
   return <Specialties onNavigate={setPage} />;
+  case "admin":
+  return <Admin onNavigate={setPage} />;
 
       default:
         return <Home onNavigate={setPage} />;

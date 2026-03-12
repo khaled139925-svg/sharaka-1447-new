@@ -431,7 +431,10 @@ export default function Home({ onNavigate }: HomeProps) {
   const [showCountries, setShowCountries] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
 
+
   const [showContact, setShowContact] = useState(false);
+
+  const [showLogin, setShowLogin] = useState(false);
 
   const [showAdForm, setShowAdForm] = useState(false);
 const [isMember, setIsMember] = useState<boolean | null>(null);
@@ -584,21 +587,16 @@ className="flex items-center gap-3 py-4 px-3 rounded-lg hover:bg-gray-100 transi
 
 
 <button
+onClick={()=>{
+setShowMenu(false);
+setShowLogin(true);
+}}
 className="flex items-center gap-3 py-4 px-3 rounded-lg hover:bg-gray-100 transition"
 >
 <LogIn size={20} className="text-[#1976D2]" />
 <span className="font-medium">تسجيل الدخول</span>
 </button>
-<button
-onClick={()=>{
-setShowMenu(false);
-onNavigate?.("admin");
-}}
-className="flex items-center gap-3 py-4 px-3 rounded-lg hover:bg-gray-100 transition"
->
-<span className="text-xl">⚙️</span>
-<span className="font-medium">الإدارة</span>
-</button>
+
 
 </div>
 
@@ -994,6 +992,7 @@ className="w-full bg-[#FF9800] text-white py-3 rounded hover:bg-orange-500 trans
 </div>
 
 )}
+
     </div>
   );
 }

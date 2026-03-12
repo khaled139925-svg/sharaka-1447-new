@@ -1,8 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 
 interface AboutProps {
-onNavigate?: (page: string) => void;
+  onNavigate?: (page: string) => void;
 }
+
+export default function About({ onNavigate }: AboutProps) {
+
+const [showContact, setShowContact] = useState(false);
 
 const text = `
 عن منصة شراكة
@@ -143,71 +147,139 @@ const text = `
 الاستشارات والخدمات المقدمة عبر المنصة تمثل آراء وخبرات مقدميها، ولا تتحمل المنصة المسؤولية عن القرارات التي يتخذها المستخدم بناءً على تلك الاستشارات.
 تواصل معنا
 للتواصل مع منصة شراكة:
-البريد الإلكتروني
-khaled139925@gmail.com
 
 
 
 `;
 
-export default function About({ onNavigate }: AboutProps) {
-
-const goHome = () => {
-if (onNavigate) onNavigate("home");
-else window.location.href = "/";
-};
-
 const paragraphs = text.split("\n").filter(p => p.trim() !== "");
 
+const titles = [
+"عن منصة شراكة",
+"لماذا تعتبر شراكة منصة مختلفة؟",
+"من نحن",
+"الرؤية",
+"الرسالة",
+"أهداف المنصة",
+"قيم المنصة",
+"منصة تفتح أبوابها للجميع",
+"منصة تلبي احتياجات الحياة",
+"منصة تجمع الخبرة والخدمة والمنتج",
+"كيف تعمل المنصة",
+"الأسئلة الشائعة",
+"سياسة الخصوصية",
+"الشروط والأحكام",
+"إخلاء المسؤولية",
+"تواصل معنا"
+];
+
 return (
-<div className="min-h-screen bg-gray-50 py-20 px-6" dir="rtl">
 
-<div className="max-w-5xl mx-auto space-y-10">  
+<div className="min-h-screen bg-gray-50 py-16">
 
-    <button  
-      onClick={goHome}  
-      className="text-[#1976D2] hover:text-[#FF9800] text-lg font-semibold"  
-    >  
-      ← العودة للرئيسية  
-    </button>  
+<div className="max-w-5xl mx-auto px-6">
 
-    <h1 className="text-4xl font-bold text-center text-[#FF9800]">  
-      عن منصة شراكة  
-    </h1>  
+<div className="mb-8 text-right">
+  <button
+    onClick={() => onNavigate?.("home")}
+    className="text-[#1976D2] hover:text-[#FF9800] text-lg flex items-center gap-2"
+  >
+    <span>🏠</span>
+    <span>الرئيسية</span>
+  </button>
+</div>
+</div>
+<h1 className="text-4xl font-bold text-center text-[#FF9800] mb-12">
+من نحن
+</h1>
 
-    <div className="space-y-6">  
+<div className="space-y-6">
 
-      {paragraphs.map((p, i) => {  
+{paragraphs.map((p,i)=>{
 
-        const isTitle =  
-          p.length < 40 &&  
-          !p.includes("؟") &&  
-          !p.includes(".");  
+const isTitle = titles.includes(p.trim());
+const isList = p.startsWith("1.") || p.startsWith("2.") || p.startsWith("3.") ||
+p.startsWith("4.") || p.startsWith("5.") || p.startsWith("6.") ||
+p.startsWith("7.") || p.startsWith("8.") || p.startsWith("9.") ||
+p.startsWith("ال");
 
-        if (isTitle) {  
-          return (  
-            <h2  
-              key={i}  
-              className="text-2xl font-bold text-[#1976D2] mt-8"  
-            >  
-              {p}  
-            </h2>  
-          );  
-        }  
+return(
 
-        return (  
-          <div  
-            key={i}  
-            className="bg-white shadow-lg rounded-xl p-6 text-gray-700 leading-8"  
-          >  
-            {p}  
-          </div>  
-        );  
-      })}  
+<div
+key={i}
+className={`bg-white shadow-lg rounded-xl p-6 leading-8 text-right ${
+isTitle ? "text-[#1976D2] text-xl font-bold" : "text-gray-700"
+}`}
+>
+{p}
+</div>
 
-    </div>  
+);
 
-  </div>  
+})}
+</div>
+
+<div className="mt-16 text-center">
+
+<button
+onClick={()=>setShowContact(true)}
+className="bg-[#FF9800] hover:bg-orange-500 text-white font-bold py-4 px-10 rounded-lg text-lg transition"
+>
+📩 اضغط للتواصل
+</button>
+
+</div>
+
+{showContact && (
+
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+
+    <div className="bg-white w-full max-w-lg p-8 rounded-xl shadow-2xl text-right">
+
+      <div className="flex justify-between items-center mb-6">
+
+        <h3 className="text-xl font-bold text-[#1976D2]">
+          تواصل معنا
+        </h3>
+
+        <button
+          onClick={()=>setShowContact(false)}
+          className="text-xl hover:text-red-500"
+        >
+          ✕
+        </button>
+
+      </div>
+
+      <input
+        type="text"
+        placeholder="الاسم"
+        className="w-full border p-3 rounded mb-4"
+      />
+
+      <input
+        type="email"
+        placeholder="البريد الإلكتروني"
+        className="w-full border p-3 rounded mb-4"
+      />
+
+      <textarea
+        placeholder="الرسالة"
+        rows={4}
+        className="w-full border p-3 rounded mb-6"
+      />
+
+      <button
+        className="w-full bg-[#FF9800] text-white py-3 rounded hover:bg-orange-500 transition"
+      >
+        إرسال
+      </button>
+
+    </div>
+
+  </div>
+
+)}
 
 </div>
 

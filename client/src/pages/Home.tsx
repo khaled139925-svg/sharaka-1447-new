@@ -425,10 +425,15 @@ const COUNTRIES = [
   { code: "CA", name: "كندا", flag: "🇨🇦" },
 ];
 
-export default function Home({ onNavigate }: HomeProps) {
+export default function Home({ onNavigate }) {
   const [language, setLanguage] = useState<"ar" | "en">("ar");
   const [selectedCountry, setSelectedCountry] = useState("SA");
   const [showCountries, setShowCountries] = useState(false);
+  const navigate = (page:string)=>{
+if(page==="admin") window.location.href="/admin";
+};
+
+let pressTimer:any;
   const [showMenu, setShowMenu] = useState(false);
 
 
@@ -493,12 +498,31 @@ const [isMember, setIsMember] = useState<boolean | null>(null);
           {/* COUNTRY */}
           <div className="relative mr-3">
             <button
-  onClick={() => setShowCountries(!showCountries)}
-  className="px-3 py-2 text-sm font-semibold rounded-lg flex items-center gap-2 ml-2"
-  style={{ color: "#1976D2", border: "2px solid #1976D2" }}
+onMouseDown={()=>{
+pressTimer = setTimeout(()=>{
+navigate("admin");
+},5000);
+}}
+
+onMouseUp={()=>clearTimeout(pressTimer)}
+
+onTouchStart={()=>{
+pressTimer = setTimeout(()=>{
+navigate("admin");
+},5000);
+}}
+
+onTouchEnd={()=>clearTimeout(pressTimer)}
+
+onClick={() => setShowCountries(!showCountries)}
+
+className="px-3 py-2 text-sm font-semibold rounded-lg flex items-center gap-2 ml-2"
+style={{ color: "#1976D2", border: "2px solid #1976D2" }}
 >
+
   <Globe size={16} />
   {COUNTRIES.find(c => c.code === selectedCountry)?.flag}
+
 </button>
 
             {showCountries && (

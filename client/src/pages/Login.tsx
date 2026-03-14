@@ -1,86 +1,225 @@
 import { useState } from "react";
-import { supabase } from "../lib/supabase";
 
-export default function Login({ onNavigate }: any) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+export default function Dashboard({ onNavigate }: any) {
 
-  const handleLogin = async (e: any) => {
-    e.preventDefault();
+const [tab,setTab] = useState("profile");
+const [editing,setEditing] = useState(false);
+const [sessionTab,setSessionTab] = useState("new");
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+const [profile,setProfile] = useState({
+name:"اسم المستخدم",
+email:"user@email.com",
+phone:"05xxxxxxxx",
+country:"السعودية",
+specialty:"استشارات أعمال",
+bio:"نبذة عني",
+type:"فرد"
+});
 
-    if (!error) {
-      onNavigate?.("dashboard");
-    } else {
-      alert(error.message);
-    }
-  };
+const [sessions,setSessions] = useState([
+{
+id:1,
+client:"أحمد",
+type:"استشارة أعمال",
+date:"2025-03-20",
+duration:"30 دقيقة",
+price:"200 ريال",
+status:"new"
+}
+]);
 
-  return (
-    <div
-      style={{
-        height: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        background: "#f5f7fb"
-      }}
-    >
-      <form
-        onSubmit={handleLogin}
-        style={{
-          background: "white",
-          padding: "40px",
-          borderRadius: "10px",
-          boxShadow: "0 5px 20px rgba(0,0,0,0.1)",
-          width: "350px",
-          textAlign: "center"
-        }}
-      >
-        <h2 style={{ marginBottom: "20px" }}>تسجيل الدخول</h2>
+const [orders] = useState([
+{
+id:1,
+client:"محمد",
+product:"خدمة استشارة",
+price:"300",
+qty:"1",
+status:"طلب جديد"
+}
+]);
 
-        <input
-          type="email"
-          placeholder="البريد الإلكتروني"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          style={{
-            width: "100%",
-            padding: "10px",
-            marginBottom: "15px"
-          }}
-        />
+const logout=()=>{
+onNavigate?.("home");
+};
 
-        <input
-          type="password"
-          placeholder="كلمة المرور"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={{
-            width: "100%",
-            padding: "10px",
-            marginBottom: "20px"
-          }}
-        />
+return(
 
-        <button
-          type="submit"
-          style={{
-            width: "100%",
-            padding: "10px",
-            background: "#1976D2",
-            color: "white",
-            border: "none",
-            borderRadius: "6px"
-          }}
-        >
-          دخول
-        </button>
-      </form>
-    </div>
-  );
+<div style={{padding:"40px",background:"#f5f7fb",minHeight:"100vh"}}>
+
+<div style={{display:"flex",justifyContent:"space-between"}}>
+
+<h2>لوحة الحساب</h2>
+
+<button onClick={logout}>
+تسجيل الخروج
+</button>
+
+</div>
+
+<div style={{display:"flex",gap:"10px",marginTop:"30px"}}>
+
+<button onClick={()=>setTab("profile")}>
+الملف الشخصي
+</button>
+
+<button onClick={()=>setTab("sessions")}>
+الجلسات
+</button>
+
+<button onClick={()=>setTab("orders")}>
+الطلبات
+</button>
+
+</div>
+
+{/* PROFILE */}
+
+{tab==="profile" && (
+
+<div style={{background:"white",padding:"25px",marginTop:"20px"}}>
+
+{!editing && (
+
+<div>
+
+<p><b>الاسم:</b> {profile.name}</p>
+<p><b>البريد:</b> {profile.email}</p>
+<p><b>الهاتف:</b> {profile.phone}</p>
+<p><b>الدولة:</b> {profile.country}</p>
+<p><b>التخصص:</b> {profile.specialty}</p>
+<p><b>نوع الحساب:</b> {profile.type}</p>
+<p><b>النبذة:</b> {profile.bio}</p>
+
+<button onClick={()=>setEditing(true)}>
+تعديل الملف الشخصي
+</button>
+
+</div>
+
+)}
+
+{editing && (
+
+<div>
+
+<input
+value={profile.name}
+onChange={(e)=>setProfile({...profile,name:e.target.value})}
+/>
+
+<input
+value={profile.phone}
+onChange={(e)=>setProfile({...profile,phone:e.target.value})}
+/>
+
+<input
+value={profile.country}
+onChange={(e)=>setProfile({...profile,country:e.target.value})}
+/>
+
+<input
+value={profile.specialty}
+onChange={(e)=>setProfile({...profile,specialty:e.target.value})}
+/>
+
+<textarea
+value={profile.bio}
+onChange={(e)=>setProfile({...profile,bio:e.target.value})}
+/>
+
+<button onClick={()=>setEditing(false)}>
+حفظ
+</button>
+
+</div>
+
+)}
+
+</div>
+
+)}
+
+{/* SESSIONS */}
+
+{tab==="sessions" && (
+
+<div style={{background:"white",padding:"25px",marginTop:"20px"}}>
+
+<div style={{display:"flex",gap:"10px"}}>
+
+<button onClick={()=>setSessionTab("new")}>
+الطلبات الجديدة
+</button>
+
+<button onClick={()=>setSessionTab("accepted")}>
+الطلبات المقبولة
+</button>
+
+<button onClick={()=>setSessionTab("finished")}>
+الجلسات المنتهية
+</button>
+
+</div>
+
+{sessions
+.filter(s=>s.status===sessionTab)
+.map(s=>(
+
+<div key={s.id} style={{border:"1px solid #eee",padding:"15px",marginTop:"10px"}}>
+
+<p>العميل: {s.client}</p>
+<p>نوع الجلسة: {s.type}</p>
+<p>التاريخ: {s.date}</p>
+<p>المدة: {s.duration}</p>
+<p>السعر: {s.price}</p>
+
+{sessionTab==="new" && (
+
+<div>
+
+<button>قبول</button>
+<button>رفض</button>
+
+</div>
+
+)}
+
+</div>
+
+))}
+
+</div>
+
+)}
+
+{/* ORDERS */}
+
+{tab==="orders" && (
+
+<div style={{background:"white",padding:"25px",marginTop:"20px"}}>
+
+<h3>الطلبات</h3>
+
+{orders.map(o=>(
+
+<div key={o.id} style={{border:"1px solid #eee",padding:"15px",marginTop:"10px"}}>
+
+<p>العميل: {o.client}</p>
+<p>الطلب: {o.product}</p>
+<p>السعر: {o.price}</p>
+<p>الكمية: {o.qty}</p>
+<p>الحالة: {o.status}</p>
+
+</div>
+
+))}
+
+</div>
+
+)}
+
+</div>
+
+);
 }

@@ -427,6 +427,7 @@ const COUNTRIES = [
 
 export default function Home({ onNavigate }) {
   const [language, setLanguage] = useState<"ar" | "en">("ar");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState("SA");
   const [showCountries, setShowCountries] = useState(false);
   const navigate = (page:string)=>{
@@ -613,12 +614,17 @@ className="flex items-center gap-3 py-4 px-3 rounded-lg hover:bg-gray-100 transi
 <button
 onClick={()=>{
 setShowMenu(false);
-setShowLogin(true);
+window.location.href="/login";
 }}
 className="flex items-center gap-3 py-4 px-3 rounded-lg hover:bg-gray-100 transition"
 >
+
 <LogIn size={20} className="text-[#1976D2]" />
-<span className="font-medium">تسجيل الدخول</span>
+
+<span className="font-medium">
+تسجيل الدخول
+</span>
+
 </button>
 
 

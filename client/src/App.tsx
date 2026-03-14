@@ -16,7 +16,7 @@ import AdminAds from "./pages/AdminAds";
 import AdminMeetings from "./pages/AdminMeetings";
 import AdminMessages from "./pages/AdminMessages";
 import AdminStats from "./pages/AdminStats";
-
+import BookSession from "./pages/BookSession";
 function AdminShortcut() {
   const navigate = useNavigate();
 
@@ -95,6 +95,8 @@ export default function App() {
         <Route path="/admin-messages" element={<AdminMessages onNavigate={onNavigate} />} />
 
         <Route path="/admin-stats" element={<AdminStats onNavigate={onNavigate} />} />
+
+        <Route path="/book-session" element={<BookSession />} />
 
       </Routes>
 

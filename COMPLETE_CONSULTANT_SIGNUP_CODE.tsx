@@ -264,7 +264,7 @@ onChange={(e)=>update("city",e.target.value)}
 
 </div>
 
-{/* حقل الصورة الشخصية/الشعار */}
+{/* حقل الصورة الشخصية/الشعار - هذا هو الحقل الجديد */}
 
 <div className="md:col-span-2">
 

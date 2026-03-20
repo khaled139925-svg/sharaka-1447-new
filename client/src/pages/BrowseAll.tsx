@@ -1,69 +1,50 @@
 import { useEffect, useState } from "react";
-import MemberCard from "../components/ui/MemberCard";
+import { supabase } from "../lib/supabase";
 
-interface Member {
-  id: number;
-  name: string;
-  specialty: string;
-  country?: string;
-  bio: string;
-  image: string;
-}
+export default function BrowseAll({ onNavigate }:any) {
 
-export default function BrowseAll() {
-  const [members, setMembers] = useState<Member[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
+  const [data,setData] = useState<any[]>([]);
 
-  useEffect(() => {
-    fetch("/api/members")
-      .then((res) => {
-        if (!res.ok) throw new Error("فشل الاتصال");
-        return res.json();
-      })
-      .then((data) => {
-        setMembers(data);
-        setIsLoading(false);
-      })
-      .catch(() => {
-        setIsError(true);
-        setIsLoading(false);
-      });
-  }, []);
+  useEffect(()=>{
+    fetchData();
+  },[]);
 
-  if (isLoading) {
-    return (
-      <div style={{ padding: "40px", textAlign: "center", minHeight: "100vh", background: "#f5f7fb" }}>
-        <p style={{ fontSize: "18px", color: "#1976D2" }}>جاري تحميل الأعضاء...</p>
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div style={{ padding: "40px", textAlign: "center", minHeight: "100vh", background: "#f5f7fb" }}>
-        <p style={{ fontSize: "18px", color: "red" }}>حدث خطأ أثناء تحميل البيانات.</p>
-      </div>
-    );
-  }
+  const fetchData = async () => {
+    const { data } = await supabase.from("consultants").select("*");
+    setData(data || []);
+  };
 
   return (
-    <div style={{ padding: "40px", background: "#f5f7fb", minHeight: "100vh", direction: "rtl" }}>
-      <h2 style={{ marginBottom: "30px", color: "#1976D2", fontSize: "26px", fontWeight: "bold" }}>
-        تصفح جميع الأعضاء
-      </h2>
+    <div className="p-10">
 
-      {members.length === 0 ? (
-        <p style={{ textAlign: "center", color: "#666", fontSize: "16px" }}>
-          لا يوجد أعضاء مسجلون حتى الآن.
-        </p>
-      ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "20px" }}>
-          {members.map((member) => (
-            <MemberCard key={member.id} member={member} />
-          ))}
-        </div>
-      )}
+      <h1 className="text-2xl mb-6">تصفح الجميع</h1>
+
+      <div className="grid md:grid-cols-3 gap-6">
+
+        {data.map((c)=>(
+          <div key={c.id} className="border p-4 rounded shadow">
+
+            <img
+              src={c.profile_image}
+              className="w-full h-40 object-cover rounded mb-3"
+            />
+
+            <h3 className="font-bold">{c.name}</h3>
+            <p>{c.specialty}</p>
+            <p className="text-sm text-gray-600">{c.bio}</p>
+
+            <button
+              onClick={()=>onNavigate("profile", c.id)}
+              className="mt-3 bg-blue-600 text-white px-3 py-1 rounded"
+            >
+              تفاصيل
+            </button>
+
+          </div>
+        ))}
+
+      </div>
+
     </div>
   );
 }

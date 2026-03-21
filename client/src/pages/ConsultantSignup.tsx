@@ -82,33 +82,51 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
   };
 
   const handleSubmit = async (e: any) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    // إدراج المستشار
-    const { error } = await supabase.from("consultants").insert([
-      {
-        name: form.fullName || form.companyName,
-        email: form.email,
-        phone: form.phone,
-        password: form.password,
-        country: form.country,
-        city: form.city,
-        specialty: form.specialty,
-        sub_specialty: form.sub_specialty,
-        bio: form.bio,
-        profile_image: form.profileImage
-      }
-    ]);
+  const { error } = await supabase.from("consultants").insert([
+    {
+      account_type: accountType,
 
-    if (error) {
-      alert(error.message);
-      return;
+      full_name: form.fullName,
+      company_name: form.companyName,
+      email: form.email,
+      phone: form.phone,
+      password: form.password,
+
+      country: form.country,
+      city: form.city,
+
+      specialty: form.specialty,
+      sub_specialty: form.sub_specialty,
+      experience: form.experience,
+      activity: form.activity,
+
+      bio: form.bio,
+
+      price: form.price,
+      currency: form.currency,
+
+      website: form.website,
+      whatsapp: form.whatsapp,
+      linkedin: form.linkedin,
+      instagram: form.instagram,
+      youtube: form.youtube,
+      tiktok: form.tiktok,
+      telegram: form.telegram,
+      snapchat: form.snapchat,
+
+      profile_image: form.profileImage
     }
+  ]);
 
-    alert("تم التسجيل بنجاح");
-    onNavigate?.("browse");
-  };
+  if (error) {
+    alert(error.message);
+    return;
+  }
 
+  alert("تم التسجيل بنجاح");
+};
   return (
     <form onSubmit={handleSubmit}>
       <div className="min-h-screen bg-gray-50 py-16" dir="rtl">

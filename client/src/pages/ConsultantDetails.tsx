@@ -80,12 +80,8 @@ export default function ConsultantDetails() {
   const adsList = consultant.ads && Array.isArray(consultant.ads) ? consultant.ads : [];
   const paymentsList = consultant.payment_methods && Array.isArray(consultant.payment_methods) ? consultant.payment_methods : [];
   const portfolioList = consultant.portfolio && Array.isArray(consultant.portfolio) ? consultant.portfolio : [];
-  
-  // التحقق من تسجيل الدخول
+  const currentUserId = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user") || "{}").id : null;
   const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-  const currentUser = localStorage.getItem("user");
-  const currentUserId = currentUser ? JSON.parse(currentUser).id : null;
-  const isNotSelf = consultant.id !== currentUserId;
 
   return (
     <div className="min-h-screen bg-gray-50 py-12" dir="rtl">
@@ -171,27 +167,12 @@ export default function ConsultantDetails() {
             )}
 
             <hr className="my-6" />
-            
-            {/* أزرار التواصل */}
-            <div className="flex flex-wrap gap-3">
-              <button
-                onClick={() => setShowContact(!showContact)}
-                className="bg-[#1976D2] text-white px-6 py-2 rounded-lg hover:bg-[#1565C0] transition"
-              >
-                {showContact ? "إخفاء معلومات التواصل" : "تواصل"}
-              </button>
-
-              {/* زر المراسلة - يظهر فقط للمستخدمين المسجلين وليس لنفسه */}
-              {isLoggedIn && isNotSelf && (
-                <button
-                  onClick={() => navigate(`/messages/${consultant.id}`)}
-                  className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition flex items-center justify-center gap-2"
-                >
-                  <MessageCircle size={18} />
-                  مراسلة {consultant.full_name || consultant.company_name}
-                </button>
-              )}
-            </div>
+            <button
+              onClick={() => setShowContact(!showContact)}
+              className="bg-[#1976D2] text-white px-6 py-2 rounded-lg hover:bg-[#1565C0] transition"
+            >
+              {showContact ? "إخفاء معلومات التواصل" : "تواصل"}
+            </button>
 
             {showContact && (
               <div className="mt-4 grid md:grid-cols-2 gap-3">
@@ -218,6 +199,19 @@ export default function ConsultantDetails() {
               </div>
             )}
 
+            {/* زر المراسلة - يظهر فقط للمستخدمين المسجلين وليس لنفسه */}
+            {isLoggedIn && consultant.id !== currentUserId && (
+              <div className="mt-4">
+                <button
+                  onClick={() => navigate(`/messages/${consultant.id}`)}
+                  className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition flex items-center justify-center gap-2 w-full md:w-auto"
+                >
+                  <MessageCircle size={18} />
+                  مراسلة {consultant.full_name || consultant.company_name}
+                </button>
+              </div>
+            )}
+
             {/* الروابط الاجتماعية */}
             <div className="mt-6">
               <h2 className="text-xl font-bold text-[#1976D2] mb-3">الروابط</h2>
@@ -240,21 +234,6 @@ export default function ConsultantDetails() {
                 {consultant.youtube && (
                   <a href={getWebLink(consultant.youtube)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition">
                     <Youtube size={18} className="text-red-600" /> <span>يوتيوب</span>
-                  </a>
-                )}
-                {consultant.tiktok && (
-                  <a href={getWebLink(consultant.tiktok)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition">
-                    <span className="text-black">🎵</span> <span>تيك توك</span>
-                  </a>
-                )}
-                {consultant.telegram && (
-                  <a href={getWebLink(consultant.telegram)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition">
-                    <span className="text-blue-400">✈️</span> <span>تيليجرام</span>
-                  </a>
-                )}
-                {consultant.snapchat && (
-                  <a href={getWebLink(consultant.snapchat)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition">
-                    <span className="text-yellow-600">👻</span> <span>سناب شات</span>
                   </a>
                 )}
               </div>

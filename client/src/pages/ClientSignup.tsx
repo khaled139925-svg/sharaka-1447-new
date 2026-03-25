@@ -1,11 +1,14 @@
 import { useState } from 'react';
+import { supabase } from '../lib/supabase';
 import { Button } from "@/components/ui/button";
 import { Mail, Lock, Phone, User, ArrowLeft } from 'lucide-react';
+
 interface ClientSignupProps {
   onNavigate?: (page: 'home' | 'client-signup' | 'consultant-signup') => void;
 }
 
 export default function ClientSignup({ onNavigate }: ClientSignupProps) {
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -13,6 +16,7 @@ export default function ClientSignup({ onNavigate }: ClientSignupProps) {
     password: '',
     confirmPassword: '',
   });
+
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState<'ar' | 'en'>('ar');
@@ -33,7 +37,7 @@ export default function ClientSignup({ onNavigate }: ClientSignupProps) {
       login: 'تسجيل الدخول',
       passwordMismatch: 'كلمات المرور غير متطابقة',
       fillAllFields: 'يرجى ملء جميع الحقول',
-      signupSuccess: 'تم التسجيل بنجاح! جاري التحويل...',
+      signupSuccess: 'تم التسجيل بنجاح!',
       english: 'English',
       arabic: 'العربية',
       back: 'رجوع',
@@ -51,7 +55,7 @@ export default function ClientSignup({ onNavigate }: ClientSignupProps) {
       login: 'Sign In',
       passwordMismatch: 'Passwords do not match',
       fillAllFields: 'Please fill in all fields',
-      signupSuccess: 'Registration successful! Redirecting...',
+      signupSuccess: 'Registration successful!',
       english: 'English',
       arabic: 'العربية',
       back: 'Back',
@@ -83,167 +87,73 @@ export default function ClientSignup({ onNavigate }: ClientSignupProps) {
     }
 
     setLoading(true);
-    try {
-      // TODO: Call API to register client
-      console.log('Client signup:', formData);
-      alert(t.signupSuccess);
-      navigate('/');
-    } catch (err) {
-      setError(language === 'ar' ? 'حدث خطأ في التسجيل' : 'Registration error occurred');
-    } finally {
+
+    const { error } = await supabase.from("clients").insert([
+      {
+        full_name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password,
+      },
+    ]);
+
+    if (error) {
+      console.log("ERROR:", error);
+      alert(JSON.stringify(error));
       setLoading(false);
+      return;
     }
+
+    alert(t.signupSuccess);
+    setLoading(false);
   };
 
   return (
     <div className={`min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-      {/* Header */}
+      
       <header className="sticky top-0 z-50 bg-white shadow-md border-b border-gray-200">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <button
-            onClick={() => onNavigate?.('home')}
-            className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 transition"
-          >
+          
+          <button onClick={() => onNavigate?.('home')} className="flex items-center gap-2 text-indigo-600">
             <ArrowLeft size={20} />
             <span>{t.back}</span>
           </button>
 
           <button
             onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
-            className="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition"
+            className="px-3 py-2 text-sm bg-gray-100 rounded-lg"
           >
             {language === 'ar' ? t.english : t.arabic}
           </button>
+
         </div>
       </header>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-16 flex items-center justify-center min-h-[calc(100vh-80px)]">
-        <div className="w-full max-w-md">
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2 text-center">{t.title}</h1>
-            <p className="text-gray-600 text-center mb-8">{t.subtitle}</p>
+      <div className="container mx-auto px-4 py-16 flex justify-center">
+        <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
 
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-                {error}
-              </div>
-            )}
+          <h1 className="text-2xl font-bold text-center mb-4">{t.title}</h1>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Name Field */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <div className="flex items-center gap-2">
-                    <User size={16} />
-                    {t.name}
-                  </div>
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder={t.name}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
-                />
-              </div>
-
-              {/* Email Field */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <div className="flex items-center gap-2">
-                    <Mail size={16} />
-                    {t.email}
-                  </div>
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder={t.email}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
-                />
-              </div>
-
-              {/* Phone Field */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <div className="flex items-center gap-2">
-                    <Phone size={16} />
-                    {t.phone}
-                  </div>
-                </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  placeholder={t.phone}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
-                />
-              </div>
-
-              {/* Password Field */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <div className="flex items-center gap-2">
-                    <Lock size={16} />
-                    {t.password}
-                  </div>
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder={t.password}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
-                />
-              </div>
-
-              {/* Confirm Password Field */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <div className="flex items-center gap-2">
-                    <Lock size={16} />
-                    {t.confirmPassword}
-                  </div>
-                </label>
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  placeholder={t.confirmPassword}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
-                />
-              </div>
-
-              {/* Submit Button */}
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-lg transition"
-              >
-                {loading ? (language === 'ar' ? 'جاري التسجيل...' : 'Registering...') : t.signup}
-              </Button>
-            </form>
-
-            {/* Login Link */}
-            <div className="mt-6 text-center">
-              <p className="text-gray-600">
-                {t.haveAccount}{' '}
-                <button
-                  onClick={() => onNavigate?.('home')}
-                  className="text-indigo-600 hover:text-indigo-700 font-semibold"
-                >
-                  {t.login}
-                </button>
-              </p>
+          {error && (
+            <div className="bg-red-100 text-red-700 p-3 rounded mb-4">
+              {error}
             </div>
-          </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+
+            <input name="name" placeholder={t.name} value={formData.name} onChange={handleChange} className="w-full p-2 border rounded" />
+            <input name="email" placeholder={t.email} value={formData.email} onChange={handleChange} className="w-full p-2 border rounded" />
+            <input name="phone" placeholder={t.phone} value={formData.phone} onChange={handleChange} className="w-full p-2 border rounded" />
+            <input type="password" name="password" placeholder={t.password} value={formData.password} onChange={handleChange} className="w-full p-2 border rounded" />
+            <input type="password" name="confirmPassword" placeholder={t.confirmPassword} value={formData.confirmPassword} onChange={handleChange} className="w-full p-2 border rounded" />
+
+            <Button type="submit" disabled={loading} className="w-full">
+              {loading ? '...' : t.signup}
+            </Button>
+
+          </form>
+
         </div>
       </div>
     </div>

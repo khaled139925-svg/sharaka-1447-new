@@ -1,236 +1,199 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "../lib/supabase";
+import { Edit, LogOut, User, Mail, Phone, MapPin, Briefcase, DollarSign, Calendar, MessageSquare, ShoppingBag, CreditCard, Image } from 'lucide-react';
 
-export default function Dashboard({ onNavigate }: any) {
+export default function Dashboard() {
+  const navigate = useNavigate();
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [showContact, setShowContact] = useState(false);
 
-const [tab,setTab] = useState("profile");
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (!userData) {
+      navigate("/login");
+      return;
+    }
+    setUser(JSON.parse(userData));
+    setLoading(false);
+  }, [navigate]);
 
-const [profile,setProfile] = useState({
-name:"اسم المستخدم",
-email:"user@email.com",
-phone:"05xxxxxxxx",
-bio:"نبذة عني",
-specialty:"استشارات أعمال",
-country:"السعودية"
-});
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("isLoggedIn");
+    navigate("/");
+  };
 
-const [editing,setEditing] = useState<string | null>(null);
+  const handleEditProfile = () => {
+    navigate(`/edit-profile/${user?.id}`);
+  };
 
-const [sessions,setSessions] = useState([
-{
-id:1,
-client:"أحمد",
-type:"استشارة أعمال",
-date:"2025-03-20",
-status:"pending"
-}
-]);
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF9800] mx-auto"></div>
+      </div>
+    );
+  }
 
-const logout = ()=>{
-onNavigate?.("home");
-};
+  const displayName = user?.full_name || user?.company_name || user?.email?.split('@')[0];
+  const adsList = user?.ads && Array.isArray(user.ads) ? user.ads : [];
+  const paymentsList = user?.payment_methods && Array.isArray(user.payment_methods) ? user.payment_methods : [];
 
-const acceptSession=(id:number)=>{
-setSessions(
-sessions.map(s=>s.id===id ? {...s,status:"accepted"} : s)
-);
-};
+  return (
+    <div className="min-h-screen bg-gray-50 py-12" dir="rtl">
+      <div className="max-w-7xl mx-auto px-6">
+        
+        {/* Header */}
+        <div className="bg-white rounded-2xl shadow-md p-6 mb-8">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-[#1976D2] to-[#FF9800] flex items-center justify-center text-white text-2xl">
+                {displayName?.[0] || "م"}
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-800">{displayName}</h1>
+                <p className="text-gray-500">{user?.email}</p>
+                <p className="text-sm text-[#FF9800]">{user?.account_type === "individual" ? "حساب فرد" : "حساب منشأة"}</p>
+              </div>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition"
+            >
+              <LogOut size={18} />
+              <span>تسجيل خروج</span>
+            </button>
+          </div>
+        </div>
 
-const rejectSession=(id:number)=>{
-setSessions(
-sessions.map(s=>s.id===id ? {...s,status:"rejected"} : s)
-);
-};
+        {/* أزرار الإجراءات */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <button
+            onClick={handleEditProfile}
+            className="bg-[#1976D2] text-white p-4 rounded-xl flex items-center justify-center gap-3 hover:bg-[#1565C0] transition"
+          >
+            <Edit size={22} />
+            <span className="font-bold">تعديل الملف الشخصي</span>
+          </button>
+          
+          <button
+            onClick={() => navigate("/messages")}
+            className="bg-purple-600 text-white p-4 rounded-xl flex items-center justify-center gap-3 hover:bg-purple-700 transition"
+          >
+            <MessageSquare size={22} />
+            <span className="font-bold">الرسائل</span>
+          </button>
+          
+          <button
+            onClick={() => navigate(`/consultant/${user?.id}`)}
+            className="bg-[#FF9800] text-white p-4 rounded-xl flex items-center justify-center gap-3 hover:bg-orange-500 transition"
+          >
+            <User size={22} />
+            <span className="font-bold">عرض صفحتي العامة</span>
+          </button>
+        </div>
 
-return(
+        {/* معلومات الملف الشخصي */}
+        <div className="bg-white rounded-2xl shadow-md p-6 mb-8">
+          <h2 className="text-xl font-bold text-[#1976D2] mb-6">معلومات الملف الشخصي</h2>
+          
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="flex items-start gap-3">
+              <User size={20} className="text-gray-400 mt-1" />
+              <div>
+                <p className="text-sm text-gray-500">الاسم</p>
+                <p className="font-semibold">{displayName || "-"}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Mail size={20} className="text-gray-400 mt-1" />
+              <div>
+                <p className="text-sm text-gray-500">البريد الإلكتروني</p>
+                <p className="font-semibold">{user?.email || "-"}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Phone size={20} className="text-gray-400 mt-1" />
+              <div>
+                <p className="text-sm text-gray-500">رقم الهاتف</p>
+                <p className="font-semibold">{user?.phone || "-"}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <MapPin size={20} className="text-gray-400 mt-1" />
+              <div>
+                <p className="text-sm text-gray-500">الموقع</p>
+                <p className="font-semibold">{user?.city && user?.country ? `${user.city}, ${user.country}` : (user?.country || user?.city || "-")}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Briefcase size={20} className="text-gray-400 mt-1" />
+              <div>
+                <p className="text-sm text-gray-500">التخصص</p>
+                <p className="font-semibold">{user?.specialty || "-"} {user?.sub_specialty ? `(${user.sub_specialty})` : ""}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <DollarSign size={20} className="text-gray-400 mt-1" />
+              <div>
+                <p className="text-sm text-gray-500">السعر</p>
+                <p className="font-semibold">{user?.price ? `${user.price} ${user.currency}/ساعة` : "-"}</p>
+              </div>
+            </div>
+          </div>
+        </div>
 
-<div style={{padding:"40px",background:"#f5f7fb",minHeight:"100vh"}}>
+        {/* الإعلانات */}
+        {adsList.length > 0 && (
+          <div className="bg-white rounded-2xl shadow-md p-6 mb-8">
+            <h3 className="text-lg font-bold text-[#FF9800] mb-4 flex items-center gap-2">
+              <ShoppingBag size={20} />
+              الإعلانات ({adsList.length})
+            </h3>
+            <div className="space-y-3">
+              {adsList.slice(0, 3).map((ad: any, idx: number) => (
+                <div key={idx} className="border-b pb-2">
+                  <p className="font-semibold">{ad.title || "بدون عنوان"}</p>
+                  <p className="text-sm text-gray-500">{ad.description || "لا يوجد وصف"}</p>
+                </div>
+              ))}
+              {adsList.length > 3 && (
+                <p className="text-sm text-[#1976D2]">+ {adsList.length - 3} إعلانات أخرى</p>
+              )}
+            </div>
+          </div>
+        )}
 
-<div style={{display:"flex",justifyContent:"space-between"}}>
+        {/* طرق الدفع */}
+        {paymentsList.length > 0 && (
+          <div className="bg-white rounded-2xl shadow-md p-6 mb-8">
+            <h3 className="text-lg font-bold text-[#1976D2] mb-4 flex items-center gap-2">
+              <CreditCard size={20} />
+              طرق الدفع ({paymentsList.length})
+            </h3>
+            <div className="space-y-2">
+              {paymentsList.map((p: any, idx: number) => (
+                <div key={idx} className="border-b pb-2">
+                  <p className="font-semibold">{p.method || "-"}</p>
+                  <p className="text-sm text-gray-500">{p.details || "-"}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
-<h2>حسابي</h2>
-
-<button
-onClick={logout}
-style={{
-background:"#e53935",
-color:"white",
-border:"none",
-padding:"8px 16px",
-borderRadius:"6px",
-cursor:"pointer"
-}}
->
-تسجيل الخروج
-</button>
-
-</div>
-
-<div style={{display:"flex",gap:"10px",marginTop:"30px",marginBottom:"30px"}}>
-
-<button onClick={()=>setTab("profile")}>الملف الشخصي</button>
-<button onClick={()=>setTab("sessions")}>الجلسات</button>
-<button onClick={()=>setTab("services")}>الخدمات</button>
-
-</div>
-
-{/* PROFILE */}
-
-{tab==="profile" && (
-
-<div style={{background:"white",padding:"20px",borderRadius:"10px"}}>
-
-<h3>الملف الشخصي</h3>
-
-<p>
-<b>الاسم:</b> {profile.name}
-<button onClick={()=>setEditing("name")}>✏️</button>
-</p>
-
-{editing==="name" && (
-<input
-value={profile.name}
-onChange={(e)=>setProfile({...profile,name:e.target.value})}
-/>
-)}
-
-<p>
-<b>البريد:</b> {profile.email}
-</p>
-
-<p>
-<b>الهاتف:</b> {profile.phone}
-<button onClick={()=>setEditing("phone")}>✏️</button>
-</p>
-
-{editing==="phone" && (
-<input
-value={profile.phone}
-onChange={(e)=>setProfile({...profile,phone:e.target.value})}
-/>
-)}
-
-<p>
-<b>التخصص:</b> {profile.specialty}
-<button onClick={()=>setEditing("specialty")}>✏️</button>
-</p>
-
-{editing==="specialty" && (
-<input
-value={profile.specialty}
-onChange={(e)=>setProfile({...profile,specialty:e.target.value})}
-/>
-)}
-
-<p>
-<b>الدولة:</b> {profile.country}
-<button onClick={()=>setEditing("country")}>✏️</button>
-</p>
-
-{editing==="country" && (
-<input
-value={profile.country}
-onChange={(e)=>setProfile({...profile,country:e.target.value})}
-/>
-)}
-
-<p>
-<b>نبذة:</b> {profile.bio}
-<button onClick={()=>setEditing("bio")}>✏️</button>
-</p>
-
-{editing==="bio" && (
-<textarea
-value={profile.bio}
-onChange={(e)=>setProfile({...profile,bio:e.target.value})}
-/>
-)}
-
-</div>
-
-)}
-
-{/* SESSIONS */}
-
-{tab==="sessions" && (
-
-<div style={{background:"white",padding:"20px",borderRadius:"10px"}}>
-
-<h3>طلبات الجلسات</h3>
-
-{sessions.map(session=>(
-
-<div
-key={session.id}
-style={{
-border:"1px solid #eee",
-padding:"15px",
-marginBottom:"10px",
-borderRadius:"8px"
-}}
->
-
-<p>العميل: {session.client}</p>
-<p>نوع الجلسة: {session.type}</p>
-<p>التاريخ: {session.date}</p>
-<p>الحالة: {session.status}</p>
-
-{session.status==="pending" && (
-
-<div style={{marginTop:"10px"}}>
-
-<button
-onClick={()=>acceptSession(session.id)}
-style={{marginRight:"10px"}}
->
-قبول
-</button>
-
-<button
-onClick={()=>rejectSession(session.id)}
->
-رفض
-</button>
-
-</div>
-
-)}
-
-</div>
-
-))}
-
-</div>
-
-)}
-
-{/* SERVICES */}
-
-{tab==="services" && (
-
-<div style={{background:"white",padding:"20px",borderRadius:"10px"}}>
-
-<h3>الخدمات</h3>
-
-<button
-style={{
-background:"#FF9800",
-color:"white",
-border:"none",
-padding:"10px 20px",
-borderRadius:"6px",
-marginBottom:"20px"
-}}
->
-إضافة خدمة
-</button>
-
-<p>لا توجد خدمات حالياً</p>
-
-</div>
-
-)}
-
-</div>
-
-);
+        {/* زر العودة للرئيسية */}
+        <div className="mt-8 text-center">
+          <button
+            onClick={() => navigate("/")}
+            className="text-gray-500 hover:text-gray-700 transition"
+          >
+            ← العودة للرئيسية
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }

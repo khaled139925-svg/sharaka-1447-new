@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "../lib/supabase";
 import logo from "../assets/globe-icon.png";
 import {
   Globe,
@@ -27,41 +29,27 @@ import {
   Hotel,
   Info,
   UserPlus,
-  LogIn
+  LogIn,
+  MapPin,
+  Award,
+  DollarSign,
+  X
 } from "lucide-react";
 
-const CONSULTANTS = [
-  {
-    id: 1,
-    name: "د. أحمد محمد",
-    specialty: "استشارات إدارة الأعمال",
-    bio: "خبرة 15 سنة في إدارة المشاريع والشركات",
-    experience: 15,
-    price: 50,
-    rating: 4.8,
-  },
-  {
-    id: 2,
-    name: "أ. فاطمة علي",
-    specialty: "التسويق الرقمي",
-    bio: "متخصصة في التسويق الإلكتروني والعلامات التجارية",
-    experience: 10,
-    price: 45,
-    rating: 4.9,
-  },
-  {
-    id: 3,
-    name: "م. سارة حسن",
-    specialty: "تطوير البرمجيات",
-    bio: "مهندسة برمجيات بخبرة 10 سنوات في التطوير",
-    experience: 10,
-    price: 60,
-    rating: 4.7,
-  },
-];
-
-interface HomeProps {
-  onNavigate?: (page: "home" | "about" | "client-signup" | "consultant-signup") => void;
+interface Consultant {
+  id: string;
+  account_type: string;
+  full_name: string;
+  company_name: string;
+  specialty: string;
+  sub_specialty: string;
+  experience: string;
+  price: string;
+  currency: string;
+  country: string;
+  city: string;
+  profile_image: string;
+  bio: string;
 }
 
 const SPECIALTIES = [
@@ -116,20 +104,70 @@ const COUNTRIES = [
   { code: "CA", name: "كندا", flag: "🇨🇦" },
 ];
 
+interface HomeProps {
+  onNavigate?: (page: "home" | "about" | "client-signup" | "consultant-signup") => void;
+}
+
 export default function Home({ onNavigate }: HomeProps) {
+  const navigateTo = useNavigate();
   const [language, setLanguage] = useState<"ar" | "en">("ar");
   const [selectedCountry, setSelectedCountry] = useState("SA");
   const [showCountries, setShowCountries] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showContact, setShowContact] = useState(false);
-  const [showAdForm, setShowAdForm] = useState(false);
-  const [isMember, setIsMember] = useState<boolean | null>(null);
-  const [openSpecialty, setOpenSpecialty] = useState<number | null>(null);
+  const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>(null);
+  const [consultants, setConsultants] = useState<Consultant[]>([]);
+  const [filteredConsultants, setFilteredConsultants] = useState<Consultant[]>([]);
+  const [loading, setLoading] = useState(false);
 
   let pressTimer: any;
 
   const navigate = (page: string) => {
     if (page === "admin") window.location.href = "/admin";
+  };
+
+  // جلب المستشارين من قاعدة البيانات
+  useEffect(() => {
+    fetchConsultants();
+  }, []);
+
+  const fetchConsultants = async () => {
+    const { data, error } = await supabase
+      .from("consultants")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (!error && data) {
+      setConsultants(data);
+    }
+  };
+
+  // تصفية المستشارين حسب التخصص المختار
+  useEffect(() => {
+    if (selectedSpecialty) {
+      const filtered = consultants.filter(c => c.specialty === selectedSpecialty);
+      setFilteredConsultants(filtered);
+      setLoading(false);
+    } else {
+      setFilteredConsultants([]);
+    }
+  }, [selectedSpecialty, consultants]);
+
+  const handleSpecialtyClick = (specialtyName: string) => {
+    setSelectedSpecialty(specialtyName);
+    setLoading(true);
+  };
+
+  const closeCards = () => {
+    setSelectedSpecialty(null);
+    setFilteredConsultants([]);
+  };
+
+  const getImageUrl = (url: string) => {
+    if (!url) return null;
+    if (url.startsWith("http") || url.startsWith("data:image")) return url;
+    const { data } = supabase.storage.from('profile_images').getPublicUrl(url);
+    return data.publicUrl;
   };
 
   const isRTL = language === "ar";
@@ -139,11 +177,15 @@ export default function Home({ onNavigate }: HomeProps) {
       title: "اعرض ما لديك… واحصل على ما تريد",
       english: "English",
       arabic: "العربية",
+      backToSpecialties: "← العودة للتخصصات",
+      noConsultants: "لا يوجد مستشارين في هذا التخصص حالياً",
     },
     en: {
       title: "Show what you have… get what you want",
       english: "English",
       arabic: "Arabic",
+      backToSpecialties: "← Back to Specialties",
+      noConsultants: "No consultants in this specialty yet",
     },
   };
   const t = translations[language];
@@ -151,17 +193,13 @@ export default function Home({ onNavigate }: HomeProps) {
   return (
     <div className={`min-h-screen bg-white ${isRTL ? "rtl" : "ltr"}`} dir={isRTL ? "rtl" : "ltr"}>
 
-      {/* ===== HEADER ===== */}
+      {/* ===== HEADER (نفس الكود الأصلي) ===== */}
       <header className="sticky top-0 z-50 bg-white shadow-md">
         <div className="container mx-auto px-4 py-4 flex items-center">
-
           <button className="text-3xl text-[#1976D2] mr-4" onClick={() => setShowMenu(!showMenu)}>
             ☰
           </button>
-
           <div className="flex-1"></div>
-
-          {/* اختيار الدولة */}
           <div className="relative mr-3">
             <button
               onMouseDown={() => { pressTimer = setTimeout(() => navigate("admin"), 5000); }}
@@ -175,7 +213,6 @@ export default function Home({ onNavigate }: HomeProps) {
               <Globe size={16} />
               {COUNTRIES.find(c => c.code === selectedCountry)?.flag}
             </button>
-
             {showCountries && (
               <div className="absolute top-full mt-2 bg-white border-2 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
                 {COUNTRIES.map((country) => (
@@ -190,8 +227,6 @@ export default function Home({ onNavigate }: HomeProps) {
               </div>
             )}
           </div>
-
-          {/* اللغة */}
           <button
             onClick={() => setLanguage(language === "ar" ? "en" : "ar")}
             className="px-3 py-2 text-sm font-semibold rounded-lg"
@@ -212,7 +247,6 @@ export default function Home({ onNavigate }: HomeProps) {
                 <h2 className="text-xl font-bold text-[#FF9800]">القائمة</h2>
                 <button onClick={() => setShowMenu(false)} className="text-2xl hover:text-red-500">✕</button>
               </div>
-
               <button
                 onClick={() => { setShowMenu(false); onNavigate?.("about"); }}
                 className="flex items-center gap-3 py-4 px-3 rounded-lg hover:bg-gray-100 transition"
@@ -220,7 +254,6 @@ export default function Home({ onNavigate }: HomeProps) {
                 <Info size={20} className="text-[#1976D2]" />
                 <span className="font-medium">من نحن</span>
               </button>
-
               <button
                 onClick={() => { setShowMenu(false); onNavigate?.("consultant-signup"); }}
                 className="flex items-center gap-3 py-4 px-3 rounded-lg hover:bg-gray-100 transition"
@@ -228,14 +261,13 @@ export default function Home({ onNavigate }: HomeProps) {
                 <UserPlus size={20} className="text-[#FF9800]" />
                 <span className="font-medium">انضم إلينا</span>
               </button>
-
               <button
-                onClick={() => { setShowMenu(false); window.location.href = "/login"; }}
-                className="flex items-center gap-3 py-4 px-3 rounded-lg hover:bg-gray-100 transition"
-              >
-                <LogIn size={20} className="text-[#1976D2]" />
-                <span className="font-medium">تسجيل الدخول</span>
-              </button>
+  onClick={() => window.location.href = "/login"}
+  className="flex items-center gap-3 py-4 px-3 rounded-lg hover:bg-gray-100 transition"
+>
+  <LogIn size={20} className="text-[#1976D2]" />
+  <span className="font-medium">تسجيل الدخول</span>
+</button>
             </div>
           </div>
         )}
@@ -247,23 +279,17 @@ export default function Home({ onNavigate }: HomeProps) {
           <div className="flex justify-center mb-2">
             <img src={logo} alt="Sharaka" className="logo-float" style={{ height: "200px", mixBlendMode: "multiply" }} />
           </div>
-
           <h2 className="text-4xl font-bold mb-2" style={{ color: "#FF9800" }}>
             {t.title}
           </h2>
-
           <p className="text-xl" style={{ color: "#1976D2" }}>شريك نجاحك</p>
-
           <div className="mt-6 flex flex-col items-center gap-4">
-            {/* زر انضم الآن */}
             <button
               onClick={() => onNavigate?.("consultant-signup")}
               className="w-60 bg-[#FF9800] hover:bg-orange-500 text-white font-bold py-4 rounded-lg text-lg transition"
             >
               انضم الآن
             </button>
-
-            {/* زر تصفح الجميع — نفس الحجم تماماً */}
             <button
               onClick={() => window.location.href = "/browse"}
               className="w-60 bg-[#1976D2] hover:bg-blue-700 text-white font-bold py-4 rounded-lg text-lg transition"
@@ -277,73 +303,158 @@ export default function Home({ onNavigate }: HomeProps) {
       {/* ===== التخصصات ===== */}
       <section id="specialties" className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-            {SPECIALTIES.map((s, i) => {
-              const Icon = s.icon;
-              const open = openSpecialty === i;
-              return (
-                <div key={i} className="bg-white rounded-xl shadow-md hover:shadow-xl transition">
-                  <button onClick={() => setOpenSpecialty(open ? null : i)} className="w-full p-5 text-center">
-                    <div className="flex justify-center mb-3">
-                      <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center">
-                        {typeof s.icon === "string"
-                          ? <span className="text-2xl">{s.icon}</span>
-                          : <Icon size={30} className="text-[#1976D2]" />
-                        }
+          
+          {/* زر العودة إذا كان هناك تخصص مختار */}
+          {selectedSpecialty && (
+            <div className="mb-6 text-right">
+              <button
+                onClick={closeCards}
+                className="text-[#1976D2] hover:text-[#FF9800] flex items-center gap-2"
+              >
+                <span>←</span>
+                <span>{t.backToSpecialties}</span>
+              </button>
+            </div>
+          )}
+
+          {/* عرض التخصصات أو البطاقات */}
+          {!selectedSpecialty ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+              {SPECIALTIES.map((s, i) => {
+                const Icon = s.icon;
+                return (
+                  <div
+                    key={i}
+                    onClick={() => handleSpecialtyClick(s.name)}
+                    className="bg-white rounded-xl shadow-md hover:shadow-xl transition cursor-pointer"
+                  >
+                    <div className="w-full p-5 text-center">
+                      <div className="flex justify-center mb-3">
+                        <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center">
+                          {typeof s.icon === "string"
+                            ? <span className="text-2xl">{s.icon}</span>
+                            : <Icon size={30} className="text-[#1976D2]" />
+                          }
+                        </div>
+                      </div>
+                      <h3 className="font-bold text-[#FF9800]">{s.name}</h3>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            // عرض البطاقات حسب التخصص المختار
+            <div>
+              <h2 className="text-2xl font-bold text-[#1976D2] mb-6 text-center">
+                {selectedSpecialty}
+              </h2>
+              
+              {loading ? (
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF9800] mx-auto"></div>
+                  <p className="mt-4 text-gray-600">جاري التحميل...</p>
+                </div>
+              ) : filteredConsultants.length === 0 ? (
+                <div className="text-center py-12 bg-white rounded-xl shadow-sm">
+                  <p className="text-gray-500 text-lg">{t.noConsultants}</p>
+                  <button
+                    onClick={() => onNavigate?.("consultant-signup")}
+                    className="mt-4 bg-[#FF9800] text-white px-6 py-2 rounded-lg hover:bg-orange-500 transition"
+                  >
+                    كن أول مستشار في هذا التخصص
+                  </button>
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredConsultants.map((consultant) => (
+                    <div
+                      key={consultant.id}
+                      onClick={() => navigateTo(`/consultant/${consultant.id}`)}
+                      className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
+                    >
+                      <div className="h-32 bg-gradient-to-r from-[#1976D2] to-[#FF9800] relative">
+                        {consultant.profile_image && (
+                          <img
+                            src={getImageUrl(consultant.profile_image) || ""}
+                            alt={consultant.full_name || consultant.company_name}
+                            className="w-full h-full object-cover opacity-30"
+                          />
+                        )}
+                        <div className="absolute -bottom-10 right-4">
+                          <div className="w-20 h-20 rounded-full bg-white shadow-lg border-4 border-white overflow-hidden">
+                            {consultant.profile_image ? (
+                              <img
+                                src={getImageUrl(consultant.profile_image) || ""}
+                                alt="صورة"
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-3xl">
+                                {consultant.account_type === "individual" ? "👤" : "🏢"}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="pt-12 p-5">
+                        <h3 className="text-xl font-bold text-gray-800 mb-1">
+                          {consultant.account_type === "individual" 
+                            ? consultant.full_name || "مستشار"
+                            : consultant.company_name || "منشأة"}
+                        </h3>
+                        
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="text-[#FF9800] font-semibold">{consultant.specialty || "تخصص غير محدد"}</span>
+                          {consultant.sub_specialty && (
+                            <span className="text-gray-400 text-sm">- {consultant.sub_specialty}</span>
+                          )}
+                        </div>
+
+                        {(consultant.country || consultant.city) && (
+                          <div className="flex items-center gap-2 text-gray-500 text-sm mb-2">
+                            <MapPin size={14} />
+                            <span>{consultant.city && consultant.city}{consultant.country && `، ${consultant.country}`}</span>
+                          </div>
+                        )}
+
+                        {consultant.experience && (
+                          <div className="flex items-center gap-2 text-gray-500 text-sm mb-2">
+                            <Award size={14} className="text-[#FF9800]" />
+                            <span>{consultant.experience} سنوات خبرة</span>
+                          </div>
+                        )}
+
+                        {consultant.price && (
+                          <div className="flex items-center gap-2 text-green-600 font-semibold mb-3">
+                            <DollarSign size={14} />
+                            <span>{consultant.price} {consultant.currency || "ريال"}/ساعة</span>
+                          </div>
+                        )}
+
+                        {consultant.bio && (
+                          <p className="text-gray-500 text-sm line-clamp-2 mb-4">
+                            {consultant.bio.length > 100 ? consultant.bio.substring(0, 100) + "..." : consultant.bio}
+                          </p>
+                        )}
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigateTo(`/consultant/${consultant.id}`);
+                          }}
+                          className="w-full bg-[#1976D2] text-white py-2 rounded-xl hover:bg-[#1565C0] transition font-medium"
+                        >
+                          عرض التفاصيل
+                        </button>
                       </div>
                     </div>
-                    <h3 className="font-bold text-[#FF9800]">{s.name}</h3>
-                  </button>
-                  {open && (
-                    <div className="px-5 pb-5 text-sm text-gray-700">
-                      {s.subs.map((sub, index) => <div key={index}>• {sub}</div>)}
-                    </div>
-                  )}
+                  ))}
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== سوق شراكة ===== */}
-      <section className="py-20 bg-white">
-        <div className="max-w-6xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold mb-10 text-[#FF9800]">سوق شراكة</h2>
-
-          <div className="flex flex-col items-center gap-4 mb-12">
-            <button
-              onClick={() => setShowAdForm(true)}
-              className="w-60 bg-[#FF9800] hover:bg-orange-500 text-white font-bold py-4 rounded-lg text-lg transition"
-            >
-              أضف إعلانك مجانًا
-            </button>
-            <button
-              onClick={() => onNavigate?.("market")}
-              className="w-60 bg-[#1976D2] hover:bg-blue-700 text-white font-bold py-4 rounded-lg text-lg transition"
-            >
-              تصفح الإعلانات
-            </button>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-            {[
-              { icon: "🏠", name: "عقار" }, { icon: "🚗", name: "سيارات" },
-              { icon: "📱", name: "أجهزة" }, { icon: "💼", name: "وظائف" },
-              { icon: "🛒", name: "بيع" }, { icon: "🛍", name: "شراء" },
-              { icon: "📈", name: "استثمار" }, { icon: "🏪", name: "تجارة" },
-              { icon: "🧰", name: "خدمات" }, { icon: "➕", name: "أخرى" },
-            ].map((s, i) => (
-              <div key={i} className="bg-white rounded-xl shadow-md hover:shadow-xl transition">
-                <button className="w-full p-5 text-center">
-                  <div className="flex justify-center mb-3">
-                    <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center text-2xl">{s.icon}</div>
-                  </div>
-                  <h3 className="font-bold text-[#FF9800]">{s.name}</h3>
-                </button>
-              </div>
-            ))}
-          </div>
+              )}
+            </div>
+          )}
         </div>
       </section>
 
@@ -363,44 +474,6 @@ export default function Home({ onNavigate }: HomeProps) {
           </button>
         </div>
       </section>
-
-      {/* ===== MODAL: إضافة إعلان ===== */}
-      {showAdForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white w-full max-w-xl p-8 rounded-xl shadow-2xl text-right">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-[#1976D2]">إضافة إعلان</h3>
-              <button onClick={() => { setShowAdForm(false); setIsMember(null); }} className="text-xl hover:text-red-500">✕</button>
-            </div>
-
-            {isMember === null && (
-              <div className="text-center space-y-4">
-                <p className="text-lg font-semibold">هل لديك عضوية في منصة شراكة؟</p>
-                <div className="flex justify-center gap-4">
-                  <button onClick={() => setIsMember(true)} className="bg-[#1976D2] text-white px-6 py-3 rounded-lg">نعم</button>
-                  <button onClick={() => onNavigate?.("consultant-signup")} className="bg-[#FF9800] text-white px-6 py-3 rounded-lg">لا — انضم الآن</button>
-                </div>
-              </div>
-            )}
-
-            {isMember === true && (
-              <div className="space-y-4">
-                <input type="text" placeholder="عنوان الإعلان" className="w-full border p-3 rounded" />
-                <select className="w-full border p-3 rounded">
-                  <option>اختر القسم</option>
-                  <option>عقار</option><option>سيارات</option><option>أجهزة</option>
-                  <option>وظائف</option><option>بيع</option><option>شراء</option>
-                  <option>استثمار</option><option>تجارة</option><option>خدمات</option><option>أخرى</option>
-                </select>
-                <textarea placeholder="وصف الإعلان" rows={4} className="w-full border p-3 rounded" />
-                <input type="text" placeholder="السعر (اختياري)" className="w-full border p-3 rounded" />
-                <input type="text" placeholder="رقم التواصل" className="w-full border p-3 rounded" />
-                <button className="w-full bg-[#FF9800] text-white py-3 rounded hover:bg-orange-500 transition">نشر الإعلان</button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* ===== MODAL: تواصل معنا ===== */}
       {showContact && (

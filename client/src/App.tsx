@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import Messages from "./pages/Messages";
 
 import BrowseConsultants from "./pages/BrowseConsultants";
 import Home from "./pages/Home";
@@ -10,9 +11,11 @@ import ClientSignup from "./pages/ClientSignup";
 import ConsultantSignup from "./pages/ConsultantSignup";
 import Specialties from "./pages/Specialties";
 import ConsultantDetails from "./pages/ConsultantDetails";
+import EditProfile from "./pages/EditProfile";
+import AdminDashboard from "./pages/AdminDashboard";
 
 import AdminLogin from "./pages/AdminLogin";
-import AdminDashboard from "./pages/AdminDashboard";
+import AdminDashboardOld from "./pages/AdminDashboard";
 import AdminUsers from "./pages/AdminUsers";
 import AdminAds from "./pages/AdminAds";
 import AdminMeetings from "./pages/AdminMeetings";
@@ -84,13 +87,16 @@ export default function App() {
         <Route path="/" element={<Home onNavigate={onNavigate} />} />
         <Route path="/about" element={<About onNavigate={onNavigate} />} />
         <Route path="/login" element={<Login onNavigate={onNavigate} />} />
-        <Route path="/dashboard" element={<Dashboard onNavigate={onNavigate} />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/client-signup" element={<ClientSignup onNavigate={onNavigate} />} />
         <Route path="/consultant-signup" element={<ConsultantSignup onNavigate={onNavigate} />} />
         <Route path="/specialties" element={<Specialties onNavigate={onNavigate} />} />
+        <Route path="/messages" element={<Messages />} />
+<Route path="/messages/:userId" element={<Messages />} />
 
         <Route path="/browse" element={<BrowseConsultants />} />
         <Route path="/consultant/:id" element={<ConsultantDetails />} />
+        <Route path="/edit-profile/:id" element={<EditProfile />} />
         <Route path="/book-session" element={<BookSession />} />
 
         <Route path="/add-ad" element={<AddAd />} />
@@ -98,7 +104,7 @@ export default function App() {
         <Route path="/ad/:id" element={<AdDetails />} />
 
         <Route path="/admin" element={<AdminLogin onNavigate={onNavigate} />} />
-        <Route path="/admin-dashboard" element={<AdminDashboard onNavigate={onNavigate} />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/admin-users" element={<AdminUsers onNavigate={onNavigate} />} />
         <Route path="/admin-ads" element={<AdminAds onNavigate={onNavigate} />} />
         <Route path="/admin-meetings" element={<AdminMeetings onNavigate={onNavigate} />} />

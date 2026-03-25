@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { Users, ShoppingBag, CreditCard, MessageSquare, Eye, EyeOff, Trash2, Edit, CheckCircle, XCircle, Mail, Send, RefreshCw, Image, Video, DollarSign, Phone, MapPin, Award, Calendar } from 'lucide-react';
+import { Users, ShoppingBag, CreditCard, MessageSquare, Eye, EyeOff, Trash2, Edit, CheckCircle, XCircle, Mail, Send } from 'lucide-react';
 
 interface Consultant {
   id: number;
@@ -79,18 +79,17 @@ export default function AdminDashboard() {
   };
 
   const loadData = async () => {
-  setLoading(true);
-  
-  // جلب جميع المستخدمين
-  const { data: allUsers } = await supabase
-    .from("consultants")
-    .select("*")
-    .order("created_at", { ascending: false });
-  
-  // تصفية المستخدمين يدوياً - استبعاد الأدمن
-  const usersData = allUsers?.filter(user => user.id !== 5) || [];
-  
-  if (usersData) {
+    setLoading(true);
+    
+    // جلب جميع المستخدمين
+    const { data: allUsers } = await supabase
+      .from("consultants")
+      .select("*")
+      .order("created_at", { ascending: false });
+    
+    // استبعاد الأدمن (id = 5)
+    const usersData = allUsers?.filter(user => user.id !== 5) || [];
+    
     setUsers(usersData);
     
     const activeUsers = usersData.filter(u => u.is_active === true && u.is_frozen === false).length;
@@ -105,10 +104,9 @@ export default function AdminDashboard() {
       totalMessages: 0,
       unreadMessages: 0
     });
-  }
-  
-  setLoading(false);
-};
+    
+    setLoading(false);
+  };
 
   const loadMessages = async () => {
     const { data: messagesData } = await supabase
@@ -153,11 +151,6 @@ export default function AdminDashboard() {
     
     if (!error) {
       loadData();
-      await supabase.from("notifications").insert({
-        user_id: userId,
-        title: !currentStatus ? "تم تفعيل حسابك" : "تم إيقاف حسابك",
-        message: !currentStatus ? "تم تفعيل حسابك بنجاح، يمكنك الآن تسجيل الدخول" : "تم إيقاف حسابك، تواصل مع الإدارة للمزيد"
-      });
     }
   };
 
@@ -172,13 +165,6 @@ export default function AdminDashboard() {
     
     if (!error) {
       loadData();
-      if (!currentStatus) {
-        await supabase.from("notifications").insert({
-          user_id: userId,
-          title: "تم تجميد حسابك",
-          message: `تم تجميد حسابك للأسباب التالية: ${reason}`
-        });
-      }
     }
   };
 
@@ -210,12 +196,6 @@ export default function AdminDashboard() {
       setShowMessageModal(false);
       loadMessages();
       alert("تم إرسال الرسالة بنجاح");
-      
-      await supabase.from("notifications").insert({
-        user_id: selectedMessageUser.id,
-        title: "رسالة جديدة من الإدارة",
-        message: newMessage.substring(0, 100)
-      });
     }
   };
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { Send, ArrowRight, MessageSquare, User, Mail, Phone } from 'lucide-react';
@@ -32,8 +32,8 @@ export default function Messages() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [conversations, setConversations] = useState<any[]>([]);
-  const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
-  const [showConversations, setShowConversations] = useState(true);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     checkUser();
@@ -43,10 +43,20 @@ export default function Messages() {
     if (currentUser && userId) {
       loadOtherUser();
       loadMessages();
+      setupRealtimeSubscription();
     } else if (currentUser && !userId) {
       loadConversations();
     }
   }, [currentUser, userId]);
+
+  // التمرير إلى أسفل الرسائل تلقائياً
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   const checkUser = () => {
     const userData = localStorage.getItem("user");
@@ -56,6 +66,50 @@ export default function Messages() {
     }
     setCurrentUser(JSON.parse(userData));
     setLoading(false);
+  };
+
+  // إعداد الاستماع للرسائل الجديدة في الوقت الفعلي
+  const setupRealtimeSubscription = () => {
+    if (!userId) return;
+
+    const subscription = supabase
+      .channel('messages-channel')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `sender_id=eq.${userId},receiver_id=eq.${currentUser?.id}`
+        },
+        (payload) => {
+          console.log("رسالة جديدة واردة:", payload);
+          // إضافة الرسالة الجديدة إلى القائمة
+          setMessages(prev => [...prev, payload.new as Message]);
+          // تحديث المحادثات إذا كانت مفتوحة
+          if (!userId) loadConversations();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `sender_id=eq.${currentUser?.id},receiver_id=eq.${userId}`
+        },
+        (payload) => {
+          console.log("رسالة جديدة صادرة:", payload);
+          setMessages(prev => [...prev, payload.new as Message]);
+        }
+      )
+      .subscribe();
+
+    setIsConnected(true);
+
+    return () => {
+      subscription.unsubscribe();
+    };
   };
 
   const loadOtherUser = async () => {
@@ -150,17 +204,13 @@ export default function Messages() {
     
     if (!error) {
       setNewMessage("");
-      loadMessages();
-      // تحديث المحادثات إذا كنا في صفحة المحادثات
-      if (!userId) loadConversations();
+      // لا نحتاج لإعادة تحميل الرسائل لأنها ستظهر عبر الـ Realtime
     }
     setSending(false);
   };
 
   const selectConversation = (uid: number) => {
-    setSelectedConversation(uid);
     navigate(`/messages/${uid}`);
-    setShowConversations(false);
   };
 
   const getImageUrl = (url: string) => {
@@ -178,7 +228,7 @@ export default function Messages() {
     );
   }
 
-  // إذا كان هناك userId في الرابط (محادثة مع شخص معين)
+  // صفحة المحادثة مع شخص معين
   if (userId && otherUser) {
     return (
       <div className="min-h-screen bg-gray-50 py-12" dir="rtl">
@@ -189,7 +239,6 @@ export default function Messages() {
             <button
               onClick={() => {
                 navigate("/messages");
-                setShowConversations(true);
               }}
               className="flex items-center gap-2 text-[#1976D2] hover:text-[#FF9800]"
             >
@@ -204,6 +253,7 @@ export default function Messages() {
               <div>
                 <h2 className="font-bold">{otherUser.full_name || otherUser.company_name}</h2>
                 <p className="text-xs text-gray-500">{otherUser.specialty || "مستشار"}</p>
+                {isConnected && <span className="text-xs text-green-500">● متصل</span>}
               </div>
             </div>
           </div>
@@ -224,6 +274,7 @@ export default function Messages() {
                   </div>
                 );
               })}
+              <div ref={messagesEndRef} />
               {messages.length === 0 && (
                 <div className="text-center text-gray-500 py-10">
                   <MessageSquare size={48} className="mx-auto mb-3 opacity-50" />

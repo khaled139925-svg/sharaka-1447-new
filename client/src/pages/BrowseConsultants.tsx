@@ -1,15 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { MapPin, Award, DollarSign, Star, Briefcase, User, Building, ShoppingBag, Search, Filter } from 'lucide-react';
+import { MapPin, Award, DollarSign, ShoppingCart, Search, ChevronRight, X } from 'lucide-react';
 
 interface Consultant {
   id: number;
   account_type: string;
   full_name: string;
   company_name: string;
-  email: string;
-  phone: string;
   country: string;
   city: string;
   profile_image: string;
@@ -25,54 +23,14 @@ interface Consultant {
   products: any[];
 }
 
-// قائمة الدول
-const COUNTRIES = [
-  { code: "ALL", name: "الكل", flag: "🌍" },
-  { code: "SA", name: "السعودية", flag: "🇸🇦" },
-  { code: "AE", name: "الإمارات", flag: "🇦🇪" },
-  { code: "KW", name: "الكويت", flag: "🇰🇼" },
-  { code: "QA", name: "قطر", flag: "🇶🇦" },
-  { code: "BH", name: "البحرين", flag: "🇧🇭" },
-  { code: "OM", name: "عمان", flag: "🇴🇲" },
-  { code: "EG", name: "مصر", flag: "🇪🇬" },
-  { code: "JO", name: "الأردن", flag: "🇯🇴" },
-  { code: "LB", name: "لبنان", flag: "🇱🇧" },
-  { code: "PS", name: "فلسطين", flag: "🇵🇸" },
-  { code: "IQ", name: "العراق", flag: "🇮🇶" },
-  { code: "YE", name: "اليمن", flag: "🇾🇪" },
-  { code: "SD", name: "السودان", flag: "🇸🇩" },
-  { code: "LY", name: "ليبيا", flag: "🇱🇾" },
-  { code: "TN", name: "تونس", flag: "🇹🇳" },
-  { code: "DZ", name: "الجزائر", flag: "🇩🇿" },
-  { code: "MA", name: "المغرب", flag: "🇲🇦" },
-  { code: "TR", name: "تركيا", flag: "🇹🇷" },
-  { code: "PK", name: "باكستان", flag: "🇵🇰" },
-  { code: "ID", name: "إندونيسيا", flag: "🇮🇩" },
-  { code: "MY", name: "ماليزيا", flag: "🇲🇾" },
-  { code: "GB", name: "بريطانيا", flag: "🇬🇧" },
-  { code: "DE", name: "ألمانيا", flag: "🇩🇪" },
-  { code: "FR", name: "فرنسا", flag: "🇫🇷" },
-  { code: "IT", name: "إيطاليا", flag: "🇮🇹" },
-  { code: "ES", name: "إسبانيا", flag: "🇪🇸" },
-  { code: "US", name: "أمريكا", flag: "🇺🇸" },
-  { code: "CA", name: "كندا", flag: "🇨🇦" },
-  { code: "RU", name: "روسيا", flag: "🇷🇺" },
-  { code: "AU", name: "أستراليا", flag: "🇦🇺" },
-  { code: "JP", name: "اليابان", flag: "🇯🇵" },
-  { code: "CN", name: "الصين", flag: "🇨🇳" },
-  { code: "IN", name: "الهند", flag: "🇮🇳" },
-];
-
 export default function BrowseConsultants() {
   const navigate = useNavigate();
   const [consultants, setConsultants] = useState<Consultant[]>([]);
   const [filteredConsultants, setFilteredConsultants] = useState<Consultant[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCountry, setSelectedCountry] = useState("ALL");
   const [selectedSpecialty, setSelectedSpecialty] = useState("");
   const [specialties, setSpecialties] = useState<string[]>([]);
-  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
 
   useEffect(() => {
     fetchConsultants();
@@ -80,7 +38,7 @@ export default function BrowseConsultants() {
 
   useEffect(() => {
     filterConsultants();
-  }, [searchTerm, selectedCountry, selectedSpecialty, consultants]);
+  }, [searchTerm, selectedSpecialty, consultants]);
 
   const fetchConsultants = async () => {
     setLoading(true);
@@ -102,27 +60,26 @@ export default function BrowseConsultants() {
   const filterConsultants = () => {
     let filtered = [...consultants];
 
-    // فلترة حسب البحث
     if (searchTerm) {
+      const term = searchTerm.toLowerCase();
       filtered = filtered.filter(c => 
-        (c.full_name?.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (c.company_name?.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (c.specialty?.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (c.sub_specialty?.toLowerCase().includes(searchTerm.toLowerCase()))
+        (c.full_name?.toLowerCase().includes(term)) ||
+        (c.company_name?.toLowerCase().includes(term)) ||
+        (c.specialty?.toLowerCase().includes(term)) ||
+        (c.sub_specialty?.toLowerCase().includes(term))
       );
     }
 
-    // فلترة حسب الدولة
-    if (selectedCountry !== "ALL") {
-      filtered = filtered.filter(c => c.country === selectedCountry);
-    }
-
-    // فلترة حسب التخصص
     if (selectedSpecialty) {
       filtered = filtered.filter(c => c.specialty === selectedSpecialty);
     }
 
     setFilteredConsultants(filtered);
+  };
+
+  const clearFilters = () => {
+    setSearchTerm("");
+    setSelectedSpecialty("");
   };
 
   const getImageUrl = (url: string) => {
@@ -149,9 +106,13 @@ export default function BrowseConsultants() {
     return null;
   };
 
-  const getCountryFlag = (countryCode: string) => {
-    const country = COUNTRIES.find(c => c.code === countryCode);
-    return country?.flag || "🌍";
+  const getCountryFlag = (code: string) => {
+    const flags: { [key: string]: string } = {
+      "SA": "🇸🇦", "AE": "🇦🇪", "KW": "🇰🇼", "QA": "🇶🇦", "BH": "🇧🇭", "OM": "🇴🇲",
+      "EG": "🇪🇬", "JO": "🇯🇴", "LB": "🇱🇧", "PS": "🇵🇸", "IQ": "🇮🇶", "YE": "🇾🇪",
+      "TR": "🇹🇷", "PK": "🇵🇰", "ID": "🇮🇩", "MY": "🇲🇾", "GB": "🇬🇧", "US": "🇺🇸"
+    };
+    return flags[code] || "🌍";
   };
 
   if (loading) {
@@ -162,13 +123,18 @@ export default function BrowseConsultants() {
     );
   }
 
-  const selectedCountryObj = COUNTRIES.find(c => c.code === selectedCountry);
-
   return (
     <div className="min-h-screen bg-gray-50 py-6 md:py-12" dir="rtl">
       <div className="max-w-7xl mx-auto px-3 md:px-6">
         
-        {/* header */}
+        <button
+          onClick={() => navigate(-1)}
+          className="mb-4 md:mb-6 text-[#1976D2] hover:text-[#FF9800] flex items-center gap-1 transition text-sm md:text-base"
+        >
+          <ChevronRight size={18} />
+          <span>رجوع</span>
+        </button>
+
         <div className="text-center mb-6 md:mb-10">
           <h1 className="text-2xl md:text-4xl font-bold text-[#1976D2] mb-2 md:mb-3">
             تصفح المستشارين والخبراء
@@ -178,10 +144,8 @@ export default function BrowseConsultants() {
           </p>
         </div>
 
-        {/* شريط البحث والفلترة */}
         <div className="bg-white rounded-xl md:rounded-2xl shadow-md p-3 md:p-6 mb-6 md:mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
-            {/* بحث */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             <div>
               <label className="block mb-1 md:mb-2 font-semibold text-gray-700 text-sm md:text-base">🔍 بحث</label>
               <div className="relative">
@@ -196,38 +160,6 @@ export default function BrowseConsultants() {
               </div>
             </div>
             
-            {/* اختيار الدولة */}
-            <div>
-              <label className="block mb-1 md:mb-2 font-semibold text-gray-700 text-sm md:text-base">📍 الدولة</label>
-              <div className="relative">
-                <button
-                  onClick={() => setShowCountryDropdown(!showCountryDropdown)}
-                  className="w-full border border-gray-300 p-2 md:p-3 rounded-lg md:rounded-xl text-right bg-white flex justify-between items-center"
-                >
-                  <span>{selectedCountryObj?.flag} {selectedCountryObj?.name}</span>
-                  <span className="text-gray-400">▼</span>
-                </button>
-                {showCountryDropdown && (
-                  <div className="absolute z-20 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                    {COUNTRIES.map((country) => (
-                      <div
-                        key={country.code}
-                        onClick={() => {
-                          setSelectedCountry(country.code);
-                          setShowCountryDropdown(false);
-                        }}
-                        className="p-2 md:p-3 hover:bg-gray-100 cursor-pointer text-right flex items-center gap-2"
-                      >
-                        <span>{country.flag}</span>
-                        <span>{country.name}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            {/* اختيار التخصص */}
             <div>
               <label className="block mb-1 md:mb-2 font-semibold text-gray-700 text-sm md:text-base">📌 التخصص</label>
               <select
@@ -244,20 +176,21 @@ export default function BrowseConsultants() {
           </div>
         </div>
 
-        {/* عدد النتائج */}
         <div className="mb-4 md:mb-6 text-right">
           <p className="text-gray-500 text-sm md:text-base">
             <span className="font-bold text-[#FF9800]">{filteredConsultants.length}</span> مستشار/خبير
-            {selectedCountry !== "ALL" && (
-              <span className="mr-2">من {selectedCountryObj?.flag} {selectedCountryObj?.name}</span>
+            {selectedSpecialty && (
+              <span className="mr-2">في تخصص {selectedSpecialty}</span>
+            )}
+            {searchTerm && (
+              <span className="mr-2">نتائج البحث "{searchTerm}"</span>
             )}
           </p>
         </div>
 
-        {/* البطاقات */}
         {filteredConsultants.length === 0 ? (
           <div className="text-center py-12 md:py-20 bg-white rounded-xl md:rounded-2xl shadow-sm">
-            <p className="text-gray-500 text-base md:text-lg">لا يوجد مستشارين حالياً</p>
+            <p className="text-gray-500 text-base md:text-lg">لا يوجد مستشارين</p>
             <button
               onClick={() => navigate("/consultant-signup")}
               className="mt-3 md:mt-4 bg-[#FF9800] text-white px-4 md:px-6 py-1.5 md:py-2 rounded-lg md:rounded-xl hover:bg-[#F57C00] transition text-sm md:text-base"
@@ -273,7 +206,6 @@ export default function BrowseConsultants() {
                 onClick={() => navigate(`/consultant/${consultant.id}`)}
                 className="bg-white rounded-xl md:rounded-2xl shadow-lg overflow-hidden hover:shadow-xl md:hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
               >
-                {/* صورة الغلاف */}
                 <div className="h-28 md:h-32 bg-gradient-to-r from-[#1976D2] to-[#FF9800] relative">
                   {consultant.profile_image && (
                     <img
@@ -299,31 +231,27 @@ export default function BrowseConsultants() {
                   </div>
                 </div>
 
-                {/* محتوى البطاقة */}
                 <div className="pt-8 md:pt-12 p-3 md:p-5">
-                  {/* الاسم */}
-                  <h3 className="text-base md:text-xl font-bold text-gray-800 mb-0.5 md:mb-1">
-                    {consultant.account_type === "individual" 
-                      ? consultant.full_name || "مستشار"
-                      : consultant.company_name || "منشأة"}
-                  </h3>
-                  
-                  {/* التخصص والدولة */}
-                  <div className="flex items-center justify-between mb-2 md:mb-3">
-                    <div className="flex items-center gap-1 md:gap-2">
-                      <span className="text-[#FF9800] font-semibold text-xs md:text-sm">{consultant.specialty || "تخصص غير محدد"}</span>
-                      {consultant.sub_specialty && (
-                        <span className="text-gray-400 text-xs">- {consultant.sub_specialty}</span>
-                      )}
-                    </div>
+                  <div className="flex justify-between items-start">
+                    <h3 className="text-base md:text-xl font-bold text-gray-800 mb-0.5 md:mb-1">
+                      {consultant.account_type === "individual" 
+                        ? consultant.full_name || "مستشار"
+                        : consultant.company_name || "منشأة"}
+                    </h3>
                     {consultant.country && (
-                      <div className="text-xs text-gray-500 flex items-center gap-1">
-                        <span>{getCountryFlag(consultant.country)}</span>
-                      </div>
+                      <span className="text-sm md:text-base" title={consultant.country}>
+                        {getCountryFlag(consultant.country)}
+                      </span>
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center gap-1 md:gap-2 mb-2 md:mb-3">
+                    <span className="text-[#FF9800] font-semibold text-xs md:text-sm">{consultant.specialty || "تخصص غير محدد"}</span>
+                    {consultant.sub_specialty && (
+                      <span className="text-gray-400 text-xs">- {consultant.sub_specialty}</span>
                     )}
                   </div>
 
-                  {/* الموقع */}
                   {(consultant.country || consultant.city) && (
                     <div className="flex items-center gap-1 md:gap-2 text-gray-500 text-xs md:text-sm mb-1 md:mb-2">
                       <MapPin size={12} className="md:w-4 md:h-4" />
@@ -331,14 +259,13 @@ export default function BrowseConsultants() {
                     </div>
                   )}
 
-                  {/* الخدمات المختصرة */}
                   {consultant.selected_services && consultant.selected_services.length > 0 && (
                     <div className="mt-2 md:mt-3 space-y-1">
-                      {consultant.selected_services.map((service: string) => {
+                      {consultant.selected_services.slice(0, 2).map((service: string) => {
                         if (service === "products") {
                           return (
                             <div key={service} className="flex items-center gap-1 text-xs md:text-sm text-gray-600">
-                              <ShoppingBag size={12} className="text-[#FF9800] md:w-4 md:h-4" />
+                              <ShoppingCart size={12} className="text-[#FF9800] md:w-4 md:h-4" />
                               <span>متجر</span>
                             </div>
                           );
@@ -356,10 +283,12 @@ export default function BrowseConsultants() {
                           return null;
                         }
                       })}
+                      {consultant.selected_services.length > 2 && (
+                        <div className="text-xs text-gray-400">+{consultant.selected_services.length - 2} خدمات أخرى</div>
+                      )}
                     </div>
                   )}
 
-                  {/* الخبرة */}
                   {consultant.experience && (
                     <div className="flex items-center gap-1 md:gap-2 text-gray-500 text-xs md:text-sm mt-2 md:mt-3">
                       <Award size={12} className="text-[#FF9800] md:w-4 md:h-4" />
@@ -367,14 +296,6 @@ export default function BrowseConsultants() {
                     </div>
                   )}
 
-                  {/* النبذة مختصرة */}
-                  {consultant.bio && (
-                    <p className="text-gray-500 text-xs md:text-sm line-clamp-2 mt-2 md:mt-3 mb-2 md:mb-3">
-                      {consultant.bio.length > 80 ? consultant.bio.substring(0, 80) + "..." : consultant.bio}
-                    </p>
-                  )}
-
-                  {/* زر التفاصيل */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();

@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { X, Mail, Phone, Globe, Instagram, Youtube, Linkedin, MessageCircle, MapPin, Award, DollarSign, Package, Truck, Map, ShoppingBag } from 'lucide-react';
+import { X, Mail, Phone, Globe, Instagram, Youtube, Linkedin, MessageCircle, MapPin, Award, DollarSign, Calendar, ShoppingCart, Truck, Map } from 'lucide-react';
 
 export default function ConsultantDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [consultant, setConsultant] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showContact, setShowContact] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -22,9 +23,7 @@ export default function ConsultantDetails() {
         const user = JSON.parse(userData);
         setCurrentUser(user);
         setIsLoggedIn(true);
-      } catch (e) {
-        console.log("خطأ في قراءة المستخدم");
-      }
+      } catch (e) {}
     }
     loadConsultant();
   }, [id]);
@@ -122,28 +121,21 @@ export default function ConsultantDetails() {
     return serviceId;
   };
 
-  const getServicePrice = (serviceId: string) => {
-    if (serviceId === "consulting") return consultant.consulting_price;
-    if (serviceId === "training") return consultant.training_price;
-    if (serviceId === "individual") return consultant.individual_price;
-    if (serviceId === "workshop") return consultant.workshop_price;
-    return null;
-  };
+  const isOwnProfile = isLoggedIn && currentUser && consultant.id === currentUser.id;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-4 md:py-12" dir="rtl">
-      <div className="max-w-5xl mx-auto px-3 md:px-6">
+    <div className="min-h-screen bg-gray-50 py-6 md:py-12" dir="rtl">
+      <div className="max-w-5xl mx-auto px-4 md:px-6">
         
         <button
           onClick={() => navigate(-1)}
-          className="mb-3 md:mb-6 text-[#1976D2] hover:text-[#FF9800] flex items-center gap-2 transition text-sm md:text-base"
+          className="mb-4 md:mb-6 text-[#1976D2] hover:text-[#FF9800] flex items-center gap-2 transition text-sm md:text-base"
         >
           <span>←</span> رجوع
         </button>
 
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           
-          {/* صورة الغلاف */}
           <div className="h-32 md:h-48 bg-gradient-to-r from-[#1976D2] to-[#FF9800] relative">
             {consultant.profile_image && (
               <img
@@ -194,13 +186,12 @@ export default function ConsultantDetails() {
 
             <hr className="my-3 md:my-6" />
 
-            {/* المعلومات الأساسية */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-4">
               <div className="bg-gray-50 rounded-xl p-2 md:p-4 flex items-center gap-2 md:gap-3">
                 <MapPin size={16} className="text-[#1976D2] shrink-0" />
                 <div>
                   <p className="text-xs text-gray-500">الموقع</p>
-                  <p className="font-medium text-xs md:text-sm">{consultant.city && consultant.country ? `${consultant.city}, ${consultant.country}` : val(consultant.country || consultant.city)}</p>
+                  <p className="font-medium text-xs md:text-sm">{consultant.city && consultant.city}{consultant.country && `، ${consultant.country}`}</p>
                 </div>
               </div>
               <div className="bg-gray-50 rounded-xl p-2 md:p-4 flex items-center gap-2 md:gap-3">
@@ -212,7 +203,6 @@ export default function ConsultantDetails() {
               </div>
             </div>
 
-            {/* أنواع الخدمات - أزرار */}
             {selectedServices.length > 0 && (
               <div className="mt-4 md:mt-6">
                 <h2 className="text-base md:text-xl font-bold text-[#1976D2] mb-2 md:mb-3">الخدمات</h2>
@@ -234,7 +224,6 @@ export default function ConsultantDetails() {
               </div>
             )}
 
-            {/* عرض السعر للخدمة المختارة */}
             {activeService && activeService !== "products" && currentPrice && (
               <div className="mt-3 md:mt-4 bg-green-50 rounded-xl p-2 md:p-4 flex items-center gap-2 md:gap-3">
                 <DollarSign size={18} className="text-green-600" />
@@ -246,35 +235,26 @@ export default function ConsultantDetails() {
               </div>
             )}
 
-            {/* عرض المنتجات (المتجر) */}
             {activeService === "products" && products.length > 0 && (
               <div className="mt-3 md:mt-4 space-y-3 md:space-y-4">
                 {products.map((product: any, idx: number) => (
                   <div key={idx} className="border rounded-xl p-3 md:p-4 bg-gray-50">
                     {product.image && (
                       <div className="relative w-full aspect-square mb-3 rounded-lg overflow-hidden cursor-pointer" onClick={() => openImageModal(product.image)}>
-                        <img 
-                          src={product.image} 
-                          alt={product.name} 
-                          className="w-full h-full object-cover"
-                        />
+                        <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
                       </div>
                     )}
                     <h3 className="font-bold text-base md:text-lg">{product.name}</h3>
                     <p className="text-gray-600 text-xs md:text-sm mt-1">{product.description}</p>
-                    {product.price && (
-                      <p className="text-[#FF9800] font-bold mt-2 text-sm md:text-base">السعر: {product.price} ريال</p>
-                    )}
+                    {product.price && <p className="text-[#FF9800] font-bold mt-2 text-sm md:text-base">السعر: {product.price} ريال</p>}
                     {product.delivery && (
                       <div className="flex items-center gap-2 mt-2 text-xs md:text-sm text-gray-500">
-                        <Truck size={14} />
-                        <span>طريقة التوصيل: {product.delivery}</span>
+                        <Truck size={14} /><span>طريقة التوصيل: {product.delivery}</span>
                       </div>
                     )}
                     {product.locations && product.locations.length > 0 && (
                       <div className="flex items-center gap-2 mt-1 text-xs md:text-sm text-gray-500">
-                        <Map size={14} />
-                        <span>يشمل: {product.locations.join(", ")}</span>
+                        <Map size={14} /><span>يشمل: {product.locations.join(", ")}</span>
                       </div>
                     )}
                   </div>
@@ -294,7 +274,6 @@ export default function ConsultantDetails() {
 
             <hr className="my-3 md:my-6" />
             
-            {/* طرق الدفع */}
             {paymentsList.length > 0 && (
               <div>
                 <h2 className="text-base md:text-xl font-bold text-[#1976D2] mb-2 md:mb-4">طرق الدفع</h2>
@@ -309,56 +288,36 @@ export default function ConsultantDetails() {
               </div>
             )}
 
-            {/* طرق الاتصال */}
             <div className="mt-4 md:mt-6">
               <h2 className="text-base md:text-xl font-bold text-[#1976D2] mb-2 md:mb-4">طرق الاتصال</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-4">
                 {consultant.whatsapp && (
                   <a href={getWhatsAppLink(consultant.whatsapp)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-2 md:p-3 bg-green-50 rounded-xl hover:bg-green-100 transition">
                     <MessageCircle size={16} className="text-green-600" />
-                    <div>
-                      <p className="text-xs text-gray-500">واتساب</p>
-                      <p className="font-medium text-xs md:text-sm">{consultant.whatsapp}</p>
-                    </div>
+                    <div><p className="text-xs text-gray-500">واتساب</p><p className="font-medium text-xs md:text-sm">{consultant.whatsapp}</p></div>
                   </a>
                 )}
                 {consultant.phone && (
                   <a href={getPhoneLink(consultant.phone)} className="flex items-center gap-2 p-2 md:p-3 bg-blue-50 rounded-xl hover:bg-blue-100 transition">
                     <Phone size={16} className="text-blue-600" />
-                    <div>
-                      <p className="text-xs text-gray-500">هاتف</p>
-                      <p className="font-medium text-xs md:text-sm">{consultant.phone}</p>
-                    </div>
+                    <div><p className="text-xs text-gray-500">هاتف</p><p className="font-medium text-xs md:text-sm">{consultant.phone}</p></div>
                   </a>
                 )}
                 {consultant.email && (
                   <a href={getEmailLink(consultant.email)} className="flex items-center gap-2 p-2 md:p-3 bg-red-50 rounded-xl hover:bg-red-100 transition">
                     <Mail size={16} className="text-red-600" />
-                    <div>
-                      <p className="text-xs text-gray-500">بريد إلكتروني</p>
-                      <p className="font-medium text-xs md:text-sm">{consultant.email}</p>
-                    </div>
+                    <div><p className="text-xs text-gray-500">بريد</p><p className="font-medium text-xs md:text-sm">{consultant.email}</p></div>
                   </a>
-                )}
-                {consultant.other_contact && (
-                  <div className="flex items-center gap-2 p-2 md:p-3 bg-gray-50 rounded-xl">
-                    <Globe size={16} className="text-gray-600" />
-                    <div>
-                      <p className="text-xs text-gray-500">وسيلة أخرى</p>
-                      <p className="font-medium text-xs md:text-sm">{consultant.other_contact}</p>
-                    </div>
-                  </div>
                 )}
               </div>
             </div>
 
-            {/* الروابط */}
             <div className="mt-4 md:mt-6">
               <h2 className="text-base md:text-xl font-bold text-[#1976D2] mb-2 md:mb-4">الموقع الإلكتروني والروابط</h2>
               <div className="flex flex-wrap gap-2 md:gap-3">
                 {consultant.website && (
                   <a href={getWebLink(consultant.website)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 md:gap-2 bg-gray-100 hover:bg-gray-200 px-2 py-1 md:px-4 md:py-2 rounded-lg transition text-xs md:text-sm">
-                    <Globe size={14} className="text-blue-600" /> <span>الموقع الإلكتروني</span>
+                    <Globe size={14} className="text-blue-600" /> <span>الموقع</span>
                   </a>
                 )}
                 {consultant.linkedin && (
@@ -379,13 +338,12 @@ export default function ConsultantDetails() {
               </div>
             </div>
 
-            {/* زر المراسلة */}
             <div className="mt-4 md:mt-6">
               <button
                 onClick={() => {
-                  if (isLoggedIn) {
+                  if (isLoggedIn && !isOwnProfile) {
                     navigate(`/messages/${consultant.id}`);
-                  } else {
+                  } else if (!isLoggedIn) {
                     if (confirm("يرجى تسجيل الدخول أولاً للتمكن من مراسلة المستشار. هل تريد الانتقال إلى صفحة تسجيل الدخول؟")) {
                       navigate("/login");
                     }
@@ -398,7 +356,6 @@ export default function ConsultantDetails() {
               </button>
             </div>
 
-            {/* الإعلانات */}
             {adsList.length > 0 && (
               <>
                 <hr className="my-3 md:my-6" />
@@ -409,36 +366,17 @@ export default function ConsultantDetails() {
                       <div key={idx} className="border rounded-xl p-3 md:p-4 hover:shadow-md transition">
                         <h3 className="font-bold text-sm md:text-lg">{ad.title || "بدون عنوان"}</h3>
                         <p className="text-gray-600 mt-1 text-xs md:text-sm">{ad.description || "لا يوجد وصف"}</p>
-                        
                         {(ad.image || ad.video) && (
-                          <button
-                            onClick={() => toggleAdMedia(idx)}
-                            className="mt-2 flex items-center gap-2 text-[#1976D2] text-xs md:text-sm hover:text-[#FF9800] transition"
-                          >
+                          <button onClick={() => toggleAdMedia(idx)} className="mt-2 flex items-center gap-2 text-[#1976D2] text-xs md:text-sm hover:text-[#FF9800] transition">
                             {showAdMedia[idx] ? "إخفاء الوسائط" : "عرض الوسائط"}
                           </button>
                         )}
-                        
                         {showAdMedia[idx] && (
                           <div className="mt-2">
-                            {ad.image && (
-                              <img 
-                                src={ad.image} 
-                                alt="صورة الإعلان" 
-                                className="max-h-40 md:max-h-48 rounded-lg border cursor-pointer hover:opacity-90 transition" 
-                                onClick={() => openImageModal(ad.image)} 
-                              />
-                            )}
-                            {ad.video && (
-                              <video 
-                                src={ad.video} 
-                                controls 
-                                className="max-h-40 md:max-h-48 rounded-lg border mt-2" 
-                              />
-                            )}
+                            {ad.image && <img src={ad.image} alt="صورة الإعلان" className="max-h-40 md:max-h-48 rounded-lg border cursor-pointer hover:opacity-90 transition" onClick={() => openImageModal(ad.image)} />}
+                            {ad.video && <video src={ad.video} controls className="max-h-40 md:max-h-48 rounded-lg border mt-2" />}
                           </div>
                         )}
-                        
                         <div className="flex flex-wrap gap-2 md:gap-4 mt-2 md:mt-3 text-xs md:text-sm">
                           {ad.price && <span className="text-[#FF9800] font-bold">💰 {ad.price} ريال</span>}
                           {ad.contact && <span className="text-gray-500">📞 {ad.contact}</span>}
@@ -449,12 +387,10 @@ export default function ConsultantDetails() {
                 </div>
               </>
             )}
-
           </div>
         </div>
       </div>
 
-      {/* نافذة عرض الصورة المكبرة */}
       {isImageModalOpen && selectedImage && (
         <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onClick={closeImageModal}>
           <div className="relative max-w-5xl max-h-[90vh]">

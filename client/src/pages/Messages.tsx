@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { Send, ArrowRight, MessageSquare, User, Mail, Phone } from 'lucide-react';
+import { Send, ArrowRight, MessageSquare } from 'lucide-react';
 
 interface Message {
   id: number;
@@ -12,28 +12,17 @@ interface Message {
   created_at: string;
 }
 
-interface User {
-  id: number;
-  full_name: string;
-  company_name: string;
-  email: string;
-  phone: string;
-  profile_image: string;
-  specialty: string;
-}
-
 export default function Messages() {
   const { userId } = useParams();
   const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [otherUser, setOtherUser] = useState<User | null>(null);
+  const [otherUser, setOtherUser] = useState<any>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [conversations, setConversations] = useState<any[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     checkUser();
@@ -43,13 +32,12 @@ export default function Messages() {
     if (currentUser && userId) {
       loadOtherUser();
       loadMessages();
-      setupRealtimeSubscription();
+      setupRealtime(); // الاستماع للرسائل الجديدة
     } else if (currentUser && !userId) {
       loadConversations();
     }
   }, [currentUser, userId]);
 
-  // التمرير إلى أسفل الرسائل تلقائياً
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -68,11 +56,15 @@ export default function Messages() {
     setLoading(false);
   };
 
-  // إعداد الاستماع للرسائل الجديدة في الوقت الفعلي
-  const setupRealtimeSubscription = () => {
-    if (!userId) return;
+  // الاستماع للرسائل الجديدة في الوقت الفعلي
+  const setupRealtime = () => {
+    if (!userId || !currentUser) return;
 
-    const subscription = supabase
+    console.log("🟢 إعداد الاستماع للرسائل...");
+    console.log("المستخدم الحالي:", currentUser.id);
+    console.log("المستخدم الآخر:", userId);
+
+    const channel = supabase
       .channel('messages-channel')
       .on(
         'postgres_changes',
@@ -80,35 +72,21 @@ export default function Messages() {
           event: 'INSERT',
           schema: 'public',
           table: 'messages',
-          filter: `sender_id=eq.${userId},receiver_id=eq.${currentUser?.id}`
+          filter: `receiver_id=eq.${currentUser.id}`
         },
         (payload) => {
-          console.log("رسالة جديدة واردة:", payload);
-          // إضافة الرسالة الجديدة إلى القائمة
+          console.log("🔵 رسالة واردة جديدة:", payload);
           setMessages(prev => [...prev, payload.new as Message]);
-          // تحديث المحادثات إذا كانت مفتوحة
-          if (!userId) loadConversations();
+          // تحديث قائمة المحادثات
+          loadConversations();
         }
       )
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `sender_id=eq.${currentUser?.id},receiver_id=eq.${userId}`
-        },
-        (payload) => {
-          console.log("رسالة جديدة صادرة:", payload);
-          setMessages(prev => [...prev, payload.new as Message]);
-        }
-      )
-      .subscribe();
-
-    setIsConnected(true);
+      .subscribe((status) => {
+        console.log("📡 حالة الاشتراك:", status);
+      });
 
     return () => {
-      subscription.unsubscribe();
+      supabase.removeChannel(channel);
     };
   };
 
@@ -125,16 +103,21 @@ export default function Messages() {
   const loadMessages = async () => {
     if (!currentUser || !userId) return;
     
-    const { data } = await supabase
+    console.log("📥 جلب الرسائل...");
+    const { data, error } = await supabase
       .from("messages")
       .select("*")
       .or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${userId}),and(sender_id.eq.${userId},receiver_id.eq.${currentUser.id})`)
       .order("created_at", { ascending: true });
     
-    if (data) {
-      setMessages(data);
+    if (error) {
+      console.error("خطأ في جلب الرسائل:", error);
+    } else {
+      console.log(`✅ تم جلب ${data?.length || 0} رسالة`);
+      setMessages(data || []);
+      
       // تحديث الرسائل كمقروءة
-      const unreadMessages = data.filter(m => m.receiver_id === currentUser.id && !m.is_read);
+      const unreadMessages = data?.filter(m => m.receiver_id === currentUser.id && !m.is_read) || [];
       for (const msg of unreadMessages) {
         await supabase.from("messages").update({ is_read: true }).eq("id", msg.id);
       }
@@ -144,7 +127,6 @@ export default function Messages() {
   const loadConversations = async () => {
     if (!currentUser) return;
     
-    // جلب جميع المحادثات
     const { data: sentMessages } = await supabase
       .from("messages")
       .select("*")
@@ -193,31 +175,33 @@ export default function Messages() {
   };
 
   const sendMessage = async () => {
-    if (!newMessage.trim() || !currentUser || !userId) return;
+    if (!newMessage.trim()) return;
+    if (!currentUser || !userId) return;
     
     setSending(true);
-    const { error } = await supabase.from("messages").insert({
+    
+    console.log("📤 إرسال رسالة...");
+    const { data, error } = await supabase.from("messages").insert({
       sender_id: currentUser.id,
       receiver_id: parseInt(userId),
       message: newMessage,
-    });
+    }).select();
     
-    if (!error) {
+    if (error) {
+      console.error("❌ خطأ في الإرسال:", error);
+    } else {
+      console.log("✅ تم الإرسال:", data);
       setNewMessage("");
-      // لا نحتاج لإعادة تحميل الرسائل لأنها ستظهر عبر الـ Realtime
+      // إضافة الرسالة محلياً
+      if (data) {
+        setMessages(prev => [...prev, data[0]]);
+      }
     }
     setSending(false);
   };
 
   const selectConversation = (uid: number) => {
     navigate(`/messages/${uid}`);
-  };
-
-  const getImageUrl = (url: string) => {
-    if (!url) return null;
-    if (url.startsWith("http")) return url;
-    const { data } = supabase.storage.from('media').getPublicUrl(url);
-    return data.publicUrl;
   };
 
   if (loading) {
@@ -228,18 +212,15 @@ export default function Messages() {
     );
   }
 
-  // صفحة المحادثة مع شخص معين
+  // صفحة المحادثة
   if (userId && otherUser) {
     return (
       <div className="min-h-screen bg-gray-50 py-12" dir="rtl">
         <div className="max-w-4xl mx-auto px-6">
           
-          {/* رأس المحادثة */}
           <div className="bg-white rounded-2xl shadow-md p-4 mb-6 flex items-center justify-between">
             <button
-              onClick={() => {
-                navigate("/messages");
-              }}
+              onClick={() => navigate("/messages")}
               className="flex items-center gap-2 text-[#1976D2] hover:text-[#FF9800]"
             >
               <ArrowRight size={20} />
@@ -253,19 +234,17 @@ export default function Messages() {
               <div>
                 <h2 className="font-bold">{otherUser.full_name || otherUser.company_name}</h2>
                 <p className="text-xs text-gray-500">{otherUser.specialty || "مستشار"}</p>
-                {isConnected && <span className="text-xs text-green-500">● متصل</span>}
               </div>
             </div>
           </div>
           
-          {/* منطقة الرسائل */}
           <div className="bg-white rounded-2xl shadow-md h-[60vh] flex flex-col">
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
               {messages.map((msg) => {
                 const isMine = msg.sender_id === currentUser?.id;
                 return (
                   <div key={msg.id} className={`flex ${isMine ? "justify-start" : "justify-end"}`}>
-                    <div className={`max-w-[70%] p-3 rounded-2xl ${isMine ? "bg-[#1976D2] text-white" : "bg-gray-100 text-gray-800"}`}>
+                    <div className={`max-w-[80%] p-3 rounded-2xl ${isMine ? "bg-[#1976D2] text-white" : "bg-gray-100 text-gray-800"}`}>
                       <p className="text-sm">{msg.message}</p>
                       <p className="text-xs mt-1 opacity-70">
                         {new Date(msg.created_at).toLocaleTimeString("ar-SA", { hour: '2-digit', minute: '2-digit' })}
@@ -284,29 +263,29 @@ export default function Messages() {
               )}
             </div>
             
-            {/* منطقة كتابة الرسالة */}
-            <div className="border-t p-4 flex gap-2">
-              <textarea
-                rows={1}
-                className="flex-1 border rounded-xl p-3 resize-none focus:outline-none focus:ring-2 focus:ring-[#FF9800]"
-                placeholder="اكتب رسالتك..."
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage();
-                  }
-                }}
-              />
-              <button
-                onClick={sendMessage}
-                disabled={sending || !newMessage.trim()}
-                className="bg-[#FF9800] text-white px-4 py-2 rounded-xl hover:bg-orange-500 transition disabled:opacity-50 flex items-center gap-2"
-              >
-                <Send size={18} />
-                <span className="hidden sm:inline">إرسال</span>
-              </button>
+            <div className="border-t p-4">
+              <div className="flex gap-2">
+                <textarea
+                  rows={1}
+                  className="flex-1 border rounded-xl p-3 resize-none focus:outline-none focus:ring-2 focus:ring-[#FF9800]"
+                  placeholder="اكتب رسالتك..."
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      sendMessage();
+                    }
+                  }}
+                />
+                <button
+                  onClick={sendMessage}
+                  disabled={sending || !newMessage.trim()}
+                  className="bg-[#FF9800] text-white px-4 py-2 rounded-xl hover:bg-orange-500 transition disabled:opacity-50 flex items-center gap-2"
+                >
+                  <Send size={18} />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -318,7 +297,6 @@ export default function Messages() {
   return (
     <div className="min-h-screen bg-gray-50 py-12" dir="rtl">
       <div className="max-w-4xl mx-auto px-6">
-        
         <div className="bg-white rounded-2xl shadow-md p-6 mb-6">
           <h1 className="text-2xl font-bold text-[#FF9800]">الرسائل</h1>
           <p className="text-gray-500">المحادثات والمراسلات</p>

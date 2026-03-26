@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
-import Messages from "./pages/Messages";
 
 import BrowseConsultants from "./pages/BrowseConsultants";
 import Home from "./pages/Home";
@@ -12,10 +11,11 @@ import ConsultantSignup from "./pages/ConsultantSignup";
 import Specialties from "./pages/Specialties";
 import ConsultantDetails from "./pages/ConsultantDetails";
 import EditProfile from "./pages/EditProfile";
-import AdminDashboard from "./pages/AdminDashboard";
+import Messages from "./pages/Messages";
+import ResetPassword from "./pages/ResetPassword";
 
 import AdminLogin from "./pages/AdminLogin";
-import AdminDashboardOld from "./pages/AdminDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import AdminUsers from "./pages/AdminUsers";
 import AdminAds from "./pages/AdminAds";
 import AdminMeetings from "./pages/AdminMeetings";
@@ -27,7 +27,6 @@ import AddAd from "./pages/AddAd";
 import Ads from "./pages/Ads";
 import AdDetails from "./pages/AdDetails";
 
-/* 🔥 حل مشكلة التنقل */
 function NavigationHandler() {
   const navigate = useNavigate();
 
@@ -52,7 +51,6 @@ function NavigationHandler() {
   return null;
 }
 
-/* 🔐 اختصار لوحة التحكم */
 function AdminShortcut() {
   const navigate = useNavigate();
 
@@ -63,7 +61,6 @@ function AdminShortcut() {
         navigate("/admin");
       }
     };
-
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, [navigate]);
@@ -78,12 +75,9 @@ export default function App() {
 
   return (
     <BrowserRouter>
-
       <NavigationHandler />
       <AdminShortcut />
-
       <Routes>
-
         <Route path="/" element={<Home onNavigate={onNavigate} />} />
         <Route path="/about" element={<About onNavigate={onNavigate} />} />
         <Route path="/login" element={<Login onNavigate={onNavigate} />} />
@@ -91,18 +85,16 @@ export default function App() {
         <Route path="/client-signup" element={<ClientSignup onNavigate={onNavigate} />} />
         <Route path="/consultant-signup" element={<ConsultantSignup onNavigate={onNavigate} />} />
         <Route path="/specialties" element={<Specialties onNavigate={onNavigate} />} />
-        <Route path="/messages" element={<Messages />} />
-<Route path="/messages/:userId" element={<Messages />} />
-
         <Route path="/browse" element={<BrowseConsultants />} />
         <Route path="/consultant/:id" element={<ConsultantDetails />} />
         <Route path="/edit-profile/:id" element={<EditProfile />} />
+        <Route path="/messages" element={<Messages />} />
+        <Route path="/messages/:userId" element={<Messages />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/book-session" element={<BookSession />} />
-
         <Route path="/add-ad" element={<AddAd />} />
         <Route path="/ads" element={<Ads />} />
         <Route path="/ad/:id" element={<AdDetails />} />
-
         <Route path="/admin" element={<AdminLogin onNavigate={onNavigate} />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/admin-users" element={<AdminUsers onNavigate={onNavigate} />} />
@@ -110,9 +102,7 @@ export default function App() {
         <Route path="/admin-meetings" element={<AdminMeetings onNavigate={onNavigate} />} />
         <Route path="/admin-messages" element={<AdminMessages onNavigate={onNavigate} />} />
         <Route path="/admin-stats" element={<AdminStats onNavigate={onNavigate} />} />
-
       </Routes>
-
     </BrowserRouter>
   );
 }

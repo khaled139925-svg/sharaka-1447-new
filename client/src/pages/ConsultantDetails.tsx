@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { X, Mail, Phone, Globe, Instagram, Youtube, Linkedin, MessageCircle, MapPin, Award, DollarSign, Calendar, Image, Video, ChevronDown, ChevronUp } from 'lucide-react';
+import { X, Mail, Phone, Globe, Instagram, Youtube, Linkedin, MessageCircle, MapPin, Award, DollarSign, Package, Truck, Map } from 'lucide-react';
 
 export default function ConsultantDetails() {
   const { id } = useParams();
@@ -12,11 +12,8 @@ export default function ConsultantDetails() {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  
-  // حالات لعرض/إخفاء المحتوى
-  const [showAdsImages, setShowAdsImages] = useState<{ [key: number]: boolean }>({});
-  const [showPortfolioImages, setShowPortfolioImages] = useState(false);
-  const [expandedAds, setExpandedAds] = useState<{ [key: number]: boolean }>({});
+  const [activeService, setActiveService] = useState<string | null>(null);
+  const [showAdMedia, setShowAdMedia] = useState<{ [key: number]: boolean }>({});
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -42,6 +39,9 @@ export default function ConsultantDetails() {
 
     if (!error && data) {
       setConsultant(data);
+      if (data.selected_services && data.selected_services.length > 0) {
+        setActiveService(data.selected_services[0]);
+      }
     }
     setLoading(false);
   };
@@ -77,16 +77,8 @@ export default function ConsultantDetails() {
     return value;
   };
 
-  const toggleAdImages = (adIndex: number) => {
-    setShowAdsImages(prev => ({ ...prev, [adIndex]: !prev[adIndex] }));
-  };
-
-  const toggleAdExpanded = (adIndex: number) => {
-    setExpandedAds(prev => ({ ...prev, [adIndex]: !prev[adIndex] }));
-  };
-
-  const togglePortfolioImages = () => {
-    setShowPortfolioImages(!showPortfolioImages);
+  const toggleAdMedia = (adIndex: number) => {
+    setShowAdMedia(prev => ({ ...prev, [adIndex]: !prev[adIndex] }));
   };
 
   if (loading) {
@@ -107,8 +99,28 @@ export default function ConsultantDetails() {
 
   const adsList = consultant.ads && Array.isArray(consultant.ads) ? consultant.ads : [];
   const paymentsList = consultant.payment_methods && Array.isArray(consultant.payment_methods) ? consultant.payment_methods : [];
-  const portfolioList = consultant.portfolio && Array.isArray(consultant.portfolio) ? consultant.portfolio : [];
-  const hasImages = portfolioList.some(item => item.type === "image" || item.type === "video");
+  const selectedServices = consultant.selected_services || [];
+  const products = consultant.products || [];
+
+  const getPriceForService = (serviceId: string) => {
+    if (serviceId === "consulting") return consultant.consulting_price;
+    if (serviceId === "training") return consultant.training_price;
+    if (serviceId === "individual") return consultant.individual_price;
+    if (serviceId === "workshop") return consultant.workshop_price;
+    return null;
+  };
+
+  const currentPrice = getPriceForService(activeService);
+  const currentCurrency = consultant.currency || "ريال";
+
+  const getServiceName = (serviceId: string) => {
+    if (serviceId === "consulting") return "جلسات استشارية";
+    if (serviceId === "training") return "دورات تدريبية";
+    if (serviceId === "products") return "منتجات";
+    if (serviceId === "individual") return "جلسات فردية";
+    if (serviceId === "workshop") return "ورش عمل";
+    return serviceId;
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-6 md:py-12" dir="rtl">
@@ -174,7 +186,7 @@ export default function ConsultantDetails() {
 
             <hr className="my-4 md:my-6" />
 
-            {/* المعلومات الأساسية - على شكل كروت */}
+            {/* المعلومات الأساسية */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
               <div className="bg-gray-50 rounded-xl p-3 md:p-4 flex items-center gap-3">
                 <MapPin size={18} className="text-[#1976D2] shrink-0" />
@@ -190,31 +202,74 @@ export default function ConsultantDetails() {
                   <p className="font-medium text-sm md:text-base">{val(consultant.experience)} سنة</p>
                 </div>
               </div>
-              <div className="bg-gray-50 rounded-xl p-3 md:p-4 flex items-center gap-3">
-                <Calendar size={18} className="text-[#1976D2] shrink-0" />
-                <div>
-                  <p className="text-xs text-gray-500">نوع الخدمة</p>
-                  <p className="font-medium text-sm md:text-base">{val(consultant.activity)}</p>
-                </div>
-              </div>
-              <div className="bg-gray-50 rounded-xl p-3 md:p-4 flex items-center gap-3">
-                <DollarSign size={18} className="text-green-600 shrink-0" />
-                <div>
-                  <p className="text-xs text-gray-500">السعر</p>
-                  <p className="font-medium text-sm md:text-base">{val(consultant.price)} {val(consultant.currency)}/ساعة</p>
-                </div>
-              </div>
             </div>
 
-            {/* برامج الاجتماعات */}
-            {consultant.meeting_platforms && consultant.meeting_platforms !== "-" && (
-              <div className="mt-4 md:mt-6 bg-gray-50 rounded-xl p-3 md:p-4">
-                <p className="text-xs text-gray-500 mb-2">برامج الاجتماعات</p>
+            {/* أنواع الخدمات - أزرار */}
+            {selectedServices.length > 0 && (
+              <div className="mt-6">
+                <h2 className="text-lg md:text-xl font-bold text-[#1976D2] mb-3">الخدمات</h2>
                 <div className="flex flex-wrap gap-2">
-                  {consultant.meeting_platforms.split(", ").map((platform: string, idx: number) => (
-                    <span key={idx} className="bg-white px-2 py-1 rounded-lg text-xs shadow-sm">{platform}</span>
+                  {selectedServices.map((service: string) => (
+                    <button
+                      key={service}
+                      onClick={() => setActiveService(service)}
+                      className={`px-4 py-2 rounded-full text-sm transition ${
+                        activeService === service 
+                          ? "bg-[#FF9800] text-white" 
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                    >
+                      {getServiceName(service)}
+                    </button>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* عرض السعر للخدمة المختارة */}
+            {activeService && activeService !== "products" && currentPrice && (
+              <div className="mt-4 bg-green-50 rounded-xl p-3 md:p-4 flex items-center gap-3">
+                <DollarSign size={20} className="text-green-600" />
+                <div>
+                  <p className="text-xs text-gray-500">السعر</p>
+                  <p className="font-bold text-lg md:text-xl text-green-700">{currentPrice} {currentCurrency}</p>
+                  <p className="text-xs text-gray-500">لكل ساعة</p>
+                </div>
+              </div>
+            )}
+
+            {/* عرض المنتجات */}
+            {activeService === "products" && products.length > 0 && (
+              <div className="mt-4 space-y-4">
+                {products.map((product: any, idx: number) => (
+                  <div key={idx} className="border rounded-xl p-4 bg-gray-50">
+                    {product.image && (
+                      <img 
+                        src={product.image} 
+                        alt={product.name} 
+                        className="w-full h-40 object-cover rounded-lg mb-3 cursor-pointer"
+                        onClick={() => openImageModal(product.image)}
+                      />
+                    )}
+                    <h3 className="font-bold text-lg">{product.name}</h3>
+                    <p className="text-gray-600 text-sm mt-1">{product.description}</p>
+                    {product.price && (
+                      <p className="text-[#FF9800] font-bold mt-2">السعر: {product.price} ريال</p>
+                    )}
+                    {product.delivery && (
+                      <div className="flex items-center gap-2 mt-2 text-sm text-gray-500">
+                        <Truck size={14} />
+                        <span>طريقة التوصيل: {product.delivery}</span>
+                      </div>
+                    )}
+                    {product.locations && product.locations.length > 0 && (
+                      <div className="flex items-center gap-2 mt-1 text-sm text-gray-500">
+                        <Map size={14} />
+                        <span>يشمل: {product.locations.join(", ")}</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             )}
 
@@ -222,7 +277,7 @@ export default function ConsultantDetails() {
               <>
                 <hr className="my-4 md:my-6" />
                 <div>
-                  <h2 className="text-lg md:text-xl font-bold text-[#1976D2] mb-2 md:mb-3">النبذة</h2>
+                  <h2 className="text-lg md:text-xl font-bold text-[#1976D2] mb-2 md:mb-3">نبذة</h2>
                   <p className="text-gray-700 leading-relaxed text-sm md:text-base">{consultant.bio}</p>
                 </div>
               </>
@@ -230,8 +285,23 @@ export default function ConsultantDetails() {
 
             <hr className="my-4 md:my-6" />
             
+            {/* طرق الدفع */}
+            {paymentsList.length > 0 && (
+              <div>
+                <h2 className="text-lg md:text-xl font-bold text-[#1976D2] mb-3 md:mb-4">طرق الدفع</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3">
+                  {paymentsList.map((p: any, idx: number) => (
+                    <div key={idx} className="border rounded-lg p-2 md:p-3 flex justify-between items-center text-sm">
+                      <span className="font-semibold">{p.method || "-"}</span>
+                      <span className="text-gray-600 text-xs md:text-sm">{p.details || "-"}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* طرق الاتصال */}
-            <div>
+            <div className="mt-6">
               <h2 className="text-lg md:text-xl font-bold text-[#1976D2] mb-3 md:mb-4">طرق الاتصال</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                 {consultant.whatsapp && (
@@ -273,28 +343,9 @@ export default function ConsultantDetails() {
               </div>
             </div>
 
-            {/* زر المراسلة */}
-            <div className="mt-4 md:mt-6">
-              <button
-                onClick={() => {
-                  if (isLoggedIn) {
-                    navigate(`/messages/${consultant.id}`);
-                  } else {
-                    if (confirm("يرجى تسجيل الدخول أولاً للتمكن من مراسلة المستشار. هل تريد الانتقال إلى صفحة تسجيل الدخول؟")) {
-                      navigate("/login");
-                    }
-                  }
-                }}
-                className="w-full bg-purple-600 text-white py-3 rounded-xl hover:bg-purple-700 transition flex items-center justify-center gap-2 font-medium"
-              >
-                <MessageCircle size={20} />
-                مراسلة {consultant.full_name || consultant.company_name}
-              </button>
-            </div>
-
-            {/* الروابط الاجتماعية */}
-            <div className="mt-6 md:mt-8">
-              <h2 className="text-lg md:text-xl font-bold text-[#1976D2] mb-3 md:mb-4">الروابط</h2>
+            {/* الروابط */}
+            <div className="mt-6">
+              <h2 className="text-lg md:text-xl font-bold text-[#1976D2] mb-3 md:mb-4">الموقع الإلكتروني والروابط</h2>
               <div className="flex flex-wrap gap-3">
                 {consultant.website && (
                   <a href={getWebLink(consultant.website)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition text-sm">
@@ -319,120 +370,73 @@ export default function ConsultantDetails() {
               </div>
             </div>
 
-            {/* الإعلانات - مع زر عرض الصور */}
+            {/* زر المراسلة */}
+            <div className="mt-6">
+              <button
+                onClick={() => {
+                  if (isLoggedIn) {
+                    navigate(`/messages/${consultant.id}`);
+                  } else {
+                    if (confirm("يرجى تسجيل الدخول أولاً للتمكن من مراسلة المستشار. هل تريد الانتقال إلى صفحة تسجيل الدخول؟")) {
+                      navigate("/login");
+                    }
+                  }
+                }}
+                className="w-full bg-purple-600 text-white py-3 rounded-xl hover:bg-purple-700 transition flex items-center justify-center gap-2 font-medium"
+              >
+                <MessageCircle size={20} />
+                مراسلة {consultant.full_name || consultant.company_name}
+              </button>
+            </div>
+
+            {/* الإعلانات */}
             {adsList.length > 0 && (
               <>
                 <hr className="my-4 md:my-6" />
                 <div>
-                  <h2 className="text-lg md:text-xl font-bold text-[#FF9800] mb-3 md:mb-4">الإعلانات ({adsList.length})</h2>
+                  <h2 className="text-lg md:text-xl font-bold text-[#FF9800] mb-3 md:mb-4">الإعلانات</h2>
                   <div className="space-y-3 md:space-y-4">
                     {adsList.map((ad: any, idx: number) => (
                       <div key={idx} className="border rounded-xl p-3 md:p-4 hover:shadow-md transition">
-                        <div 
-                          className="flex justify-between items-center cursor-pointer"
-                          onClick={() => toggleAdExpanded(idx)}
-                        >
-                          <h3 className="font-bold text-base md:text-lg">{ad.title || "بدون عنوان"}</h3>
-                          {expandedAds[idx] ? <ChevronUp size={18} className="text-gray-400" /> : <ChevronDown size={18} className="text-gray-400" />}
-                        </div>
+                        <h3 className="font-bold text-base md:text-lg">{ad.title || "بدون عنوان"}</h3>
+                        <p className="text-gray-600 mt-1 text-sm">{ad.description || "لا يوجد وصف"}</p>
                         
-                        {expandedAds[idx] && (
-                          <>
-                            <p className="text-gray-600 mt-2 text-sm">{ad.description || "لا يوجد وصف"}</p>
-                            
-                            {/* عرض الصور والفيديو مع زر إظهار/إخفاء */}
-                            {(ad.image || ad.video) && (
-                              <div className="mt-3">
-                                <button
-                                  onClick={() => toggleAdImages(idx)}
-                                  className="flex items-center gap-2 text-[#1976D2] text-sm hover:text-[#FF9800] transition"
-                                >
-                                  {showAdsImages[idx] ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                                  {showAdsImages[idx] ? "إخفاء الوسائط" : "عرض الوسائط"}
-                                  {ad.image && <Image size={14} />}
-                                  {ad.video && <Video size={14} />}
-                                </button>
-                                
-                                {showAdsImages[idx] && (
-                                  <div className="mt-2">
-                                    {ad.image && (
-                                      <img 
-                                        src={ad.image} 
-                                        alt="صورة الإعلان" 
-                                        className="max-h-48 rounded-lg border cursor-pointer hover:opacity-90 transition" 
-                                        onClick={() => openImageModal(ad.image)} 
-                                      />
-                                    )}
-                                    {ad.video && (
-                                      <video 
-                                        src={ad.video} 
-                                        controls 
-                                        className="max-h-48 rounded-lg border mt-2" 
-                                      />
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                            
-                            <div className="flex flex-wrap gap-3 md:gap-4 mt-3 text-xs md:text-sm">
-                              {ad.price && <span className="text-[#FF9800] font-bold">💰 {ad.price} ريال</span>}
-                              {ad.contact && <span className="text-gray-500">📞 {ad.contact}</span>}
-                            </div>
-                          </>
+                        {(ad.image || ad.video) && (
+                          <button
+                            onClick={() => toggleAdMedia(idx)}
+                            className="mt-2 flex items-center gap-2 text-[#1976D2] text-sm hover:text-[#FF9800] transition"
+                          >
+                            {showAdMedia[idx] ? "إخفاء الوسائط" : "عرض الوسائط"}
+                          </button>
                         )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* طرق الدفع */}
-            {paymentsList.length > 0 && (
-              <>
-                <hr className="my-4 md:my-6" />
-                <div>
-                  <h2 className="text-lg md:text-xl font-bold text-[#1976D2] mb-3 md:mb-4">طرق الدفع ({paymentsList.length})</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3">
-                    {paymentsList.map((p: any, idx: number) => (
-                      <div key={idx} className="border rounded-lg p-2 md:p-3 flex justify-between items-center text-sm">
-                        <span className="font-semibold">{p.method || "-"}</span>
-                        <span className="text-gray-600 text-xs md:text-sm">{p.details || "-"}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* معرض الأعمال - مع زر عرض الصور */}
-            {portfolioList.length > 0 && (
-              <>
-                <hr className="my-4 md:my-6" />
-                <div>
-                  <h2 className="text-lg md:text-xl font-bold text-[#1976D2] mb-3 md:mb-4">معرض الأعمال ({portfolioList.length})</h2>
-                  
-                  <button
-                    onClick={togglePortfolioImages}
-                    className="flex items-center gap-2 text-[#1976D2] hover:text-[#FF9800] transition mb-3"
-                  >
-                    {showPortfolioImages ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-                    {showPortfolioImages ? "إخفاء معرض الأعمال" : "عرض معرض الأعمال"}
-                    <Image size={16} />
-                  </button>
-                  
-                  {showPortfolioImages && (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 md:gap-3">
-                      {portfolioList.map((item: any, idx: number) => (
-                        <div key={idx} className="border rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition aspect-square" onClick={() => item.type === "image" && openImageModal(item.url)}>
-                          {item.type === "image" && <img src={item.url} alt="عمل" className="w-full h-full object-cover" />}
-                          {item.type === "video" && <video src={item.url} controls className="w-full h-full object-cover" onClick={(e) => e.stopPropagation()} />}
-                          {item.type === "video_link" && <iframe src={item.url} className="w-full h-full" title="فيديو" />}
+                        
+                        {showAdMedia[idx] && (
+                          <div className="mt-2">
+                            {ad.image && (
+                              <img 
+                                src={ad.image} 
+                                alt="صورة الإعلان" 
+                                className="max-h-48 rounded-lg border cursor-pointer hover:opacity-90 transition" 
+                                onClick={() => openImageModal(ad.image)} 
+                              />
+                            )}
+                            {ad.video && (
+                              <video 
+                                src={ad.video} 
+                                controls 
+                                className="max-h-48 rounded-lg border mt-2" 
+                              />
+                            )}
+                          </div>
+                        )}
+                        
+                        <div className="flex flex-wrap gap-3 md:gap-4 mt-3 text-xs md:text-sm">
+                          {ad.price && <span className="text-[#FF9800] font-bold">💰 {ad.price} ريال</span>}
+                          {ad.contact && <span className="text-gray-500">📞 {ad.contact}</span>}
                         </div>
-                      ))}
-                    </div>
-                  )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </>
             )}

@@ -40,22 +40,18 @@ const SPECIALTIES = [
 ];
 
 const SERVICE_TYPES = [
-  "جلسات استشارية",
-  "دورات تدريبية",
-  "عرض منتجات",
-  "جلسات فردية",
-  "ورش عمل",
-  "خدمات متنوعة"
+  { id: "consulting", name: "جلسات استشارية", hasPrice: true },
+  { id: "training", name: "دورات تدريبية", hasPrice: true },
+  { id: "products", name: "منتجات", hasPrice: false },
+  { id: "individual", name: "جلسات فردية", hasPrice: true },
+  { id: "workshop", name: "ورش عمل", hasPrice: true },
 ];
-
-const MEETING_PLATFORMS = ["Zoom", "Google Meet", "Microsoft Teams", "WhatsApp", "Telegram", "Discord"];
 
 export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) {
   const [accountType, setAccountType] = useState<"individual" | "company">("individual");
   const [loading, setLoading] = useState(false);
-  const [openServiceDropdown, setOpenServiceDropdown] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
   
   const [form, setForm] = useState({
     fullName: "",
@@ -69,10 +65,7 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
     specialty: "",
     sub_specialty: "",
     experience: "",
-    activity: "",
     bio: "",
-    price: "",
-    currency: "ريال سعودي",
     website: "",
     whatsapp: "",
     linkedin: "",
@@ -82,13 +75,17 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
     telegram: "",
     snapchat: "",
     otherContact: "",
-    meetingPlatforms: [] as string[],
+    profileImage: "",
     ads: [] as any[],
     payments: [] as any[],
-    portfolioImages: [] as File[],
-    portfolioVideo: null as File | null,
-    videoLink: "",
+    consulting_price: "",
+    training_price: "",
+    individual_price: "",
+    workshop_price: "",
   });
+
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const update = (key: string, value: any) => {
     setForm({ ...form, [key]: value });
@@ -97,9 +94,15 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (!file.type.startsWith('image/')) {
+        alert('يرجى اختيار صورة صحيحة');
+        return;
+      }
       setImageFile(file);
       const reader = new FileReader();
-      reader.onloadend = () => setImagePreview(reader.result as string);
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
       reader.readAsDataURL(file);
     }
   };
@@ -109,31 +112,44 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
     setImageFile(null);
   };
 
-  const handleMeetingPlatformChange = (platform: string, checked: boolean) => {
-    if (checked) {
-      setForm({ ...form, meetingPlatforms: [...form.meetingPlatforms, platform] });
+  const toggleService = (serviceId: string) => {
+    if (selectedServices.includes(serviceId)) {
+      setSelectedServices(selectedServices.filter(s => s !== serviceId));
     } else {
-      setForm({ ...form, meetingPlatforms: form.meetingPlatforms.filter(p => p !== platform) });
+      setSelectedServices([...selectedServices, serviceId]);
     }
   };
 
-  const uploadFile = async (file: File, folder: string): Promise<string> => {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${folder}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-    const { error } = await supabase.storage
-      .from('media')
+  const addProduct = () => {
+    setProducts([...products, { 
+      name: "", 
+      description: "", 
+      image: null, 
+      price: "", 
+      delivery: "", 
+      locations: [] 
+    }]);
+  };
+
+  const uploadImage = async (file: File): Promise<string> => {
+    const fileName = `${Date.now()}_${file.name}`;
+    const { error: uploadError } = await supabase.storage
+      .from('profile_images')
       .upload(fileName, file);
-    
-    if (error) {
-      console.error("خطأ في رفع الملف:", error);
-      return "";
+
+    if (uploadError) {
+      const reader = new FileReader();
+      const base64 = await new Promise<string>((resolve) => {
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(file);
+      });
+      return base64;
     }
-    
-    const { data } = supabase.storage
-      .from('media')
+
+    const { data: publicUrlData } = supabase.storage
+      .from('profile_images')
       .getPublicUrl(fileName);
-    
-    return data.publicUrl;
+    return publicUrlData.publicUrl;
   };
 
   const handleSubmit = async (e: any) => {
@@ -146,46 +162,28 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
       return;
     }
 
-    // 1. رفع الصورة الشخصية
-    let profileImageUrl = "";
+    let imageUrl = "";
     if (imageFile) {
-      profileImageUrl = await uploadFile(imageFile, "profile");
+      imageUrl = await uploadImage(imageFile);
     }
 
-    // 2. رفع صور الإعلانات
-    const adsWithUrls = [];
-    for (const ad of form.ads) {
-      const adData: any = {
-        title: ad.title || "",
-        description: ad.description || "",
-        price: ad.price || "",
-        contact: ad.contact || "",
-      };
-      
-      if (ad.image) {
-        adData.image = await uploadFile(ad.image, "ads");
+    // تحويل صور المنتجات
+    const productsWithImages = [];
+    for (const product of products) {
+      let productImage = "";
+      if (product.image) {
+        productImage = await uploadImage(product.image);
       }
-      if (ad.video) {
-        adData.video = await uploadFile(ad.video, "ads");
-      }
-      adsWithUrls.push(adData);
+      productsWithImages.push({
+        name: product.name,
+        description: product.description,
+        image: productImage,
+        price: product.price,
+        delivery: product.delivery,
+        locations: product.locations,
+      });
     }
 
-    // 3. رفع صور معرض الأعمال
-    const portfolioItems = [];
-    for (const img of form.portfolioImages) {
-      const url = await uploadFile(img, "portfolio");
-      portfolioItems.push({ type: "image", url: url });
-    }
-    if (form.portfolioVideo) {
-      const url = await uploadFile(form.portfolioVideo, "portfolio");
-      portfolioItems.push({ type: "video", url: url });
-    }
-    if (form.videoLink) {
-      portfolioItems.push({ type: "video_link", url: form.videoLink });
-    }
-
-    // تجهيز البيانات للإرسال
     const dataToInsert = {
       account_type: accountType,
       full_name: form.fullName || null,
@@ -198,10 +196,7 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
       specialty: form.specialty || null,
       sub_specialty: form.sub_specialty || null,
       experience: form.experience || null,
-      activity: form.activity || null,
       bio: form.bio || null,
-      price: form.price || null,
-      currency: form.currency || null,
       website: form.website || null,
       whatsapp: form.whatsapp || null,
       linkedin: form.linkedin || null,
@@ -211,14 +206,16 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
       telegram: form.telegram || null,
       snapchat: form.snapchat || null,
       other_contact: form.otherContact || null,
-      meeting_platforms: form.meetingPlatforms.join(", ") || null,
-      profile_image: profileImageUrl || null,
-      ads: adsWithUrls,
+      profile_image: imageUrl || null,
+      ads: form.ads,
       payment_methods: form.payments,
-      portfolio: portfolioItems,
+      selected_services: selectedServices,
+      products: productsWithImages,
+      consulting_price: form.consulting_price || null,
+      training_price: form.training_price || null,
+      individual_price: form.individual_price || null,
+      workshop_price: form.workshop_price || null,
     };
-
-    console.log("البيانات:", dataToInsert);
 
     const { data, error } = await supabase
       .from("consultants")
@@ -226,13 +223,11 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
       .select();
 
     if (error) {
-      console.error("الخطأ:", error);
       alert("خطأ: " + error.message);
       setLoading(false);
       return;
     }
 
-    console.log("تم الحفظ:", data);
     alert("تم التسجيل بنجاح");
     setLoading(false);
     onNavigate?.("home");
@@ -285,7 +280,7 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
               </button>
             </div>
 
-            {/* المعلومات الأساسية - نفس الكود السابق */}
+            {/* المعلومات الأساسية */}
             <h2 className="text-2xl font-bold text-[#1976D2] mb-4">المعلومات الأساسية</h2>
             <div className="grid md:grid-cols-2 gap-6 mb-10">
               {accountType === "individual" && (
@@ -395,7 +390,7 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
             <h2 className="text-2xl font-bold text-[#1976D2] mb-4">المعلومات المهنية</h2>
             <div className="grid md:grid-cols-2 gap-6 mb-10">
               <div>
-                <label className="block mb-2 font-semibold">التخصص الرئيسي</label>
+                <label className="block mb-2 font-semibold">التخصص</label>
                 <select
                   className="w-full border p-3 rounded-lg"
                   value={form.specialty}
@@ -408,16 +403,12 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
                     <option key={s.name} value={s.name}>{s.name}</option>
                   ))}
                 </select>
-              </div>
-              <div>
-                <label className="block mb-2 font-semibold">التخصص الفرعي</label>
                 <select
-                  className="w-full border p-3 rounded-lg"
+                  className="w-full border p-3 rounded-lg mt-3"
                   value={form.sub_specialty}
                   onChange={(e) =>
                     setForm({ ...form, sub_specialty: e.target.value })
                   }
-                  disabled={!form.specialty}
                 >
                   <option value="">اختر التخصص الفرعي</option>
                   {SPECIALTIES.find(s => s.name === form.specialty)?.subs.map((sub) => (
@@ -436,79 +427,188 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
               </div>
             </div>
 
-            {/* نوع الخدمة - القائمة المنسدلة */}
+            {/* أنواع الخدمات - أزرار اختيار */}
             <div className="mb-10">
-              <label className="block mb-2 font-semibold">نوع الخدمة / الجلسات التي تقدمها</label>
+              <label className="block mb-2 font-semibold">الخدمات التي تقدمها</label>
               <p className="text-gray-600 mb-3 text-sm">
-                هل ترغب في تقديم جلسات استشارية أو اجتماعات تتضمن عرض منتجات أو دورات تدريبية أو جلسات لتقديم أي خدمة؟
+                اختر الخدمات التي تقدمها (يمكنك اختيار أكثر من خدمة)
               </p>
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setOpenServiceDropdown(!openServiceDropdown)}
-                  className="w-full border p-3 rounded-lg text-right bg-white flex justify-between items-center"
-                >
-                  <span>{form.activity || "اختر نوع الخدمة"}</span>
-                  <span className="text-gray-400">▼</span>
-                </button>
-                {openServiceDropdown && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-auto">
-                    {SERVICE_TYPES.map((service) => (
-                      <div
-                        key={service}
-                        onClick={() => {
-                          update("activity", service);
-                          setOpenServiceDropdown(false);
+              <div className="flex flex-wrap gap-3">
+                {SERVICE_TYPES.map((service) => (
+                  <button
+                    key={service.id}
+                    type="button"
+                    onClick={() => toggleService(service.id)}
+                    className={`px-4 py-2 rounded-full text-sm transition ${
+                      selectedServices.includes(service.id)
+                        ? "bg-[#FF9800] text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    {service.name}
+                  </button>
+                ))}
+              </div>
+              
+              {/* أسعار الخدمات */}
+              {selectedServices.includes("consulting") && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-xl">
+                  <label className="block mb-2 font-semibold">سعر الجلسات الاستشارية (لكل ساعة)</label>
+                  <input
+                    type="number"
+                    className="w-full border p-3 rounded-lg"
+                    value={form.consulting_price}
+                    onChange={(e) => update("consulting_price", e.target.value)}
+                    placeholder="مثال: 200"
+                  />
+                </div>
+              )}
+              
+              {selectedServices.includes("training") && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-xl">
+                  <label className="block mb-2 font-semibold">سعر الدورات التدريبية (لكل ساعة)</label>
+                  <input
+                    type="number"
+                    className="w-full border p-3 rounded-lg"
+                    value={form.training_price}
+                    onChange={(e) => update("training_price", e.target.value)}
+                    placeholder="مثال: 300"
+                  />
+                </div>
+              )}
+              
+              {selectedServices.includes("individual") && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-xl">
+                  <label className="block mb-2 font-semibold">سعر الجلسات الفردية (لكل ساعة)</label>
+                  <input
+                    type="number"
+                    className="w-full border p-3 rounded-lg"
+                    value={form.individual_price}
+                    onChange={(e) => update("individual_price", e.target.value)}
+                    placeholder="مثال: 150"
+                  />
+                </div>
+              )}
+              
+              {selectedServices.includes("workshop") && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-xl">
+                  <label className="block mb-2 font-semibold">سعر ورش العمل (لكل ساعة)</label>
+                  <input
+                    type="number"
+                    className="w-full border p-3 rounded-lg"
+                    value={form.workshop_price}
+                    onChange={(e) => update("workshop_price", e.target.value)}
+                    placeholder="مثال: 500"
+                  />
+                </div>
+              )}
+              
+              {/* المنتجات */}
+              {selectedServices.includes("products") && (
+                <div className="mt-4">
+                  <h3 className="font-bold text-[#FF9800] mb-3">المنتجات</h3>
+                  {products.map((product, idx) => (
+                    <div key={idx} className="border p-4 rounded-lg mb-4">
+                      <input
+                        type="text"
+                        placeholder="اسم المنتج"
+                        value={product.name}
+                        onChange={(e) => {
+                          const updated = [...products];
+                          updated[idx].name = e.target.value;
+                          setProducts(updated);
                         }}
-                        className="p-3 hover:bg-gray-100 cursor-pointer text-right"
+                        className="w-full border p-2 rounded mb-2"
+                      />
+                      <textarea
+                        placeholder="وصف المنتج"
+                        value={product.description}
+                        onChange={(e) => {
+                          const updated = [...products];
+                          updated[idx].description = e.target.value;
+                          setProducts(updated);
+                        }}
+                        className="w-full border p-2 rounded mb-2"
+                        rows={2}
+                      />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          const updated = [...products];
+                          updated[idx].image = file;
+                          setProducts(updated);
+                        }}
+                        className="w-full border p-2 rounded mb-2"
+                      />
+                      <input
+                        type="text"
+                        placeholder="السعر"
+                        value={product.price}
+                        onChange={(e) => {
+                          const updated = [...products];
+                          updated[idx].price = e.target.value;
+                          setProducts(updated);
+                        }}
+                        className="w-full border p-2 rounded mb-2"
+                      />
+                      <input
+                        type="text"
+                        placeholder="طريقة التوصيل"
+                        value={product.delivery}
+                        onChange={(e) => {
+                          const updated = [...products];
+                          updated[idx].delivery = e.target.value;
+                          setProducts(updated);
+                        }}
+                        className="w-full border p-2 rounded mb-2"
+                      />
+                      <input
+                        type="text"
+                        placeholder="المناطق التي يشملها التوصيل (مثال: الرياض، جدة، الدمام)"
+                        value={product.locations.join(", ")}
+                        onChange={(e) => {
+                          const locations = e.target.value.split(",").map(l => l.trim());
+                          const updated = [...products];
+                          updated[idx].locations = locations;
+                          setProducts(updated);
+                        }}
+                        className="w-full border p-2 rounded mb-2"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const filtered = products.filter((_, i) => i !== idx);
+                          setProducts(filtered);
+                        }}
+                        className="bg-red-500 text-white px-3 py-1 rounded text-sm"
                       >
-                        {service}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+                        حذف المنتج
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={addProduct}
+                    className="bg-blue-600 text-white px-4 py-2 rounded"
+                  >
+                    + إضافة منتج
+                  </button>
+                </div>
+              )}
             </div>
 
-            {/* الجلسات والاجتماعات */}
-            <h2 className="text-2xl font-bold text-[#1976D2] mb-4">الجلسات والاجتماعات</h2>
-            <div className="grid md:grid-cols-2 gap-6 mb-10">
-              <div>
-                <label className="block mb-2 font-semibold">السعر لكل ساعة</label>
-                <input
-                  type="number"
-                  className="w-full border p-3 rounded-lg"
-                  value={form.price}
-                  onChange={(e) => update("price", e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="block mb-2 font-semibold">العملة</label>
-                <select
-                  className="w-full border p-3 rounded-lg"
-                  value={form.currency}
-                  onChange={(e) => update("currency", e.target.value)}
-                >
-                  <option>ريال سعودي</option>
-                  <option>درهم إماراتي</option>
-                  <option>دولار أمريكي</option>
-                </select>
-              </div>
-            </div>
-
-            {/* برامج الاجتماعات */}
-            <h3 className="text-xl font-bold text-[#FF9800] mb-4">برامج الاجتماعات</h3>
-            <div className="grid md:grid-cols-3 gap-4 mb-10">
-              {MEETING_PLATFORMS.map((platform) => (
-                <label key={platform} className="flex items-center gap-3 border p-3 rounded-lg cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    checked={form.meetingPlatforms.includes(platform)}
-                    onChange={(e) => handleMeetingPlatformChange(platform, e.target.checked)} 
-                  /> 
-                  {platform}
-                </label>
-              ))}
+            {/* النبذة */}
+            <h2 className="text-2xl font-bold text-[#1976D2] mb-4">نبذة</h2>
+            <div className="mb-10">
+              <textarea
+                rows={6}
+                className="w-full border p-3 rounded-lg"
+                value={form.bio}
+                onChange={(e) => update("bio", e.target.value)}
+                placeholder="نبذة عنك أو عن منشأتك..."
+              />
             </div>
 
             {/* طرق الاتصال */}
@@ -521,7 +621,6 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
                   value={form.whatsapp}
                   onChange={(e) => update("whatsapp", e.target.value)}
                   className="flex-1 border p-2 rounded"
-                  placeholder="رابط الواتساب أو رقم الجوال"
                 />
               </div>
               <div className="flex items-center gap-4 mb-3">
@@ -531,7 +630,6 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
                   value={form.phone}
                   onChange={(e) => update("phone", e.target.value)}
                   className="flex-1 border p-2 rounded"
-                  placeholder="رقم الهاتف للاتصال"
                 />
               </div>
               <div className="flex items-center gap-4 mb-3">
@@ -541,7 +639,6 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
                   value={form.email}
                   onChange={(e) => update("email", e.target.value)}
                   className="flex-1 border p-2 rounded"
-                  placeholder="البريد الإلكتروني"
                 />
               </div>
             </div>
@@ -559,62 +656,116 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
             {/* الموقع والروابط */}
             <h2 className="text-2xl font-bold text-[#1976D2] mb-4">الموقع الإلكتروني والروابط</h2>
             <div className="grid md:grid-cols-2 gap-6 mb-10">
-              <div><label className="block mb-2 font-semibold">الموقع الإلكتروني</label><input className="w-full border p-3 rounded-lg" value={form.website} onChange={(e) => update("website", e.target.value)} placeholder="https://example.com" /></div>
-              <div><label className="block mb-2 font-semibold">LinkedIn</label><input className="w-full border p-3 rounded-lg" value={form.linkedin} onChange={(e) => update("linkedin", e.target.value)} /></div>
-              <div><label className="block mb-2 font-semibold">Instagram</label><input className="w-full border p-3 rounded-lg" value={form.instagram} onChange={(e) => update("instagram", e.target.value)} /></div>
-              <div><label className="block mb-2 font-semibold">YouTube</label><input className="w-full border p-3 rounded-lg" value={form.youtube} onChange={(e) => update("youtube", e.target.value)} /></div>
-              <div><label className="block mb-2 font-semibold">TikTok</label><input className="w-full border p-3 rounded-lg" value={form.tiktok} onChange={(e) => update("tiktok", e.target.value)} /></div>
-              <div><label className="block mb-2 font-semibold">Telegram</label><input className="w-full border p-3 rounded-lg" value={form.telegram} onChange={(e) => update("telegram", e.target.value)} /></div>
-              <div><label className="block mb-2 font-semibold">Snapchat</label><input className="w-full border p-3 rounded-lg" value={form.snapchat} onChange={(e) => update("snapchat", e.target.value)} /></div>
-            </div>
-
-            {/* النبذة */}
-            <h2 className="text-2xl font-bold text-[#1976D2] mb-4">النبذة</h2>
-            <div className="mb-10">
-              <textarea
-                rows={6}
-                className="w-full border p-3 rounded-lg"
-                value={form.bio}
-                onChange={(e) => update("bio", e.target.value)}
-                placeholder="نبذة عنك أو عن منشأتك..."
-              />
-            </div>
-
-            {/* معرض الأعمال */}
-            <h2 className="text-2xl font-bold text-[#1976D2] mb-4">معرض الأعمال</h2>
-            <div className="grid md:grid-cols-2 gap-6 mb-10">
               <div>
-                <label className="block mb-2 font-semibold">رفع صور</label>
-                <input 
-                  type="file" 
-                  multiple 
-                  className="w-full border p-3 rounded-lg"
-                  onChange={(e) => {
-                    const files = Array.from(e.target.files || []);
-                    update("portfolioImages", files);
-                  }}
-                />
-              </div>
-              <div>
-                <label className="block mb-2 font-semibold">رفع فيديو</label>
-                <input 
-                  type="file" 
-                  className="w-full border p-3 rounded-lg"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) update("portfolioVideo", file);
-                  }}
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block mb-2 font-semibold">رابط فيديو</label>
+                <label className="block mb-2 font-semibold">الموقع الإلكتروني</label>
                 <input
                   className="w-full border p-3 rounded-lg"
-                  placeholder="رابط فيديو يوتيوب مثلاً"
-                  value={form.videoLink}
-                  onChange={(e) => update("videoLink", e.target.value)}
+                  value={form.website}
+                  onChange={(e) => update("website", e.target.value)}
                 />
               </div>
+              <div>
+                <label className="block mb-2 font-semibold">LinkedIn</label>
+                <input
+                  className="w-full border p-3 rounded-lg"
+                  value={form.linkedin}
+                  onChange={(e) => update("linkedin", e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block mb-2 font-semibold">Instagram</label>
+                <input
+                  className="w-full border p-3 rounded-lg"
+                  value={form.instagram}
+                  onChange={(e) => update("instagram", e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block mb-2 font-semibold">YouTube</label>
+                <input
+                  className="w-full border p-3 rounded-lg"
+                  value={form.youtube}
+                  onChange={(e) => update("youtube", e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block mb-2 font-semibold">TikTok</label>
+                <input
+                  className="w-full border p-3 rounded-lg"
+                  value={form.tiktok}
+                  onChange={(e) => update("tiktok", e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block mb-2 font-semibold">Telegram</label>
+                <input
+                  className="w-full border p-3 rounded-lg"
+                  value={form.telegram}
+                  onChange={(e) => update("telegram", e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block mb-2 font-semibold">Snapchat</label>
+                <input
+                  className="w-full border p-3 rounded-lg"
+                  value={form.snapchat}
+                  onChange={(e) => update("snapchat", e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* طرق الدفع */}
+            <div className="mt-10">
+              <h2 className="text-xl font-bold mb-4">طرق الدفع</h2>
+              {form.payments.map((p: any, index: number) => (
+                <div key={index} className="flex gap-3 mb-3">
+                  <input
+                    placeholder="طريقة الدفع"
+                    value={p.method}
+                    onChange={(e) => {
+                      const updated = [...form.payments];
+                      updated[index].method = e.target.value;
+                      setForm({ ...form, payments: updated });
+                    }}
+                    className="border p-2 rounded w-1/2"
+                  />
+                  <input
+                    placeholder="التفاصيل"
+                    value={p.details}
+                    onChange={(e) => {
+                      const updated = [...form.payments];
+                      updated[index].details = e.target.value;
+                      setForm({ ...form, payments: updated });
+                    }}
+                    className="border p-2 rounded w-1/2"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const filtered = form.payments.filter((_, i) => i !== index);
+                      setForm({ ...form, payments: filtered });
+                    }}
+                    className="bg-red-500 text-white px-3 py-1 rounded"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => {
+                  setForm({
+                    ...form,
+                    payments: [
+                      ...form.payments,
+                      { method: "", details: "" }
+                    ]
+                  });
+                }}
+                className="bg-green-600 text-white px-4 py-2 rounded"
+              >
+                + إضافة طريقة دفع
+              </button>
             </div>
 
             {/* الإعلانات */}
@@ -656,7 +807,6 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
                       }}
                       className="w-full border p-2 rounded"
                     />
-                    {ad.image && <p className="text-green-600 text-sm mt-1">✓ تم اختيار صورة</p>}
                   </div>
                   <div className="mb-3">
                     <label>فيديو الإعلان</label>
@@ -671,7 +821,6 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
                       }}
                       className="w-full border p-2 rounded"
                     />
-                    {ad.video && <p className="text-green-600 text-sm mt-1">✓ تم اختيار فيديو</p>}
                   </div>
                   <input
                     type="text"
@@ -721,60 +870,6 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
                 className="bg-blue-600 text-white px-4 py-2 rounded"
               >
                 + إضافة إعلان
-              </button>
-            </div>
-
-            {/* طرق الدفع */}
-            <div className="mt-10">
-              <h2 className="text-xl font-bold mb-4">طرق الدفع</h2>
-              {form.payments.map((p: any, index: number) => (
-                <div key={index} className="flex gap-3 mb-3">
-                  <input
-                    placeholder="طريقة الدفع (مثال: باي بال، تحويل بنكي)"
-                    value={p.method}
-                    onChange={(e) => {
-                      const updated = [...form.payments];
-                      updated[index].method = e.target.value;
-                      setForm({ ...form, payments: updated });
-                    }}
-                    className="border p-2 rounded w-1/2"
-                  />
-                  <input
-                    placeholder="التفاصيل (مثال: الرقم أو الحساب)"
-                    value={p.details}
-                    onChange={(e) => {
-                      const updated = [...form.payments];
-                      updated[index].details = e.target.value;
-                      setForm({ ...form, payments: updated });
-                    }}
-                    className="border p-2 rounded w-1/2"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const filtered = form.payments.filter((_, i) => i !== index);
-                      setForm({ ...form, payments: filtered });
-                    }}
-                    className="bg-red-500 text-white px-3 py-1 rounded"
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={() => {
-                  setForm({
-                    ...form,
-                    payments: [
-                      ...form.payments,
-                      { method: "", details: "" }
-                    ]
-                  });
-                }}
-                className="bg-green-600 text-white px-4 py-2 rounded"
-              >
-                + إضافة طريقة دفع
               </button>
             </div>
 

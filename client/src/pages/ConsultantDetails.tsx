@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { X, Mail, Phone, Globe, Instagram, Youtube, Linkedin, MessageCircle, MapPin, Award, DollarSign, Calendar } from 'lucide-react';
+import { X, Mail, Phone, Globe, Instagram, Youtube, Linkedin, MessageCircle, MapPin, Award, DollarSign, Calendar, Image, Video, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function ConsultantDetails() {
   const { id } = useParams();
@@ -12,6 +12,11 @@ export default function ConsultantDetails() {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
+  // حالات لعرض/إخفاء المحتوى
+  const [showAdsImages, setShowAdsImages] = useState<{ [key: number]: boolean }>({});
+  const [showPortfolioImages, setShowPortfolioImages] = useState(false);
+  const [expandedAds, setExpandedAds] = useState<{ [key: number]: boolean }>({});
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -72,6 +77,18 @@ export default function ConsultantDetails() {
     return value;
   };
 
+  const toggleAdImages = (adIndex: number) => {
+    setShowAdsImages(prev => ({ ...prev, [adIndex]: !prev[adIndex] }));
+  };
+
+  const toggleAdExpanded = (adIndex: number) => {
+    setExpandedAds(prev => ({ ...prev, [adIndex]: !prev[adIndex] }));
+  };
+
+  const togglePortfolioImages = () => {
+    setShowPortfolioImages(!showPortfolioImages);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -91,6 +108,7 @@ export default function ConsultantDetails() {
   const adsList = consultant.ads && Array.isArray(consultant.ads) ? consultant.ads : [];
   const paymentsList = consultant.payment_methods && Array.isArray(consultant.payment_methods) ? consultant.payment_methods : [];
   const portfolioList = consultant.portfolio && Array.isArray(consultant.portfolio) ? consultant.portfolio : [];
+  const hasImages = portfolioList.some(item => item.type === "image" || item.type === "video");
 
   return (
     <div className="min-h-screen bg-gray-50 py-6 md:py-12" dir="rtl">
@@ -156,7 +174,7 @@ export default function ConsultantDetails() {
 
             <hr className="my-4 md:my-6" />
 
-            {/* المعلومات الأساسية - على شكل كروت في الجوال */}
+            {/* المعلومات الأساسية - على شكل كروت */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
               <div className="bg-gray-50 rounded-xl p-3 md:p-4 flex items-center gap-3">
                 <MapPin size={18} className="text-[#1976D2] shrink-0" />
@@ -212,7 +230,7 @@ export default function ConsultantDetails() {
 
             <hr className="my-4 md:my-6" />
             
-            {/* طرق الاتصال - قسم مباشر بدون زر */}
+            {/* طرق الاتصال */}
             <div>
               <h2 className="text-lg md:text-xl font-bold text-[#1976D2] mb-3 md:mb-4">طرق الاتصال</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
@@ -301,7 +319,7 @@ export default function ConsultantDetails() {
               </div>
             </div>
 
-            {/* الإعلانات */}
+            {/* الإعلانات - مع زر عرض الصور */}
             {adsList.length > 0 && (
               <>
                 <hr className="my-4 md:my-6" />
@@ -310,22 +328,59 @@ export default function ConsultantDetails() {
                   <div className="space-y-3 md:space-y-4">
                     {adsList.map((ad: any, idx: number) => (
                       <div key={idx} className="border rounded-xl p-3 md:p-4 hover:shadow-md transition">
-                        <h3 className="font-bold text-base md:text-lg">{ad.title || "بدون عنوان"}</h3>
-                        <p className="text-gray-600 mt-1 text-sm">{ad.description || "لا يوجد وصف"}</p>
-                        {ad.image && (
-                          <div className="mt-2 md:mt-3">
-                            <img src={ad.image} alt="صورة الإعلان" className="max-h-40 rounded-lg border cursor-pointer hover:opacity-90 transition" onClick={() => openImageModal(ad.image)} />
-                          </div>
-                        )}
-                        {ad.video && (
-                          <div className="mt-2 md:mt-3">
-                            <video src={ad.video} controls className="max-h-40 rounded-lg border" />
-                          </div>
-                        )}
-                        <div className="flex flex-wrap gap-3 md:gap-4 mt-2 md:mt-3 text-xs md:text-sm">
-                          {ad.price && <span className="text-[#FF9800] font-bold">💰 {ad.price} ريال</span>}
-                          {ad.contact && <span className="text-gray-500">📞 {ad.contact}</span>}
+                        <div 
+                          className="flex justify-between items-center cursor-pointer"
+                          onClick={() => toggleAdExpanded(idx)}
+                        >
+                          <h3 className="font-bold text-base md:text-lg">{ad.title || "بدون عنوان"}</h3>
+                          {expandedAds[idx] ? <ChevronUp size={18} className="text-gray-400" /> : <ChevronDown size={18} className="text-gray-400" />}
                         </div>
+                        
+                        {expandedAds[idx] && (
+                          <>
+                            <p className="text-gray-600 mt-2 text-sm">{ad.description || "لا يوجد وصف"}</p>
+                            
+                            {/* عرض الصور والفيديو مع زر إظهار/إخفاء */}
+                            {(ad.image || ad.video) && (
+                              <div className="mt-3">
+                                <button
+                                  onClick={() => toggleAdImages(idx)}
+                                  className="flex items-center gap-2 text-[#1976D2] text-sm hover:text-[#FF9800] transition"
+                                >
+                                  {showAdsImages[idx] ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                  {showAdsImages[idx] ? "إخفاء الوسائط" : "عرض الوسائط"}
+                                  {ad.image && <Image size={14} />}
+                                  {ad.video && <Video size={14} />}
+                                </button>
+                                
+                                {showAdsImages[idx] && (
+                                  <div className="mt-2">
+                                    {ad.image && (
+                                      <img 
+                                        src={ad.image} 
+                                        alt="صورة الإعلان" 
+                                        className="max-h-48 rounded-lg border cursor-pointer hover:opacity-90 transition" 
+                                        onClick={() => openImageModal(ad.image)} 
+                                      />
+                                    )}
+                                    {ad.video && (
+                                      <video 
+                                        src={ad.video} 
+                                        controls 
+                                        className="max-h-48 rounded-lg border mt-2" 
+                                      />
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                            
+                            <div className="flex flex-wrap gap-3 md:gap-4 mt-3 text-xs md:text-sm">
+                              {ad.price && <span className="text-[#FF9800] font-bold">💰 {ad.price} ريال</span>}
+                              {ad.contact && <span className="text-gray-500">📞 {ad.contact}</span>}
+                            </div>
+                          </>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -351,21 +406,33 @@ export default function ConsultantDetails() {
               </>
             )}
 
-            {/* معرض الأعمال */}
+            {/* معرض الأعمال - مع زر عرض الصور */}
             {portfolioList.length > 0 && (
               <>
                 <hr className="my-4 md:my-6" />
                 <div>
                   <h2 className="text-lg md:text-xl font-bold text-[#1976D2] mb-3 md:mb-4">معرض الأعمال ({portfolioList.length})</h2>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 md:gap-3">
-                    {portfolioList.map((item: any, idx: number) => (
-                      <div key={idx} className="border rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition aspect-square" onClick={() => item.type === "image" && openImageModal(item.url)}>
-                        {item.type === "image" && <img src={item.url} alt="عمل" className="w-full h-full object-cover" />}
-                        {item.type === "video" && <video src={item.url} controls className="w-full h-full object-cover" onClick={(e) => e.stopPropagation()} />}
-                        {item.type === "video_link" && <iframe src={item.url} className="w-full h-full" title="فيديو" />}
-                      </div>
-                    ))}
-                  </div>
+                  
+                  <button
+                    onClick={togglePortfolioImages}
+                    className="flex items-center gap-2 text-[#1976D2] hover:text-[#FF9800] transition mb-3"
+                  >
+                    {showPortfolioImages ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                    {showPortfolioImages ? "إخفاء معرض الأعمال" : "عرض معرض الأعمال"}
+                    <Image size={16} />
+                  </button>
+                  
+                  {showPortfolioImages && (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 md:gap-3">
+                      {portfolioList.map((item: any, idx: number) => (
+                        <div key={idx} className="border rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition aspect-square" onClick={() => item.type === "image" && openImageModal(item.url)}>
+                          {item.type === "image" && <img src={item.url} alt="عمل" className="w-full h-full object-cover" />}
+                          {item.type === "video" && <video src={item.url} controls className="w-full h-full object-cover" onClick={(e) => e.stopPropagation()} />}
+                          {item.type === "video_link" && <iframe src={item.url} className="w-full h-full" title="فيديو" />}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </>
             )}

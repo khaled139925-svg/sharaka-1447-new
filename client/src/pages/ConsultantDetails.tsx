@@ -1,18 +1,29 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { X, Mail, Phone, Globe, Instagram, Youtube, Linkedin, MessageCircle } from 'lucide-react';
+import { X, Mail, Phone, Globe, Instagram, Youtube, Linkedin, MessageCircle, MapPin, Award, DollarSign, Calendar } from 'lucide-react';
 
 export default function ConsultantDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [consultant, setConsultant] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [showContact, setShowContact] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        setCurrentUser(user);
+        setIsLoggedIn(true);
+      } catch (e) {
+        console.log("خطأ في قراءة المستخدم");
+      }
+    }
     loadConsultant();
   }, [id]);
 
@@ -42,7 +53,6 @@ export default function ConsultantDetails() {
 
   const val = (v: any) => (v && v !== "" ? v : "-");
 
-  // دوال الروابط
   const getWhatsAppLink = (value: string) => {
     let phone = value.replace(/[^0-9+]/g, '');
     if (!phone.startsWith('+')) phone = '+' + phone;
@@ -56,6 +66,7 @@ export default function ConsultantDetails() {
   };
 
   const getEmailLink = (value: string) => `mailto:${value}`;
+  
   const getWebLink = (value: string) => {
     if (!value.startsWith('http://') && !value.startsWith('https://')) return `https://${value}`;
     return value;
@@ -80,16 +91,14 @@ export default function ConsultantDetails() {
   const adsList = consultant.ads && Array.isArray(consultant.ads) ? consultant.ads : [];
   const paymentsList = consultant.payment_methods && Array.isArray(consultant.payment_methods) ? consultant.payment_methods : [];
   const portfolioList = consultant.portfolio && Array.isArray(consultant.portfolio) ? consultant.portfolio : [];
-  const currentUserId = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user") || "{}").id : null;
-  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12" dir="rtl">
-      <div className="max-w-5xl mx-auto px-6">
+    <div className="min-h-screen bg-gray-50 py-6 md:py-12" dir="rtl">
+      <div className="max-w-5xl mx-auto px-4 md:px-6">
         
         <button
           onClick={() => navigate(-1)}
-          className="mb-6 text-[#1976D2] hover:text-[#FF9800] flex items-center gap-2 transition"
+          className="mb-4 md:mb-6 text-[#1976D2] hover:text-[#FF9800] flex items-center gap-2 transition text-sm md:text-base"
         >
           <span>←</span> رجوع
         </button>
@@ -97,7 +106,7 @@ export default function ConsultantDetails() {
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           
           {/* صورة الغلاف */}
-          <div className="h-48 bg-gradient-to-r from-[#1976D2] to-[#FF9800] relative">
+          <div className="h-32 md:h-48 bg-gradient-to-r from-[#1976D2] to-[#FF9800] relative">
             {consultant.profile_image && (
               <img
                 src={consultant.profile_image}
@@ -106,9 +115,9 @@ export default function ConsultantDetails() {
                 onClick={() => openImageModal(consultant.profile_image)}
               />
             )}
-            <div className="absolute -bottom-12 right-8">
+            <div className="absolute -bottom-8 md:-bottom-12 right-4 md:right-8">
               <div 
-                className="w-28 h-28 rounded-full bg-white shadow-lg border-4 border-white overflow-hidden cursor-pointer hover:scale-105 transition"
+                className="w-20 h-20 md:w-28 md:h-28 rounded-full bg-white shadow-lg border-4 border-white overflow-hidden cursor-pointer hover:scale-105 transition"
                 onClick={() => consultant.profile_image && openImageModal(consultant.profile_image)}
               >
                 {consultant.profile_image ? (
@@ -118,7 +127,7 @@ export default function ConsultantDetails() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gray-200 flex items-center justify-center text-3xl">
+                  <div className="w-full h-full bg-gray-200 flex items-center justify-center text-2xl md:text-3xl">
                     {consultant.account_type === "individual" ? "👤" : "🏢"}
                   </div>
                 )}
@@ -126,114 +135,167 @@ export default function ConsultantDetails() {
             </div>
           </div>
 
-          <div className="pt-16 p-8">
+          <div className="pt-12 md:pt-16 p-4 md:p-8">
             
-            <h1 className="text-2xl font-bold text-gray-800">
+            <h1 className="text-xl md:text-2xl font-bold text-gray-800">
               {consultant.full_name || consultant.company_name || "مستشار"}
             </h1>
             
             <div className="flex flex-wrap gap-2 mt-2">
               {consultant.specialty && (
-                <span className="bg-[#FF9800] text-white px-3 py-1 rounded-full text-sm">
+                <span className="bg-[#FF9800] text-white px-2 py-1 md:px-3 md:py-1 rounded-full text-xs md:text-sm">
                   {consultant.specialty}
                 </span>
               )}
               {consultant.sub_specialty && (
-                <span className="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm">
+                <span className="bg-gray-200 text-gray-700 px-2 py-1 md:px-3 md:py-1 rounded-full text-xs md:text-sm">
                   {consultant.sub_specialty}
                 </span>
               )}
             </div>
 
-            <hr className="my-6" />
+            <hr className="my-4 md:my-6" />
 
-            <div className="grid md:grid-cols-2 gap-4">
-              <div><b>الدولة:</b> {val(consultant.country)}</div>
-              <div><b>المدينة:</b> {val(consultant.city)}</div>
-              <div><b>سنوات الخبرة:</b> {val(consultant.experience)}</div>
-              <div><b>نوع الخدمة:</b> {val(consultant.activity)}</div>
-              <div><b>السعر:</b> {val(consultant.price)} {val(consultant.currency)}/ساعة</div>
-              <div><b>برامج الاجتماعات:</b> {val(consultant.meeting_platforms)}</div>
+            {/* المعلومات الأساسية - على شكل كروت في الجوال */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+              <div className="bg-gray-50 rounded-xl p-3 md:p-4 flex items-center gap-3">
+                <MapPin size={18} className="text-[#1976D2] shrink-0" />
+                <div>
+                  <p className="text-xs text-gray-500">الموقع</p>
+                  <p className="font-medium text-sm md:text-base">{consultant.city && consultant.country ? `${consultant.city}, ${consultant.country}` : val(consultant.country || consultant.city)}</p>
+                </div>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-3 md:p-4 flex items-center gap-3">
+                <Award size={18} className="text-[#FF9800] shrink-0" />
+                <div>
+                  <p className="text-xs text-gray-500">الخبرة</p>
+                  <p className="font-medium text-sm md:text-base">{val(consultant.experience)} سنة</p>
+                </div>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-3 md:p-4 flex items-center gap-3">
+                <Calendar size={18} className="text-[#1976D2] shrink-0" />
+                <div>
+                  <p className="text-xs text-gray-500">نوع الخدمة</p>
+                  <p className="font-medium text-sm md:text-base">{val(consultant.activity)}</p>
+                </div>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-3 md:p-4 flex items-center gap-3">
+                <DollarSign size={18} className="text-green-600 shrink-0" />
+                <div>
+                  <p className="text-xs text-gray-500">السعر</p>
+                  <p className="font-medium text-sm md:text-base">{val(consultant.price)} {val(consultant.currency)}/ساعة</p>
+                </div>
+              </div>
             </div>
+
+            {/* برامج الاجتماعات */}
+            {consultant.meeting_platforms && consultant.meeting_platforms !== "-" && (
+              <div className="mt-4 md:mt-6 bg-gray-50 rounded-xl p-3 md:p-4">
+                <p className="text-xs text-gray-500 mb-2">برامج الاجتماعات</p>
+                <div className="flex flex-wrap gap-2">
+                  {consultant.meeting_platforms.split(", ").map((platform: string, idx: number) => (
+                    <span key={idx} className="bg-white px-2 py-1 rounded-lg text-xs shadow-sm">{platform}</span>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {consultant.bio && (
               <>
-                <hr className="my-6" />
+                <hr className="my-4 md:my-6" />
                 <div>
-                  <h2 className="text-xl font-bold text-[#1976D2] mb-3">النبذة</h2>
-                  <p className="text-gray-700 leading-relaxed">{consultant.bio}</p>
+                  <h2 className="text-lg md:text-xl font-bold text-[#1976D2] mb-2 md:mb-3">النبذة</h2>
+                  <p className="text-gray-700 leading-relaxed text-sm md:text-base">{consultant.bio}</p>
                 </div>
               </>
             )}
 
-            <hr className="my-6" />
-            <button
-              onClick={() => setShowContact(!showContact)}
-              className="bg-[#1976D2] text-white px-6 py-2 rounded-lg hover:bg-[#1565C0] transition"
-            >
-              {showContact ? "إخفاء معلومات التواصل" : "تواصل"}
-            </button>
-
-            {showContact && (
-              <div className="mt-4 grid md:grid-cols-2 gap-3">
+            <hr className="my-4 md:my-6" />
+            
+            {/* طرق الاتصال - قسم مباشر بدون زر */}
+            <div>
+              <h2 className="text-lg md:text-xl font-bold text-[#1976D2] mb-3 md:mb-4">طرق الاتصال</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                 {consultant.whatsapp && (
-                  <a href={getWhatsAppLink(consultant.whatsapp)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-green-600 hover:text-green-700 transition p-2 rounded-lg hover:bg-green-50">
-                    <MessageCircle size={18} /> <span>واتساب: {consultant.whatsapp}</span>
+                  <a href={getWhatsAppLink(consultant.whatsapp)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 bg-green-50 rounded-xl hover:bg-green-100 transition">
+                    <MessageCircle size={20} className="text-green-600" />
+                    <div>
+                      <p className="text-xs text-gray-500">واتساب</p>
+                      <p className="font-medium text-sm">{consultant.whatsapp}</p>
+                    </div>
                   </a>
                 )}
                 {consultant.phone && (
-                  <a href={getPhoneLink(consultant.phone)} className="flex items-center gap-2 text-blue-600 hover:text-blue-700 transition p-2 rounded-lg hover:bg-blue-50">
-                    <Phone size={18} /> <span>هاتف: {consultant.phone}</span>
+                  <a href={getPhoneLink(consultant.phone)} className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl hover:bg-blue-100 transition">
+                    <Phone size={20} className="text-blue-600" />
+                    <div>
+                      <p className="text-xs text-gray-500">هاتف</p>
+                      <p className="font-medium text-sm">{consultant.phone}</p>
+                    </div>
                   </a>
                 )}
                 {consultant.email && (
-                  <a href={getEmailLink(consultant.email)} className="flex items-center gap-2 text-red-600 hover:text-red-700 transition p-2 rounded-lg hover:bg-red-50">
-                    <Mail size={18} /> <span>بريد: {consultant.email}</span>
+                  <a href={getEmailLink(consultant.email)} className="flex items-center gap-3 p-3 bg-red-50 rounded-xl hover:bg-red-100 transition">
+                    <Mail size={20} className="text-red-600" />
+                    <div>
+                      <p className="text-xs text-gray-500">بريد إلكتروني</p>
+                      <p className="font-medium text-sm">{consultant.email}</p>
+                    </div>
                   </a>
                 )}
                 {consultant.other_contact && (
-                  <div className="flex items-center gap-2 text-gray-600 p-2">
-                    <Globe size={18} /> <span>وسيلة أخرى: {consultant.other_contact}</span>
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                    <Globe size={20} className="text-gray-600" />
+                    <div>
+                      <p className="text-xs text-gray-500">وسيلة أخرى</p>
+                      <p className="font-medium text-sm">{consultant.other_contact}</p>
+                    </div>
                   </div>
                 )}
               </div>
-            )}
+            </div>
 
-            {/* زر المراسلة - يظهر فقط للمستخدمين المسجلين وليس لنفسه */}
-            {isLoggedIn && consultant.id !== currentUserId && (
-              <div className="mt-4">
-                <button
-                  onClick={() => navigate(`/messages/${consultant.id}`)}
-                  className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition flex items-center justify-center gap-2 w-full md:w-auto"
-                >
-                  <MessageCircle size={18} />
-                  مراسلة {consultant.full_name || consultant.company_name}
-                </button>
-              </div>
-            )}
+            {/* زر المراسلة */}
+            <div className="mt-4 md:mt-6">
+              <button
+                onClick={() => {
+                  if (isLoggedIn) {
+                    navigate(`/messages/${consultant.id}`);
+                  } else {
+                    if (confirm("يرجى تسجيل الدخول أولاً للتمكن من مراسلة المستشار. هل تريد الانتقال إلى صفحة تسجيل الدخول؟")) {
+                      navigate("/login");
+                    }
+                  }
+                }}
+                className="w-full bg-purple-600 text-white py-3 rounded-xl hover:bg-purple-700 transition flex items-center justify-center gap-2 font-medium"
+              >
+                <MessageCircle size={20} />
+                مراسلة {consultant.full_name || consultant.company_name}
+              </button>
+            </div>
 
             {/* الروابط الاجتماعية */}
-            <div className="mt-6">
-              <h2 className="text-xl font-bold text-[#1976D2] mb-3">الروابط</h2>
+            <div className="mt-6 md:mt-8">
+              <h2 className="text-lg md:text-xl font-bold text-[#1976D2] mb-3 md:mb-4">الروابط</h2>
               <div className="flex flex-wrap gap-3">
                 {consultant.website && (
-                  <a href={getWebLink(consultant.website)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition">
-                    <Globe size={18} className="text-blue-600" /> <span>الموقع الإلكتروني</span>
+                  <a href={getWebLink(consultant.website)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition text-sm">
+                    <Globe size={16} className="text-blue-600" /> <span>الموقع الإلكتروني</span>
                   </a>
                 )}
                 {consultant.linkedin && (
-                  <a href={getWebLink(consultant.linkedin)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition">
-                    <Linkedin size={18} className="text-blue-700" /> <span>لينكدإن</span>
+                  <a href={getWebLink(consultant.linkedin)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition text-sm">
+                    <Linkedin size={16} className="text-blue-700" /> <span>لينكدإن</span>
                   </a>
                 )}
                 {consultant.instagram && (
-                  <a href={getWebLink(consultant.instagram)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition">
-                    <Instagram size={18} className="text-pink-600" /> <span>انستغرام</span>
+                  <a href={getWebLink(consultant.instagram)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition text-sm">
+                    <Instagram size={16} className="text-pink-600" /> <span>انستغرام</span>
                   </a>
                 )}
                 {consultant.youtube && (
-                  <a href={getWebLink(consultant.youtube)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition">
-                    <Youtube size={18} className="text-red-600" /> <span>يوتيوب</span>
+                  <a href={getWebLink(consultant.youtube)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition text-sm">
+                    <Youtube size={16} className="text-red-600" /> <span>يوتيوب</span>
                   </a>
                 )}
               </div>
@@ -242,29 +304,31 @@ export default function ConsultantDetails() {
             {/* الإعلانات */}
             {adsList.length > 0 && (
               <>
-                <hr className="my-6" />
-                <h2 className="text-xl font-bold text-[#FF9800] mb-3">الإعلانات ({adsList.length})</h2>
-                <div className="space-y-4">
-                  {adsList.map((ad: any, idx: number) => (
-                    <div key={idx} className="border rounded-xl p-4 hover:shadow-md transition">
-                      <h3 className="font-bold text-lg">{ad.title || "بدون عنوان"}</h3>
-                      <p className="text-gray-600 mt-1">{ad.description || "لا يوجد وصف"}</p>
-                      {ad.image && (
-                        <div className="mt-3">
-                          <img src={ad.image} alt="صورة الإعلان" className="max-h-48 rounded-lg border cursor-pointer hover:opacity-90 transition" onClick={() => openImageModal(ad.image)} />
+                <hr className="my-4 md:my-6" />
+                <div>
+                  <h2 className="text-lg md:text-xl font-bold text-[#FF9800] mb-3 md:mb-4">الإعلانات ({adsList.length})</h2>
+                  <div className="space-y-3 md:space-y-4">
+                    {adsList.map((ad: any, idx: number) => (
+                      <div key={idx} className="border rounded-xl p-3 md:p-4 hover:shadow-md transition">
+                        <h3 className="font-bold text-base md:text-lg">{ad.title || "بدون عنوان"}</h3>
+                        <p className="text-gray-600 mt-1 text-sm">{ad.description || "لا يوجد وصف"}</p>
+                        {ad.image && (
+                          <div className="mt-2 md:mt-3">
+                            <img src={ad.image} alt="صورة الإعلان" className="max-h-40 rounded-lg border cursor-pointer hover:opacity-90 transition" onClick={() => openImageModal(ad.image)} />
+                          </div>
+                        )}
+                        {ad.video && (
+                          <div className="mt-2 md:mt-3">
+                            <video src={ad.video} controls className="max-h-40 rounded-lg border" />
+                          </div>
+                        )}
+                        <div className="flex flex-wrap gap-3 md:gap-4 mt-2 md:mt-3 text-xs md:text-sm">
+                          {ad.price && <span className="text-[#FF9800] font-bold">💰 {ad.price} ريال</span>}
+                          {ad.contact && <span className="text-gray-500">📞 {ad.contact}</span>}
                         </div>
-                      )}
-                      {ad.video && (
-                        <div className="mt-3">
-                          <video src={ad.video} controls className="max-h-48 rounded-lg border" />
-                        </div>
-                      )}
-                      <div className="flex flex-wrap gap-4 mt-3 text-sm">
-                        {ad.price && <span className="text-[#FF9800] font-bold">💰 {ad.price} ريال</span>}
-                        {ad.contact && <span className="text-gray-500">📞 {ad.contact}</span>}
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </>
             )}
@@ -272,15 +336,17 @@ export default function ConsultantDetails() {
             {/* طرق الدفع */}
             {paymentsList.length > 0 && (
               <>
-                <hr className="my-6" />
-                <h2 className="text-xl font-bold text-[#1976D2] mb-3">طرق الدفع ({paymentsList.length})</h2>
-                <div className="grid md:grid-cols-2 gap-3">
-                  {paymentsList.map((p: any, idx: number) => (
-                    <div key={idx} className="border rounded-lg p-3 flex justify-between items-center">
-                      <span className="font-semibold">{p.method || "-"}</span>
-                      <span className="text-gray-600">{p.details || "-"}</span>
-                    </div>
-                  ))}
+                <hr className="my-4 md:my-6" />
+                <div>
+                  <h2 className="text-lg md:text-xl font-bold text-[#1976D2] mb-3 md:mb-4">طرق الدفع ({paymentsList.length})</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3">
+                    {paymentsList.map((p: any, idx: number) => (
+                      <div key={idx} className="border rounded-lg p-2 md:p-3 flex justify-between items-center text-sm">
+                        <span className="font-semibold">{p.method || "-"}</span>
+                        <span className="text-gray-600 text-xs md:text-sm">{p.details || "-"}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </>
             )}
@@ -288,16 +354,18 @@ export default function ConsultantDetails() {
             {/* معرض الأعمال */}
             {portfolioList.length > 0 && (
               <>
-                <hr className="my-6" />
-                <h2 className="text-xl font-bold text-[#1976D2] mb-3">معرض الأعمال ({portfolioList.length})</h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {portfolioList.map((item: any, idx: number) => (
-                    <div key={idx} className="border rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition" onClick={() => item.type === "image" && openImageModal(item.url)}>
-                      {item.type === "image" && <img src={item.url} alt="عمل" className="w-full h-32 object-cover" />}
-                      {item.type === "video" && <video src={item.url} controls className="w-full h-32 object-cover" onClick={(e) => e.stopPropagation()} />}
-                      {item.type === "video_link" && <iframe src={item.url} className="w-full h-32" title="فيديو" />}
-                    </div>
-                  ))}
+                <hr className="my-4 md:my-6" />
+                <div>
+                  <h2 className="text-lg md:text-xl font-bold text-[#1976D2] mb-3 md:mb-4">معرض الأعمال ({portfolioList.length})</h2>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 md:gap-3">
+                    {portfolioList.map((item: any, idx: number) => (
+                      <div key={idx} className="border rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition aspect-square" onClick={() => item.type === "image" && openImageModal(item.url)}>
+                        {item.type === "image" && <img src={item.url} alt="عمل" className="w-full h-full object-cover" />}
+                        {item.type === "video" && <video src={item.url} controls className="w-full h-full object-cover" onClick={(e) => e.stopPropagation()} />}
+                        {item.type === "video_link" && <iframe src={item.url} className="w-full h-full" title="فيديو" />}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </>
             )}

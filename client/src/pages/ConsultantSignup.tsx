@@ -42,7 +42,7 @@ const SPECIALTIES = [
 const SERVICE_TYPES = [
   { id: "consulting", name: "جلسات استشارية", hasPrice: true },
   { id: "training", name: "دورات تدريبية", hasPrice: true },
-  { id: "products", name: "منتجات", hasPrice: false },
+  { id: "products", name: "متجر", hasPrice: false },
   { id: "individual", name: "جلسات فردية", hasPrice: true },
   { id: "workshop", name: "ورش عمل", hasPrice: true },
 ];
@@ -167,7 +167,6 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
       imageUrl = await uploadImage(imageFile);
     }
 
-    // تحويل صور المنتجات
     const productsWithImages = [];
     for (const product of products) {
       let productImage = "";
@@ -503,10 +502,10 @@ export default function ConsultantSignup({ onNavigate }: ConsultantSignupProps) 
                 </div>
               )}
               
-              {/* المنتجات */}
+              {/* المتجر */}
               {selectedServices.includes("products") && (
                 <div className="mt-4">
-                  <h3 className="font-bold text-[#FF9800] mb-3">المنتجات</h3>
+                  <h3 className="font-bold text-[#FF9800] mb-3">المتجر</h3>
                   {products.map((product, idx) => (
                     <div key={idx} className="border p-4 rounded-lg mb-4">
                       <input

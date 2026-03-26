@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { Users, ShoppingBag, CreditCard, MessageSquare, Eye, EyeOff, Trash2, Edit, CheckCircle, XCircle, Mail, Send } from 'lucide-react';
+import { Users, ShoppingBag, CreditCard, Eye, EyeOff, Trash2, Edit, CheckCircle, XCircle, Mail, Send, RefreshCw, Image, Video, DollarSign, Phone, MapPin, Award, Calendar, MessageSquare } from 'lucide-react';
 
 interface Consultant {
   id: number;
@@ -10,6 +10,7 @@ interface Consultant {
   email: string;
   phone: string;
   specialty: string;
+  sub_specialty: string;
   is_active: boolean;
   is_frozen: boolean;
   created_at: string;
@@ -17,46 +18,38 @@ interface Consultant {
   payment_methods: any[];
   portfolio: any[];
   profile_image: string;
-}
-
-interface Message {
-  id: number;
-  sender_id: number;
-  receiver_id: number;
-  message: string;
-  is_read: boolean;
-  created_at: string;
-  sender_name?: string;
-  receiver_name?: string;
+  country: string;
+  city: string;
+  experience: string;
+  activity: string;
+  price: string;
+  currency: string;
+  selected_services: string[];
+  products: any[];
 }
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("users");
   const [users, setUsers] = useState<Consultant[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<Consultant | null>(null);
   const [showUserModal, setShowUserModal] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [selectedMessageUser, setSelectedMessageUser] = useState<Consultant | null>(null);
   const [newMessage, setNewMessage] = useState("");
-  const [replyTo, setReplyTo] = useState<Message | null>(null);
-  const [adminId, setAdminId] = useState<number | null>(null);
   const [stats, setStats] = useState({
     totalUsers: 0,
     activeUsers: 0,
     frozenUsers: 0,
     totalAds: 0,
-    totalMessages: 0,
-    unreadMessages: 0
+    totalServices: 0,
+    totalProducts: 0
   });
 
   useEffect(() => {
     checkAdmin();
     loadData();
-    loadMessages();
-    getAdminId();
   }, []);
 
   const checkAdmin = () => {
@@ -67,80 +60,36 @@ export default function AdminDashboard() {
     }
   };
 
-  const getAdminId = async () => {
-    const { data } = await supabase
-      .from("consultants")
-      .select("id")
-      .eq("email", "admin@sharaka.com")
-      .single();
-    if (data) {
-      setAdminId(data.id);
-    }
-  };
-
   const loadData = async () => {
     setLoading(true);
     
-    // جلب جميع المستخدمين
-    const { data: allUsers } = await supabase
+    // جلب جميع المستخدمين باستثناء الأدمن
+    const { data: usersData } = await supabase
       .from("consultants")
       .select("*")
+      .neq("id", 5)
       .order("created_at", { ascending: false });
     
-    // استبعاد الأدمن (id = 5)
-    const usersData = allUsers?.filter(user => user.id !== 5) || [];
-    
-    setUsers(usersData);
-    
-    const activeUsers = usersData.filter(u => u.is_active === true && u.is_frozen === false).length;
-    const frozenUsers = usersData.filter(u => u.is_frozen === true).length;
-    const totalAds = usersData.reduce((sum, u) => sum + (u.ads?.length || 0), 0);
-    
-    setStats({
-      totalUsers: usersData.length,
-      activeUsers: activeUsers,
-      frozenUsers: frozenUsers,
-      totalAds: totalAds,
-      totalMessages: 0,
-      unreadMessages: 0
-    });
+    if (usersData) {
+      setUsers(usersData);
+      
+      const activeUsers = usersData.filter(u => u.is_active === true && u.is_frozen === false).length;
+      const frozenUsers = usersData.filter(u => u.is_frozen === true).length;
+      const totalAds = usersData.reduce((sum, u) => sum + (u.ads?.length || 0), 0);
+      const totalServices = usersData.reduce((sum, u) => sum + (u.selected_services?.length || 0), 0);
+      const totalProducts = usersData.reduce((sum, u) => sum + (u.products?.length || 0), 0);
+      
+      setStats({
+        totalUsers: usersData.length,
+        activeUsers: activeUsers,
+        frozenUsers: frozenUsers,
+        totalAds: totalAds,
+        totalServices: totalServices,
+        totalProducts: totalProducts
+      });
+    }
     
     setLoading(false);
-  };
-
-  const loadMessages = async () => {
-    const { data: messagesData } = await supabase
-      .from("messages")
-      .select("*")
-      .order("created_at", { ascending: false });
-    
-    if (messagesData) {
-      const messagesWithNames = await Promise.all(messagesData.map(async (msg) => {
-        const { data: sender } = await supabase
-          .from("consultants")
-          .select("full_name, company_name")
-          .eq("id", msg.sender_id)
-          .single();
-        const { data: receiver } = await supabase
-          .from("consultants")
-          .select("full_name, company_name")
-          .eq("id", msg.receiver_id)
-          .single();
-        
-        return {
-          ...msg,
-          sender_name: sender?.full_name || sender?.company_name || "مستخدم",
-          receiver_name: receiver?.full_name || receiver?.company_name || "مستخدم"
-        };
-      }));
-      
-      setMessages(messagesWithNames);
-      setStats(prev => ({
-        ...prev,
-        totalMessages: messagesWithNames.length,
-        unreadMessages: messagesWithNames.filter(m => !m.is_read && m.receiver_id === adminId).length
-      }));
-    }
   };
 
   const toggleUserActive = async (userId: number, currentStatus: boolean) => {
@@ -183,7 +132,17 @@ export default function AdminDashboard() {
   };
 
   const sendMessage = async () => {
-    if (!selectedMessageUser || !newMessage.trim() || !adminId) return;
+    if (!selectedMessageUser || !newMessage.trim()) return;
+    
+    // الحصول على معرف الأدمن
+    const { data: adminData } = await supabase
+      .from("consultants")
+      .select("id")
+      .eq("email", "admin@sharaka.com")
+      .single();
+    
+    const adminId = adminData?.id;
+    if (!adminId) return;
     
     const { error } = await supabase.from("messages").insert({
       sender_id: adminId,
@@ -194,8 +153,9 @@ export default function AdminDashboard() {
     if (!error) {
       setNewMessage("");
       setShowMessageModal(false);
-      loadMessages();
       alert("تم إرسال الرسالة بنجاح");
+    } else {
+      alert("خطأ في إرسال الرسالة: " + error.message);
     }
   };
 
@@ -260,6 +220,15 @@ export default function AdminDashboard() {
     return data.publicUrl;
   };
 
+  const getServiceName = (serviceId: string) => {
+    if (serviceId === "consulting") return "جلسات استشارية";
+    if (serviceId === "training") return "دورات تدريبية";
+    if (serviceId === "products") return "متجر";
+    if (serviceId === "individual") return "جلسات فردية";
+    if (serviceId === "workshop") return "ورش عمل";
+    return serviceId;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -275,7 +244,7 @@ export default function AdminDashboard() {
         {/* Header */}
         <div className="bg-gradient-to-r from-[#1976D2] to-[#FF9800] rounded-2xl p-6 mb-8 text-white">
           <h1 className="text-3xl font-bold">لوحة التحكم الإدارية</h1>
-          <p className="opacity-90 mt-2">إدارة المستخدمين، الإعلانات، والمراسلات</p>
+          <p className="opacity-90 mt-2">إدارة المستخدمين والإعلانات</p>
           <button
             onClick={() => {
               localStorage.removeItem("adminLoggedIn");
@@ -310,14 +279,14 @@ export default function AdminDashboard() {
             <p className="text-sm text-gray-500">إعلانات</p>
           </div>
           <div className="bg-white rounded-xl p-4 text-center shadow-sm">
-            <MessageSquare size={28} className="mx-auto text-purple-600 mb-2" />
-            <p className="text-2xl font-bold">{stats.totalMessages}</p>
-            <p className="text-sm text-gray-500">رسائل</p>
+            <Award size={28} className="mx-auto text-purple-600 mb-2" />
+            <p className="text-2xl font-bold">{stats.totalServices}</p>
+            <p className="text-sm text-gray-500">خدمات</p>
           </div>
           <div className="bg-white rounded-xl p-4 text-center shadow-sm">
-            <Mail size={28} className="mx-auto text-blue-600 mb-2" />
-            <p className="text-2xl font-bold">{stats.unreadMessages}</p>
-            <p className="text-sm text-gray-500">غير مقروءة</p>
+            <CreditCard size={28} className="mx-auto text-blue-600 mb-2" />
+            <p className="text-2xl font-bold">{stats.totalProducts}</p>
+            <p className="text-sm text-gray-500">منتجات</p>
           </div>
         </div>
 
@@ -328,12 +297,6 @@ export default function AdminDashboard() {
             className={`px-6 py-3 font-semibold transition ${activeTab === "users" ? "text-[#FF9800] border-b-2 border-[#FF9800]" : "text-gray-500"}`}
           >
             👥 المستخدمين
-          </button>
-          <button
-            onClick={() => setActiveTab("messages")}
-            className={`px-6 py-3 font-semibold transition ${activeTab === "messages" ? "text-[#FF9800] border-b-2 border-[#FF9800]" : "text-gray-500"}`}
-          >
-            💬 الرسائل
           </button>
         </div>
 
@@ -351,6 +314,18 @@ export default function AdminDashboard() {
                       <h3 className="font-bold">{user.full_name || user.company_name || "بدون اسم"}</h3>
                       <p className="text-sm text-gray-500">{user.email}</p>
                       <p className="text-xs text-gray-400">{user.specialty || "لا يوجد تخصص"}</p>
+                      {user.selected_services && user.selected_services.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {user.selected_services.slice(0, 2).map(s => (
+                            <span key={s} className="text-xs bg-gray-100 px-1 py-0.5 rounded">
+                              {getServiceName(s)}
+                            </span>
+                          ))}
+                          {user.selected_services.length > 2 && (
+                            <span className="text-xs text-gray-400">+{user.selected_services.length - 2}</span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                   
@@ -418,56 +393,6 @@ export default function AdminDashboard() {
             ))}
           </div>
         )}
-
-        {/* محتوى الرسائل */}
-        {activeTab === "messages" && (
-          <div className="space-y-4">
-            {messages.map((msg) => (
-              <div key={msg.id} className={`bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition ${!msg.is_read && msg.receiver_id === adminId ? "border-r-4 border-[#FF9800]" : ""}`}>
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="font-semibold">{msg.sender_name}</span>
-                      <span className="text-gray-400">→</span>
-                      <span className="text-gray-600">{msg.receiver_name}</span>
-                      {!msg.is_read && msg.receiver_id === adminId && (
-                        <span className="bg-[#FF9800] text-white text-xs px-2 py-0.5 rounded-full">جديد</span>
-                      )}
-                    </div>
-                    <p className="text-gray-700">{msg.message}</p>
-                    <p className="text-xs text-gray-400 mt-2">{new Date(msg.created_at).toLocaleString("ar-SA")}</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => {
-                        setReplyTo(msg);
-                        setSelectedMessageUser(users.find(u => u.id === msg.sender_id) || null);
-                        setShowMessageModal(true);
-                      }}
-                      className="p-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200"
-                      title="رد"
-                    >
-                      <Send size={14} />
-                    </button>
-                    <button
-                      onClick={() => navigate(`/messages/${msg.sender_id === adminId ? msg.receiver_id : msg.sender_id}`)}
-                      className="p-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200"
-                      title="فتح المحادثة"
-                    >
-                      <MessageSquare size={14} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-            {messages.length === 0 && (
-              <div className="text-center py-16 bg-white rounded-xl">
-                <MessageSquare size={48} className="mx-auto text-gray-300 mb-3" />
-                <p className="text-gray-500">لا توجد رسائل بعد</p>
-              </div>
-            )}
-          </div>
-        )}
       </div>
 
       {/* نافذة تفاصيل المستخدم */}
@@ -479,11 +404,14 @@ export default function AdminDashboard() {
               <button onClick={() => setShowUserModal(false)} className="text-2xl hover:text-red-500">✕</button>
             </div>
             <div className="p-6">
+              {/* صورة المستخدم */}
               {selectedUser.profile_image && (
                 <div className="text-center mb-6">
                   <img src={getImageUrl(selectedUser.profile_image)} alt="صورة" className="w-32 h-32 rounded-full mx-auto object-cover" />
                 </div>
               )}
+              
+              {/* المعلومات الأساسية */}
               <div className="grid md:grid-cols-2 gap-4 mb-6">
                 <div><b>الاسم:</b> {selectedUser.full_name || selectedUser.company_name || "-"}</div>
                 <div><b>البريد:</b> {selectedUser.email || "-"}</div>
@@ -493,8 +421,11 @@ export default function AdminDashboard() {
                 <div><b>الخبرة:</b> {selectedUser.experience || "-"} سنة</div>
                 <div><b>السعر:</b> {selectedUser.price || "-"} {selectedUser.currency || "ريال"}/ساعة</div>
                 <div><b>نوع الخدمة:</b> {selectedUser.activity || "-"}</div>
+                <div><b>الخدمات المقدمة:</b> {selectedUser.selected_services?.map(s => getServiceName(s)).join(", ") || "-"}</div>
+                <div><b>عدد المنتجات:</b> {selectedUser.products?.length || 0}</div>
               </div>
 
+              {/* الإعلانات */}
               {selectedUser.ads && selectedUser.ads.length > 0 && (
                 <div className="mb-6">
                   <h3 className="font-bold text-[#FF9800] mb-2">الإعلانات ({selectedUser.ads.length})</h3>
@@ -513,6 +444,7 @@ export default function AdminDashboard() {
                 </div>
               )}
 
+              {/* طرق الدفع */}
               {selectedUser.payment_methods && selectedUser.payment_methods.length > 0 && (
                 <div className="mb-6">
                   <h3 className="font-bold text-[#1976D2] mb-2">طرق الدفع</h3>
@@ -527,16 +459,16 @@ export default function AdminDashboard() {
                 </div>
               )}
 
-              {selectedUser.portfolio && selectedUser.portfolio.length > 0 && (
+              {/* المنتجات */}
+              {selectedUser.products && selectedUser.products.length > 0 && (
                 <div>
-                  <h3 className="font-bold text-[#1976D2] mb-2">معرض الأعمال</h3>
-                  <div className="grid grid-cols-3 gap-2">
-                    {selectedUser.portfolio.map((item: any, idx: number) => (
-                      <div key={idx} className="relative border rounded-lg overflow-hidden">
-                        {item.type === "image" && <img src={getImageUrl(item.url)} className="w-full h-24 object-cover" />}
-                        {item.type === "video" && <video src={getImageUrl(item.url)} className="w-full h-24 object-cover" />}
-                        {item.type === "video_link" && <iframe src={item.url} className="w-full h-24" />}
-                        <button onClick={() => deletePortfolioItem(selectedUser.id, idx)} className="absolute top-0 left-0 bg-red-500 text-white rounded-full p-1 text-xs">✕</button>
+                  <h3 className="font-bold text-[#1976D2] mb-2">المنتجات ({selectedUser.products.length})</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    {selectedUser.products.map((product: any, idx: number) => (
+                      <div key={idx} className="border rounded-lg p-2">
+                        {product.image && <img src={getImageUrl(product.image)} className="w-full h-24 object-cover rounded mb-1" />}
+                        <p className="font-semibold text-sm">{product.name}</p>
+                        <p className="text-xs text-gray-500">{product.price} ريال</p>
                       </div>
                     ))}
                   </div>
@@ -556,12 +488,6 @@ export default function AdminDashboard() {
               <button onClick={() => setShowMessageModal(false)} className="text-2xl hover:text-red-500">✕</button>
             </div>
             <div className="p-6">
-              {replyTo && (
-                <div className="bg-gray-50 p-3 rounded-lg mb-4">
-                  <p className="text-sm text-gray-500">الرد على:</p>
-                  <p className="text-sm">{replyTo.message}</p>
-                </div>
-              )}
               <textarea
                 rows={5}
                 className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#FF9800]"

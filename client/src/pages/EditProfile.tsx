@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { Upload, X, Save, ArrowRight } from 'lucide-react';
+import { Upload, X, Save, ArrowRight, Plus, Trash2 } from 'lucide-react';
 
 const SPECIALTIES = [
   { name: "الاستشارات",  subs: ["استشارات إدارية", "استشارات مالية", "استشارات قانونية", "استشارات مهنية", "استشارات أسرية"] },
@@ -37,27 +37,26 @@ const SPECIALTIES = [
 ];
 
 const SERVICE_TYPES = [
-  "جلسات استشارية",
-  "دورات تدريبية",
-  "عرض منتجات",
-  "جلسات فردية",
-  "ورش عمل",
-  "خدمات متنوعة"
+  { id: "consulting", name: "جلسات استشارية", hasPrice: true },
+  { id: "training", name: "دورات تدريبية", hasPrice: true },
+  { id: "products", name: "متجر", hasPrice: false },
+  { id: "individual", name: "جلسات فردية", hasPrice: true },
+  { id: "workshop", name: "ورش عمل", hasPrice: true },
 ];
-
-const MEETING_PLATFORMS = ["Zoom", "Google Meet", "Microsoft Teams", "WhatsApp", "Telegram", "Discord"];
 
 export default function EditProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
-  const [openServiceDropdown, setOpenServiceDropdown] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [ads, setAds] = useState<any[]>([]);
+  const [payments, setPayments] = useState<any[]>([]);
   
   const [form, setForm] = useState({
-    account_type: "individual",
     fullName: "",
     companyName: "",
     email: "",
@@ -67,10 +66,7 @@ export default function EditProfile() {
     specialty: "",
     sub_specialty: "",
     experience: "",
-    activity: "",
     bio: "",
-    price: "",
-    currency: "ريال سعودي",
     website: "",
     whatsapp: "",
     linkedin: "",
@@ -80,14 +76,11 @@ export default function EditProfile() {
     telegram: "",
     snapchat: "",
     otherContact: "",
-    meetingPlatforms: [] as string[],
-    ads: [] as any[],
-    payments: [] as any[],
-    portfolioImages: [] as File[],
-    portfolioVideo: null as File | null,
-    videoLink: "",
-    existingPortfolio: [] as any[],
     profile_image: "",
+    consulting_price: "",
+    training_price: "",
+    individual_price: "",
+    workshop_price: "",
   });
 
   useEffect(() => {
@@ -104,7 +97,6 @@ export default function EditProfile() {
 
     if (!error && data) {
       setForm({
-        account_type: data.account_type || "individual",
         fullName: data.full_name || "",
         companyName: data.company_name || "",
         email: data.email || "",
@@ -114,10 +106,7 @@ export default function EditProfile() {
         specialty: data.specialty || "",
         sub_specialty: data.sub_specialty || "",
         experience: data.experience || "",
-        activity: data.activity || "",
         bio: data.bio || "",
-        price: data.price || "",
-        currency: data.currency || "ريال سعودي",
         website: data.website || "",
         whatsapp: data.whatsapp || "",
         linkedin: data.linkedin || "",
@@ -127,15 +116,16 @@ export default function EditProfile() {
         telegram: data.telegram || "",
         snapchat: data.snapchat || "",
         otherContact: data.other_contact || "",
-        meetingPlatforms: data.meeting_platforms ? data.meeting_platforms.split(", ") : [],
-        ads: data.ads || [],
-        payments: data.payment_methods || [],
-        portfolioImages: [],
-        portfolioVideo: null,
-        videoLink: "",
-        existingPortfolio: data.portfolio || [],
         profile_image: data.profile_image || "",
+        consulting_price: data.consulting_price || "",
+        training_price: data.training_price || "",
+        individual_price: data.individual_price || "",
+        workshop_price: data.workshop_price || "",
       });
+      setSelectedServices(data.selected_services || []);
+      setProducts(data.products || []);
+      setAds(data.ads || []);
+      setPayments(data.payment_methods || []);
       if (data.profile_image) {
         setImagePreview(data.profile_image);
       }
@@ -162,24 +152,76 @@ export default function EditProfile() {
     setImageFile(null);
   };
 
-  const handleMeetingPlatformChange = (platform: string, checked: boolean) => {
-    if (checked) {
-      setForm({ ...form, meetingPlatforms: [...form.meetingPlatforms, platform] });
+  const toggleService = (serviceId: string) => {
+    if (selectedServices.includes(serviceId)) {
+      setSelectedServices(selectedServices.filter(s => s !== serviceId));
     } else {
-      setForm({ ...form, meetingPlatforms: form.meetingPlatforms.filter(p => p !== platform) });
+      setSelectedServices([...selectedServices, serviceId]);
     }
   };
 
+  const addProduct = () => {
+    setProducts([...products, { 
+      name: "", 
+      description: "", 
+      image: null, 
+      price: "", 
+      delivery: "", 
+      locations: [] 
+    }]);
+  };
+
+  const updateProduct = (index: number, field: string, value: any) => {
+    const updated = [...products];
+    updated[index][field] = value;
+    setProducts(updated);
+  };
+
+  const removeProduct = (index: number) => {
+    setProducts(products.filter((_, i) => i !== index));
+  };
+
+  const addAd = () => {
+    setAds([...ads, { title: "", description: "", image: null, video: null, price: "", contact: "" }]);
+  };
+
+  const updateAd = (index: number, field: string, value: any) => {
+    const updated = [...ads];
+    updated[index][field] = value;
+    setAds(updated);
+  };
+
+  const removeAd = (index: number) => {
+    setAds(ads.filter((_, i) => i !== index));
+  };
+
+  const addPayment = () => {
+    setPayments([...payments, { method: "", details: "" }]);
+  };
+
+  const updatePayment = (index: number, field: string, value: any) => {
+    const updated = [...payments];
+    updated[index][field] = value;
+    setPayments(updated);
+  };
+
+  const removePayment = (index: number) => {
+    setPayments(payments.filter((_, i) => i !== index));
+  };
+
   const uploadFile = async (file: File, folder: string): Promise<string> => {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${folder}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+    const fileName = `${folder}/${Date.now()}_${Math.random().toString(36).substring(7)}`;
     const { error } = await supabase.storage
       .from('media')
       .upload(fileName, file);
     
     if (error) {
-      console.error("خطأ في رفع الملف:", error);
-      return "";
+      const reader = new FileReader();
+      const base64 = await new Promise<string>((resolve) => {
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(file);
+      });
+      return base64;
     }
     
     const { data } = supabase.storage
@@ -193,41 +235,49 @@ export default function EditProfile() {
     e.preventDefault();
     setLoading(true);
 
-    // رفع الصورة الشخصية
     let profileImageUrl = form.profile_image;
     if (imageFile) {
       profileImageUrl = await uploadFile(imageFile, "profile");
     }
 
-    // رفع صور الإعلانات الجديدة
-    const updatedAds = [...form.ads];
-    for (let i = 0; i < updatedAds.length; i++) {
-      const ad = updatedAds[i];
-      if (ad.imageFile) {
-        ad.image = await uploadFile(ad.imageFile, "ads");
-        delete ad.imageFile;
+    // رفع صور المنتجات
+    const productsWithImages = [];
+    for (const product of products) {
+      let productImage = product.image;
+      if (product.image && typeof product.image !== 'string') {
+        productImage = await uploadFile(product.image, "products");
       }
-      if (ad.videoFile) {
-        ad.video = await uploadFile(ad.videoFile, "ads");
-        delete ad.videoFile;
-      }
+      productsWithImages.push({
+        name: product.name,
+        description: product.description,
+        image: productImage,
+        price: product.price,
+        delivery: product.delivery,
+        locations: product.locations,
+      });
     }
 
-    // رفع صور معرض الأعمال الجديدة
-    const updatedPortfolio = [...form.existingPortfolio];
-    for (const img of form.portfolioImages) {
-      const url = await uploadFile(img, "portfolio");
-      updatedPortfolio.push({ type: "image", url: url });
-    }
-    if (form.portfolioVideo) {
-      const url = await uploadFile(form.portfolioVideo, "portfolio");
-      updatedPortfolio.push({ type: "video", url: url });
-    }
-    if (form.videoLink) {
-      updatedPortfolio.push({ type: "video_link", url: form.videoLink });
+    // رفع صور الإعلانات
+    const adsWithMedia = [];
+    for (const ad of ads) {
+      let adImage = ad.image;
+      let adVideo = ad.video;
+      if (ad.image && typeof ad.image !== 'string') {
+        adImage = await uploadFile(ad.image, "ads");
+      }
+      if (ad.video && typeof ad.video !== 'string') {
+        adVideo = await uploadFile(ad.video, "ads");
+      }
+      adsWithMedia.push({
+        title: ad.title,
+        description: ad.description,
+        image: adImage,
+        video: adVideo,
+        price: ad.price,
+        contact: ad.contact,
+      });
     }
 
-    // تحديث البيانات
     const { error } = await supabase
       .from("consultants")
       .update({
@@ -240,10 +290,7 @@ export default function EditProfile() {
         specialty: form.specialty || null,
         sub_specialty: form.sub_specialty || null,
         experience: form.experience || null,
-        activity: form.activity || null,
         bio: form.bio || null,
-        price: form.price || null,
-        currency: form.currency || null,
         website: form.website || null,
         whatsapp: form.whatsapp || null,
         linkedin: form.linkedin || null,
@@ -253,11 +300,15 @@ export default function EditProfile() {
         telegram: form.telegram || null,
         snapchat: form.snapchat || null,
         other_contact: form.otherContact || null,
-        meeting_platforms: form.meetingPlatforms.join(", ") || null,
         profile_image: profileImageUrl || null,
-        ads: updatedAds,
-        payment_methods: form.payments,
-        portfolio: updatedPortfolio,
+        selected_services: selectedServices,
+        products: productsWithImages,
+        consulting_price: form.consulting_price || null,
+        training_price: form.training_price || null,
+        individual_price: form.individual_price || null,
+        workshop_price: form.workshop_price || null,
+        ads: adsWithMedia,
+        payment_methods: payments,
       })
       .eq("id", id);
 
@@ -265,7 +316,6 @@ export default function EditProfile() {
       alert("خطأ في التحديث: " + error.message);
     } else {
       alert("تم تحديث الملف الشخصي بنجاح");
-      // تحديث localStorage
       const { data: updatedUser } = await supabase
         .from("consultants")
         .select("*")
@@ -367,18 +417,6 @@ export default function EditProfile() {
                 <label className="block mb-2 font-semibold text-gray-700">سنوات الخبرة</label>
                 <input type="number" className="w-full border border-gray-300 rounded-xl p-3" value={form.experience} onChange={(e) => update("experience", e.target.value)} />
               </div>
-              <div>
-                <label className="block mb-2 font-semibold text-gray-700">السعر لكل ساعة</label>
-                <input type="number" className="w-full border border-gray-300 rounded-xl p-3" value={form.price} onChange={(e) => update("price", e.target.value)} />
-              </div>
-              <div>
-                <label className="block mb-2 font-semibold text-gray-700">العملة</label>
-                <select className="w-full border border-gray-300 rounded-xl p-3" value={form.currency} onChange={(e) => update("currency", e.target.value)}>
-                  <option>ريال سعودي</option>
-                  <option>درهم إماراتي</option>
-                  <option>دولار أمريكي</option>
-                </select>
-              </div>
             </div>
 
             {/* التخصصات */}
@@ -399,37 +437,163 @@ export default function EditProfile() {
               </div>
             </div>
 
-            {/* نوع الخدمة */}
+            {/* الخدمات - أزرار اختيار */}
             <div className="mt-5">
-              <label className="block mb-2 font-semibold text-gray-700">نوع الخدمة / الجلسات التي تقدمها</label>
-              <div className="relative">
-                <button type="button" onClick={() => setOpenServiceDropdown(!openServiceDropdown)} className="w-full border border-gray-300 rounded-xl p-3 text-right bg-white flex justify-between items-center">
-                  <span>{form.activity || "اختر نوع الخدمة"}</span>
-                  <span className="text-gray-400">▼</span>
-                </button>
-                {openServiceDropdown && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-auto">
-                    {SERVICE_TYPES.map((service) => (
-                      <div key={service} onClick={() => { update("activity", service); setOpenServiceDropdown(false); }} className="p-3 hover:bg-gray-100 cursor-pointer text-right">{service}</div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* برامج الاجتماعات */}
-            <div className="mt-5">
-              <label className="block mb-2 font-semibold text-gray-700">برامج الاجتماعات</label>
-              <div className="grid grid-cols-3 gap-3">
-                {MEETING_PLATFORMS.map((platform) => (
-                  <label key={platform} className="flex items-center gap-2 border p-2 rounded-lg cursor-pointer">
-                    <input type="checkbox" checked={form.meetingPlatforms.includes(platform)} onChange={(e) => handleMeetingPlatformChange(platform, e.target.checked)} /> {platform}
-                  </label>
+              <label className="block mb-2 font-semibold text-gray-700">الخدمات التي تقدمها</label>
+              <p className="text-gray-600 mb-3 text-sm">اختر الخدمات التي تقدمها (يمكنك اختيار أكثر من خدمة)</p>
+              <div className="flex flex-wrap gap-3">
+                {SERVICE_TYPES.map((service) => (
+                  <button
+                    key={service.id}
+                    type="button"
+                    onClick={() => toggleService(service.id)}
+                    className={`px-4 py-2 rounded-full text-sm transition ${
+                      selectedServices.includes(service.id)
+                        ? "bg-[#FF9800] text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    {service.name}
+                  </button>
                 ))}
               </div>
+              
+              {/* أسعار الخدمات */}
+              {selectedServices.includes("consulting") && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-xl">
+                  <label className="block mb-2 font-semibold">سعر الجلسات الاستشارية (لكل ساعة)</label>
+                  <input
+                    type="number"
+                    className="w-full border p-3 rounded-lg"
+                    value={form.consulting_price}
+                    onChange={(e) => update("consulting_price", e.target.value)}
+                    placeholder="مثال: 200"
+                  />
+                </div>
+              )}
+              
+              {selectedServices.includes("training") && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-xl">
+                  <label className="block mb-2 font-semibold">سعر الدورات التدريبية (لكل ساعة)</label>
+                  <input
+                    type="number"
+                    className="w-full border p-3 rounded-lg"
+                    value={form.training_price}
+                    onChange={(e) => update("training_price", e.target.value)}
+                    placeholder="مثال: 300"
+                  />
+                </div>
+              )}
+              
+              {selectedServices.includes("individual") && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-xl">
+                  <label className="block mb-2 font-semibold">سعر الجلسات الفردية (لكل ساعة)</label>
+                  <input
+                    type="number"
+                    className="w-full border p-3 rounded-lg"
+                    value={form.individual_price}
+                    onChange={(e) => update("individual_price", e.target.value)}
+                    placeholder="مثال: 150"
+                  />
+                </div>
+              )}
+              
+              {selectedServices.includes("workshop") && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-xl">
+                  <label className="block mb-2 font-semibold">سعر ورش العمل (لكل ساعة)</label>
+                  <input
+                    type="number"
+                    className="w-full border p-3 rounded-lg"
+                    value={form.workshop_price}
+                    onChange={(e) => update("workshop_price", e.target.value)}
+                    placeholder="مثال: 500"
+                  />
+                </div>
+              )}
+              
+              {/* المتجر */}
+              {selectedServices.includes("products") && (
+                <div className="mt-4">
+                  <h3 className="font-bold text-[#FF9800] mb-3">المنتجات في المتجر</h3>
+                  {products.map((product, idx) => (
+                    <div key={idx} className="border p-4 rounded-lg mb-4">
+                      <input
+                        type="text"
+                        placeholder="اسم المنتج"
+                        value={product.name}
+                        onChange={(e) => updateProduct(idx, "name", e.target.value)}
+                        className="w-full border p-2 rounded mb-2"
+                      />
+                      <textarea
+                        placeholder="وصف المنتج"
+                        value={product.description}
+                        onChange={(e) => updateProduct(idx, "description", e.target.value)}
+                        className="w-full border p-2 rounded mb-2"
+                        rows={2}
+                      />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          updateProduct(idx, "image", file);
+                        }}
+                        className="w-full border p-2 rounded mb-2"
+                      />
+                      {product.image && typeof product.image === 'string' && product.image.startsWith('http') && (
+                        <img src={product.image} alt="صورة المنتج" className="w-20 h-20 object-cover rounded mt-2" />
+                      )}
+                      <input
+                        type="text"
+                        placeholder="السعر"
+                        value={product.price}
+                        onChange={(e) => updateProduct(idx, "price", e.target.value)}
+                        className="w-full border p-2 rounded mb-2"
+                      />
+                      <input
+                        type="text"
+                        placeholder="طريقة التوصيل"
+                        value={product.delivery}
+                        onChange={(e) => updateProduct(idx, "delivery", e.target.value)}
+                        className="w-full border p-2 rounded mb-2"
+                      />
+                      <input
+                        type="text"
+                        placeholder="المناطق التي يشملها التوصيل (مثال: الرياض، جدة، الدمام)"
+                        value={product.locations.join(", ")}
+                        onChange={(e) => {
+                          const locations = e.target.value.split(",").map(l => l.trim());
+                          updateProduct(idx, "locations", locations);
+                        }}
+                        className="w-full border p-2 rounded mb-2"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeProduct(idx)}
+                        className="bg-red-500 text-white px-3 py-1 rounded text-sm"
+                      >
+                        حذف المنتج
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={addProduct}
+                    className="bg-blue-600 text-white px-4 py-2 rounded"
+                  >
+                    + إضافة منتج
+                  </button>
+                </div>
+              )}
             </div>
 
-            {/* الروابط */}
+            {/* النبذة */}
+            <div className="mt-5">
+              <label className="block mb-2 font-semibold text-gray-700">النبذة</label>
+              <textarea rows={5} className="w-full border border-gray-300 rounded-xl p-3" value={form.bio} onChange={(e) => update("bio", e.target.value)} placeholder="نبذة عنك..." />
+            </div>
+
+            {/* طرق الاتصال */}
             <div className="grid md:grid-cols-2 gap-5 mt-5">
               <div><label className="block mb-2 font-semibold text-gray-700">الموقع الإلكتروني</label><input className="w-full border border-gray-300 rounded-xl p-3" value={form.website} onChange={(e) => update("website", e.target.value)} /></div>
               <div><label className="block mb-2 font-semibold text-gray-700">واتساب</label><input className="w-full border border-gray-300 rounded-xl p-3" value={form.whatsapp} onChange={(e) => update("whatsapp", e.target.value)} /></div>
@@ -439,70 +603,49 @@ export default function EditProfile() {
               <div><label className="block mb-2 font-semibold text-gray-700">تيك توك</label><input className="w-full border border-gray-300 rounded-xl p-3" value={form.tiktok} onChange={(e) => update("tiktok", e.target.value)} /></div>
               <div><label className="block mb-2 font-semibold text-gray-700">تيليجرام</label><input className="w-full border border-gray-300 rounded-xl p-3" value={form.telegram} onChange={(e) => update("telegram", e.target.value)} /></div>
               <div><label className="block mb-2 font-semibold text-gray-700">سناب شات</label><input className="w-full border border-gray-300 rounded-xl p-3" value={form.snapchat} onChange={(e) => update("snapchat", e.target.value)} /></div>
-            </div>
-
-            {/* النبذة */}
-            <div className="mt-5">
-              <label className="block mb-2 font-semibold text-gray-700">النبذة</label>
-              <textarea rows={5} className="w-full border border-gray-300 rounded-xl p-3" value={form.bio} onChange={(e) => update("bio", e.target.value)} placeholder="نبذة عنك..." />
-            </div>
-
-            {/* الإعلانات */}
-            <div className="mt-8">
-              <h2 className="text-xl font-bold text-[#FF9800] mb-4">الإعلانات</h2>
-              {form.ads.map((ad: any, index: number) => (
-                <div key={index} className="border p-4 rounded-lg mb-4">
-                  <input type="text" placeholder="عنوان الإعلان" value={ad.title} onChange={(e) => { const updated = [...form.ads]; updated[index].title = e.target.value; setForm({...form, ads: updated}); }} className="w-full border p-2 rounded mb-2" />
-                  <textarea placeholder="وصف الإعلان" value={ad.description} onChange={(e) => { const updated = [...form.ads]; updated[index].description = e.target.value; setForm({...form, ads: updated}); }} className="w-full border p-2 rounded mb-2" rows={2} />
-                  <div className="mb-2"><label>صورة الإعلان</label><input type="file" accept="image/*" onChange={(e) => { const file = e.target.files?.[0]; const updated = [...form.ads]; updated[index].imageFile = file; setForm({...form, ads: updated}); }} className="w-full border p-2 rounded" /></div>
-                  <div className="mb-2"><label>فيديو الإعلان</label><input type="file" accept="video/*" onChange={(e) => { const file = e.target.files?.[0]; const updated = [...form.ads]; updated[index].videoFile = file; setForm({...form, ads: updated}); }} className="w-full border p-2 rounded" /></div>
-                  <input type="text" placeholder="السعر" value={ad.price} onChange={(e) => { const updated = [...form.ads]; updated[index].price = e.target.value; setForm({...form, ads: updated}); }} className="w-full border p-2 rounded mb-2" />
-                  <input type="text" placeholder="رقم التواصل" value={ad.contact} onChange={(e) => { const updated = [...form.ads]; updated[index].contact = e.target.value; setForm({...form, ads: updated}); }} className="w-full border p-2 rounded mb-2" />
-                  <button type="button" onClick={() => { const filtered = form.ads.filter((_, i) => i !== index); setForm({...form, ads: filtered}); }} className="bg-red-500 text-white px-3 py-1 rounded text-sm">حذف الإعلان</button>
-                </div>
-              ))}
-              <button type="button" onClick={() => setForm({...form, ads: [...form.ads, { title: "", description: "", price: "", contact: "", imageFile: null, videoFile: null }]})} className="bg-blue-600 text-white px-4 py-2 rounded">+ إضافة إعلان</button>
+              <div className="md:col-span-2">
+                <label className="block mb-2 font-semibold text-gray-700">وسيلة تواصل أخرى</label>
+                <input className="w-full border border-gray-300 rounded-xl p-3" value={form.otherContact} onChange={(e) => update("otherContact", e.target.value)} />
+              </div>
             </div>
 
             {/* طرق الدفع */}
             <div className="mt-8">
               <h2 className="text-xl font-bold text-[#1976D2] mb-4">طرق الدفع</h2>
-              {form.payments.map((p: any, index: number) => (
+              {payments.map((p: any, index: number) => (
                 <div key={index} className="flex gap-3 mb-3">
-                  <input placeholder="طريقة الدفع" value={p.method} onChange={(e) => { const updated = [...form.payments]; updated[index].method = e.target.value; setForm({...form, payments: updated}); }} className="border p-2 rounded w-1/2" />
-                  <input placeholder="التفاصيل" value={p.details} onChange={(e) => { const updated = [...form.payments]; updated[index].details = e.target.value; setForm({...form, payments: updated}); }} className="border p-2 rounded w-1/2" />
-                  <button type="button" onClick={() => { const filtered = form.payments.filter((_, i) => i !== index); setForm({...form, payments: filtered}); }} className="bg-red-500 text-white px-3 py-1 rounded">✕</button>
+                  <input placeholder="طريقة الدفع" value={p.method} onChange={(e) => updatePayment(index, "method", e.target.value)} className="border p-2 rounded w-1/2" />
+                  <input placeholder="التفاصيل" value={p.details} onChange={(e) => updatePayment(index, "details", e.target.value)} className="border p-2 rounded w-1/2" />
+                  <button type="button" onClick={() => removePayment(index)} className="bg-red-500 text-white px-3 py-1 rounded">✕</button>
                 </div>
               ))}
-              <button type="button" onClick={() => setForm({...form, payments: [...form.payments, { method: "", details: "" }]})} className="bg-green-600 text-white px-4 py-2 rounded">+ إضافة طريقة دفع</button>
+              <button type="button" onClick={addPayment} className="bg-green-600 text-white px-4 py-2 rounded">+ إضافة طريقة دفع</button>
             </div>
 
-            {/* معرض الأعمال */}
+            {/* الإعلانات */}
             <div className="mt-8">
-              <h2 className="text-xl font-bold text-[#1976D2] mb-4">معرض الأعمال</h2>
-              
-              {/* الأعمال الموجودة */}
-              {form.existingPortfolio.length > 0 && (
-                <div className="mb-4">
-                  <p className="text-sm text-gray-500 mb-2">الأعمال الحالية:</p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {form.existingPortfolio.map((item: any, idx: number) => (
-                      <div key={idx} className="relative border rounded-lg overflow-hidden">
-                        {item.type === "image" && <img src={item.url} className="w-full h-20 object-cover" />}
-                        {item.type === "video" && <video src={item.url} className="w-full h-20 object-cover" />}
-                        {item.type === "video_link" && <iframe src={item.url} className="w-full h-20" />}
-                        <button type="button" onClick={() => { const filtered = form.existingPortfolio.filter((_, i) => i !== idx); setForm({...form, existingPortfolio: filtered}); }} className="absolute top-0 left-0 bg-red-500 text-white rounded-full p-1 text-xs">✕</button>
-                      </div>
-                    ))}
+              <h2 className="text-xl font-bold text-[#FF9800] mb-4">الإعلانات</h2>
+              {ads.map((ad: any, index: number) => (
+                <div key={index} className="border p-4 rounded-lg mb-4">
+                  <input type="text" placeholder="عنوان الإعلان" value={ad.title} onChange={(e) => updateAd(index, "title", e.target.value)} className="w-full border p-2 rounded mb-2" />
+                  <textarea placeholder="وصف الإعلان" value={ad.description} onChange={(e) => updateAd(index, "description", e.target.value)} className="w-full border p-2 rounded mb-2" rows={2} />
+                  <div className="mb-2">
+                    <label>صورة الإعلان</label>
+                    <input type="file" accept="image/*" onChange={(e) => { const file = e.target.files?.[0]; updateAd(index, "image", file); }} className="w-full border p-2 rounded" />
+                    {ad.image && typeof ad.image === 'string' && ad.image.startsWith('http') && (
+                      <img src={ad.image} alt="صورة الإعلان" className="w-20 h-20 object-cover rounded mt-2" />
+                    )}
                   </div>
+                  <div className="mb-2">
+                    <label>فيديو الإعلان</label>
+                    <input type="file" accept="video/*" onChange={(e) => { const file = e.target.files?.[0]; updateAd(index, "video", file); }} className="w-full border p-2 rounded" />
+                  </div>
+                  <input type="text" placeholder="السعر" value={ad.price} onChange={(e) => updateAd(index, "price", e.target.value)} className="w-full border p-2 rounded mb-2" />
+                  <input type="text" placeholder="رقم التواصل" value={ad.contact} onChange={(e) => updateAd(index, "contact", e.target.value)} className="w-full border p-2 rounded mb-2" />
+                  <button type="button" onClick={() => removeAd(index)} className="bg-red-500 text-white px-3 py-1 rounded text-sm">حذف الإعلان</button>
                 </div>
-              )}
-              
-              <div className="grid md:grid-cols-2 gap-4">
-                <div><label>رفع صور جديدة</label><input type="file" multiple onChange={(e) => { const files = Array.from(e.target.files || []); update("portfolioImages", files); }} className="w-full border p-2 rounded" /></div>
-                <div><label>رفع فيديو جديد</label><input type="file" accept="video/*" onChange={(e) => { const file = e.target.files?.[0]; if (file) update("portfolioVideo", file); }} className="w-full border p-2 rounded" /></div>
-                <div className="md:col-span-2"><label>رابط فيديو جديد</label><input type="text" placeholder="رابط يوتيوب" value={form.videoLink} onChange={(e) => update("videoLink", e.target.value)} className="w-full border p-2 rounded" /></div>
-              </div>
+              ))}
+              <button type="button" onClick={addAd} className="bg-blue-600 text-white px-4 py-2 rounded">+ إضافة إعلان</button>
             </div>
 
             {/* أزرار الحفظ والإلغاء */}

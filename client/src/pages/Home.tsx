@@ -33,6 +33,7 @@ import {
   MapPin,
   Award,
   DollarSign,
+  Search,
   X
 } from "lucide-react";
 
@@ -50,7 +51,102 @@ interface Consultant {
   city: string;
   profile_image: string;
   bio: string;
+  selected_services?: string[];
+  consulting_price?: string;
+  training_price?: string;
+  individual_price?: string;
+  workshop_price?: string;
+  products?: any[];
 }
+
+// قائمة الدول الكاملة
+const COUNTRIES = [
+  // الكل
+  { code: "ALL", name: "الكل", flag: "🌍" },
+  
+  // السعودية
+  { code: "SA", name: "السعودية", flag: "🇸🇦" },
+  
+  // دول الخليج
+  { code: "AE", name: "الإمارات", flag: "🇦🇪" },
+  { code: "KW", name: "الكويت", flag: "🇰🇼" },
+  { code: "QA", name: "قطر", flag: "🇶🇦" },
+  { code: "BH", name: "البحرين", flag: "🇧🇭" },
+  { code: "OM", name: "عمان", flag: "🇴🇲" },
+  
+  // الدول العربية الأخرى
+  { code: "EG", name: "مصر", flag: "🇪🇬" },
+  { code: "JO", name: "الأردن", flag: "🇯🇴" },
+  { code: "LB", name: "لبنان", flag: "🇱🇧" },
+  { code: "SY", name: "سوريا", flag: "🇸🇾" },
+  { code: "PS", name: "فلسطين", flag: "🇵🇸" },
+  { code: "IQ", name: "العراق", flag: "🇮🇶" },
+  { code: "YE", name: "اليمن", flag: "🇾🇪" },
+  { code: "SD", name: "السودان", flag: "🇸🇩" },
+  { code: "LY", name: "ليبيا", flag: "🇱🇾" },
+  { code: "TN", name: "تونس", flag: "🇹🇳" },
+  { code: "DZ", name: "الجزائر", flag: "🇩🇿" },
+  { code: "MA", name: "المغرب", flag: "🇲🇦" },
+  { code: "MR", name: "موريتانيا", flag: "🇲🇷" },
+  { code: "SO", name: "الصومال", flag: "🇸🇴" },
+  { code: "DJ", name: "جيبوتي", flag: "🇩🇯" },
+  { code: "KM", name: "جزر القمر", flag: "🇰🇲" },
+  
+  // الدول الإسلامية الأخرى
+  { code: "TR", name: "تركيا", flag: "🇹🇷" },
+  { code: "PK", name: "باكستان", flag: "🇵🇰" },
+  { code: "AF", name: "أفغانستان", flag: "🇦🇫" },
+  { code: "IR", name: "إيران", flag: "🇮🇷" },
+  { code: "ID", name: "إندونيسيا", flag: "🇮🇩" },
+  { code: "MY", name: "ماليزيا", flag: "🇲🇾" },
+  { code: "BN", name: "بروناي", flag: "🇧🇳" },
+  { code: "BD", name: "بنغلاديش", flag: "🇧🇩" },
+  { code: "MV", name: "المالديف", flag: "🇲🇻" },
+  { code: "KZ", name: "كازاخستان", flag: "🇰🇿" },
+  { code: "UZ", name: "أوزبكستان", flag: "🇺🇿" },
+  { code: "TM", name: "تركمانستان", flag: "🇹🇲" },
+  { code: "KG", name: "قيرغيزستان", flag: "🇰🇬" },
+  { code: "TJ", name: "طاجيكستان", flag: "🇹🇯" },
+  { code: "AZ", name: "أذربيجان", flag: "🇦🇿" },
+  
+  // الدول الأوروبية
+  { code: "GB", name: "بريطانيا", flag: "🇬🇧" },
+  { code: "DE", name: "ألمانيا", flag: "🇩🇪" },
+  { code: "FR", name: "فرنسا", flag: "🇫🇷" },
+  { code: "IT", name: "إيطاليا", flag: "🇮🇹" },
+  { code: "ES", name: "إسبانيا", flag: "🇪🇸" },
+  { code: "PT", name: "البرتغال", flag: "🇵🇹" },
+  { code: "NL", name: "هولندا", flag: "🇳🇱" },
+  { code: "BE", name: "بلجيكا", flag: "🇧🇪" },
+  { code: "CH", name: "سويسرا", flag: "🇨🇭" },
+  { code: "AT", name: "النمسا", flag: "🇦🇹" },
+  { code: "SE", name: "السويد", flag: "🇸🇪" },
+  { code: "NO", name: "النرويج", flag: "🇳🇴" },
+  { code: "DK", name: "الدنمارك", flag: "🇩🇰" },
+  { code: "FI", name: "فنلندا", flag: "🇫🇮" },
+  { code: "IE", name: "أيرلندا", flag: "🇮🇪" },
+  { code: "PL", name: "بولندا", flag: "🇵🇱" },
+  { code: "CZ", name: "التشيك", flag: "🇨🇿" },
+  { code: "HU", name: "المجر", flag: "🇭🇺" },
+  { code: "GR", name: "اليونان", flag: "🇬🇷" },
+  { code: "RU", name: "روسيا", flag: "🇷🇺" },
+  
+  // أمريكا الشمالية
+  { code: "US", name: "الولايات المتحدة", flag: "🇺🇸" },
+  { code: "CA", name: "كندا", flag: "🇨🇦" },
+  { code: "MX", name: "المكسيك", flag: "🇲🇽" },
+  
+  // دول أخرى
+  { code: "AU", name: "أستراليا", flag: "🇦🇺" },
+  { code: "NZ", name: "نيوزيلندا", flag: "🇳🇿" },
+  { code: "ZA", name: "جنوب أفريقيا", flag: "🇿🇦" },
+  { code: "BR", name: "البرازيل", flag: "🇧🇷" },
+  { code: "AR", name: "الأرجنتين", flag: "🇦🇷" },
+  { code: "JP", name: "اليابان", flag: "🇯🇵" },
+  { code: "CN", name: "الصين", flag: "🇨🇳" },
+  { code: "IN", name: "الهند", flag: "🇮🇳" },
+  { code: "KR", name: "كوريا الجنوبية", flag: "🇰🇷" },
+];
 
 const SPECIALTIES = [
   { name: "الاستشارات", icon: Brain, subs: ["استشارات إدارية", "استشارات مالية", "استشارات قانونية", "استشارات مهنية", "استشارات أسرية"] },
@@ -85,33 +181,14 @@ const SPECIALTIES = [
   { name: "أنشطة متنوعة", icon: Sparkles, subs: ["أفكار ومشاريع", "مبادرات مجتمعية", "أنشطة ثقافية", "أنشطة عامة"] },
 ];
 
-const COUNTRIES = [
-  { code: "SA", name: "السعودية", flag: "🇸🇦" },
-  { code: "AE", name: "الإمارات", flag: "🇦🇪" },
-  { code: "KW", name: "الكويت", flag: "🇰🇼" },
-  { code: "QA", name: "قطر", flag: "🇶🇦" },
-  { code: "BH", name: "البحرين", flag: "🇧🇭" },
-  { code: "OM", name: "عمان", flag: "🇴🇲" },
-  { code: "YE", name: "اليمن", flag: "🇾🇪" },
-  { code: "EG", name: "مصر", flag: "🇪🇬" },
-  { code: "JO", name: "الأردن", flag: "🇯🇴" },
-  { code: "PK", name: "باكستان", flag: "🇵🇰" },
-  { code: "TR", name: "تركيا", flag: "🇹🇷" },
-  { code: "GB", name: "بريطانيا", flag: "🇬🇧" },
-  { code: "DE", name: "ألمانيا", flag: "🇩🇪" },
-  { code: "FR", name: "فرنسا", flag: "🇫🇷" },
-  { code: "US", name: "أمريكا", flag: "🇺🇸" },
-  { code: "CA", name: "كندا", flag: "🇨🇦" },
-];
-
 interface HomeProps {
   onNavigate?: (page: "home" | "about" | "client-signup" | "consultant-signup") => void;
 }
 
 export default function Home({ onNavigate }: HomeProps) {
-  const navigateTo = useNavigate();
+  const navigate = useNavigate();
   const [language, setLanguage] = useState<"ar" | "en">("ar");
-  const [selectedCountry, setSelectedCountry] = useState("SA");
+  const [selectedCountry, setSelectedCountry] = useState("ALL");
   const [showCountries, setShowCountries] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showContact, setShowContact] = useState(false);
@@ -119,14 +196,31 @@ export default function Home({ onNavigate }: HomeProps) {
   const [consultants, setConsultants] = useState<Consultant[]>([]);
   const [filteredConsultants, setFilteredConsultants] = useState<Consultant[]>([]);
   const [loading, setLoading] = useState(false);
+  const [countryFilter, setCountryFilter] = useState("ALL");
 
   let pressTimer: any;
 
-  const navigate = (page: string) => {
-    if (page === "admin") window.location.href = "/admin";
+  // اختصار لوحة التحكم على الكمبيوتر (Ctrl + Shift + Alt + A)
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.altKey && e.code === "KeyA") {
+        e.preventDefault();
+        navigate("/admin");
+      }
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [navigate]);
+
+  const navigateTo = (page: string) => {
+    if (page === "admin") navigate("/admin");
+    else if (page === "admin-dashboard") navigate("/admin-dashboard");
+    else if (page === "login") navigate("/login");
+    else if (page === "browse") navigate("/browse");
+    else onNavigate?.(page as any);
   };
 
-  // جلب المستشارين من قاعدة البيانات
+  // جلب المستشارين
   useEffect(() => {
     fetchConsultants();
   }, []);
@@ -142,16 +236,19 @@ export default function Home({ onNavigate }: HomeProps) {
     }
   };
 
-  // تصفية المستشارين حسب التخصص المختار
+  // تصفية المستشارين حسب التخصص والدولة
   useEffect(() => {
     if (selectedSpecialty) {
-      const filtered = consultants.filter(c => c.specialty === selectedSpecialty);
+      let filtered = consultants.filter(c => c.specialty === selectedSpecialty);
+      if (countryFilter !== "ALL") {
+        filtered = filtered.filter(c => c.country === countryFilter);
+      }
       setFilteredConsultants(filtered);
       setLoading(false);
     } else {
       setFilteredConsultants([]);
     }
-  }, [selectedSpecialty, consultants]);
+  }, [selectedSpecialty, consultants, countryFilter]);
 
   const handleSpecialtyClick = (specialtyName: string) => {
     setSelectedSpecialty(specialtyName);
@@ -161,6 +258,7 @@ export default function Home({ onNavigate }: HomeProps) {
   const closeCards = () => {
     setSelectedSpecialty(null);
     setFilteredConsultants([]);
+    setCountryFilter("ALL");
   };
 
   const getImageUrl = (url: string) => {
@@ -168,6 +266,16 @@ export default function Home({ onNavigate }: HomeProps) {
     if (url.startsWith("http") || url.startsWith("data:image")) return url;
     const { data } = supabase.storage.from('profile_images').getPublicUrl(url);
     return data.publicUrl;
+  };
+
+  const getCountryFlag = (countryCode: string) => {
+    const country = COUNTRIES.find(c => c.code === countryCode);
+    return country?.flag || "🌍";
+  };
+
+  const getCountryName = (countryCode: string) => {
+    const country = COUNTRIES.find(c => c.code === countryCode);
+    return country?.name || countryCode;
   };
 
   const isRTL = language === "ar";
@@ -179,6 +287,8 @@ export default function Home({ onNavigate }: HomeProps) {
       arabic: "العربية",
       backToSpecialties: "← العودة للتخصصات",
       noConsultants: "لا يوجد مستشارين في هذا التخصص حالياً",
+      filterByCountry: "تصفية حسب الدولة",
+      allCountries: "جميع الدول",
     },
     en: {
       title: "Show what you have… get what you want",
@@ -186,6 +296,8 @@ export default function Home({ onNavigate }: HomeProps) {
       arabic: "Arabic",
       backToSpecialties: "← Back to Specialties",
       noConsultants: "No consultants in this specialty yet",
+      filterByCountry: "Filter by country",
+      allCountries: "All countries",
     },
   };
   const t = translations[language];
@@ -193,18 +305,22 @@ export default function Home({ onNavigate }: HomeProps) {
   return (
     <div className={`min-h-screen bg-white ${isRTL ? "rtl" : "ltr"}`} dir={isRTL ? "rtl" : "ltr"}>
 
-      {/* ===== HEADER (نفس الكود الأصلي) ===== */}
+      {/* ===== HEADER ===== */}
       <header className="sticky top-0 z-50 bg-white shadow-md">
         <div className="container mx-auto px-4 py-4 flex items-center">
+
           <button className="text-3xl text-[#1976D2] mr-4" onClick={() => setShowMenu(!showMenu)}>
             ☰
           </button>
+
           <div className="flex-1"></div>
+
+          {/* اختيار الدولة - مع الضغط المطول للدخول للأدمن */}
           <div className="relative mr-3">
             <button
-              onMouseDown={() => { pressTimer = setTimeout(() => navigate("admin"), 5000); }}
+              onMouseDown={() => { pressTimer = setTimeout(() => navigateTo("admin"), 5000); }}
               onMouseUp={() => clearTimeout(pressTimer)}
-              onTouchStart={() => { pressTimer = setTimeout(() => navigate("admin"), 5000); }}
+              onTouchStart={() => { pressTimer = setTimeout(() => navigateTo("admin"), 5000); }}
               onTouchEnd={() => clearTimeout(pressTimer)}
               onClick={() => setShowCountries(!showCountries)}
               className="px-3 py-2 text-sm font-semibold rounded-lg flex items-center gap-2 ml-2"
@@ -213,20 +329,31 @@ export default function Home({ onNavigate }: HomeProps) {
               <Globe size={16} />
               {COUNTRIES.find(c => c.code === selectedCountry)?.flag}
             </button>
+
             {showCountries && (
-              <div className="absolute top-full mt-2 bg-white border-2 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+              <div className="absolute top-full mt-2 bg-white border-2 rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto w-48">
                 {COUNTRIES.map((country) => (
                   <button
                     key={country.code}
-                    onClick={() => { setSelectedCountry(country.code); setShowCountries(false); }}
-                    className="w-full text-right px-4 py-2 hover:bg-blue-50"
+                    onClick={() => { 
+                      setSelectedCountry(country.code); 
+                      setShowCountries(false);
+                      // تحديث فلترة الدولة في البطاقات
+                      if (selectedSpecialty) {
+                        setCountryFilter(country.code);
+                      }
+                    }}
+                    className="w-full text-right px-4 py-2 hover:bg-blue-50 flex items-center gap-2"
                   >
-                    {country.flag} {country.name}
+                    <span>{country.flag}</span>
+                    <span className="text-sm">{country.name}</span>
                   </button>
                 ))}
               </div>
             )}
           </div>
+
+          {/* اللغة */}
           <button
             onClick={() => setLanguage(language === "ar" ? "en" : "ar")}
             className="px-3 py-2 text-sm font-semibold rounded-lg"
@@ -247,6 +374,7 @@ export default function Home({ onNavigate }: HomeProps) {
                 <h2 className="text-xl font-bold text-[#FF9800]">القائمة</h2>
                 <button onClick={() => setShowMenu(false)} className="text-2xl hover:text-red-500">✕</button>
               </div>
+
               <button
                 onClick={() => { setShowMenu(false); onNavigate?.("about"); }}
                 className="flex items-center gap-3 py-4 px-3 rounded-lg hover:bg-gray-100 transition"
@@ -254,6 +382,7 @@ export default function Home({ onNavigate }: HomeProps) {
                 <Info size={20} className="text-[#1976D2]" />
                 <span className="font-medium">من نحن</span>
               </button>
+
               <button
                 onClick={() => { setShowMenu(false); onNavigate?.("consultant-signup"); }}
                 className="flex items-center gap-3 py-4 px-3 rounded-lg hover:bg-gray-100 transition"
@@ -261,13 +390,14 @@ export default function Home({ onNavigate }: HomeProps) {
                 <UserPlus size={20} className="text-[#FF9800]" />
                 <span className="font-medium">انضم إلينا</span>
               </button>
+
               <button
-  onClick={() => window.location.href = "/login"}
-  className="flex items-center gap-3 py-4 px-3 rounded-lg hover:bg-gray-100 transition"
->
-  <LogIn size={20} className="text-[#1976D2]" />
-  <span className="font-medium">تسجيل الدخول</span>
-</button>
+                onClick={() => { setShowMenu(false); navigate("/login"); }}
+                className="flex items-center gap-3 py-4 px-3 rounded-lg hover:bg-gray-100 transition"
+              >
+                <LogIn size={20} className="text-[#1976D2]" />
+                <span className="font-medium">تسجيل الدخول</span>
+              </button>
             </div>
           </div>
         )}
@@ -279,10 +409,13 @@ export default function Home({ onNavigate }: HomeProps) {
           <div className="flex justify-center mb-2">
             <img src={logo} alt="Sharaka" className="logo-float" style={{ height: "200px", mixBlendMode: "multiply" }} />
           </div>
+
           <h2 className="text-4xl font-bold mb-2" style={{ color: "#FF9800" }}>
             {t.title}
           </h2>
+
           <p className="text-xl" style={{ color: "#1976D2" }}>شريك نجاحك</p>
+
           <div className="mt-6 flex flex-col items-center gap-4">
             <button
               onClick={() => onNavigate?.("consultant-signup")}
@@ -291,7 +424,7 @@ export default function Home({ onNavigate }: HomeProps) {
               انضم الآن
             </button>
             <button
-              onClick={() => window.location.href = "/browse"}
+              onClick={() => navigate("/browse")}
               className="w-60 bg-[#1976D2] hover:bg-blue-700 text-white font-bold py-4 rounded-lg text-lg transition"
             >
               👥 تصفح الجميع
@@ -344,11 +477,51 @@ export default function Home({ onNavigate }: HomeProps) {
               })}
             </div>
           ) : (
-            // عرض البطاقات حسب التخصص المختار
             <div>
-              <h2 className="text-2xl font-bold text-[#1976D2] mb-6 text-center">
-                {selectedSpecialty}
-              </h2>
+              <div className="flex justify-between items-center mb-6 flex-wrap gap-3">
+                <h2 className="text-2xl font-bold text-[#1976D2]">
+                  {selectedSpecialty}
+                </h2>
+                
+                {/* فلترة حسب الدولة داخل التخصص */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowCountries(!showCountries)}
+                    className="px-4 py-2 border rounded-lg flex items-center gap-2 bg-white hover:bg-gray-50"
+                  >
+                    <Globe size={16} />
+                    <span>{countryFilter === "ALL" ? t.allCountries : getCountryName(countryFilter)}</span>
+                    <span className="text-gray-400">▼</span>
+                  </button>
+                  {showCountries && (
+                    <div className="absolute top-full left-0 mt-1 bg-white border rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto w-48">
+                      <button
+                        onClick={() => {
+                          setCountryFilter("ALL");
+                          setShowCountries(false);
+                        }}
+                        className="w-full text-right px-4 py-2 hover:bg-blue-50 flex items-center gap-2"
+                      >
+                        <span>🌍</span>
+                        <span>{t.allCountries}</span>
+                      </button>
+                      {COUNTRIES.filter(c => c.code !== "ALL").map((country) => (
+                        <button
+                          key={country.code}
+                          onClick={() => {
+                            setCountryFilter(country.code);
+                            setShowCountries(false);
+                          }}
+                          className="w-full text-right px-4 py-2 hover:bg-blue-50 flex items-center gap-2"
+                        >
+                          <span>{country.flag}</span>
+                          <span className="text-sm">{country.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
               
               {loading ? (
                 <div className="text-center py-12">
@@ -370,7 +543,7 @@ export default function Home({ onNavigate }: HomeProps) {
                   {filteredConsultants.map((consultant) => (
                     <div
                       key={consultant.id}
-                      onClick={() => navigateTo(`/consultant/${consultant.id}`)}
+                      onClick={() => navigate(`/consultant/${consultant.id}`)}
                       className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
                     >
                       <div className="h-32 bg-gradient-to-r from-[#1976D2] to-[#FF9800] relative">
@@ -405,10 +578,15 @@ export default function Home({ onNavigate }: HomeProps) {
                             : consultant.company_name || "منشأة"}
                         </h3>
                         
-                        <div className="flex items-center gap-2 mb-3">
-                          <span className="text-[#FF9800] font-semibold">{consultant.specialty || "تخصص غير محدد"}</span>
-                          {consultant.sub_specialty && (
-                            <span className="text-gray-400 text-sm">- {consultant.sub_specialty}</span>
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[#FF9800] font-semibold">{consultant.specialty || "تخصص غير محدد"}</span>
+                            {consultant.sub_specialty && (
+                              <span className="text-gray-400 text-sm">- {consultant.sub_specialty}</span>
+                            )}
+                          </div>
+                          {consultant.country && (
+                            <span className="text-sm">{getCountryFlag(consultant.country)}</span>
                           )}
                         </div>
 
@@ -426,15 +604,45 @@ export default function Home({ onNavigate }: HomeProps) {
                           </div>
                         )}
 
-                        {consultant.price && (
-                          <div className="flex items-center gap-2 text-green-600 font-semibold mb-3">
-                            <DollarSign size={14} />
-                            <span>{consultant.price} {consultant.currency || "ريال"}/ساعة</span>
+                        {/* عرض الخدمات المختارة */}
+                        {consultant.selected_services && consultant.selected_services.length > 0 && (
+                          <div className="mt-2 space-y-1">
+                            {consultant.selected_services.map((service: string) => {
+                              if (service === "products") {
+                                return (
+                                  <div key={service} className="flex items-center gap-1 text-sm text-gray-600">
+                                    <ShoppingCart size={14} className="text-[#FF9800]" />
+                                    <span>متجر</span>
+                                  </div>
+                                );
+                              } else {
+                                let price = "";
+                                if (service === "consulting") price = consultant.consulting_price;
+                                if (service === "training") price = consultant.training_price;
+                                if (service === "individual") price = consultant.individual_price;
+                                if (service === "workshop") price = consultant.workshop_price;
+                                let serviceName = "";
+                                if (service === "consulting") serviceName = "جلسات استشارية";
+                                if (service === "training") serviceName = "دورات تدريبية";
+                                if (service === "individual") serviceName = "جلسات فردية";
+                                if (service === "workshop") serviceName = "ورش عمل";
+                                
+                                if (price) {
+                                  return (
+                                    <div key={service} className="flex items-center gap-1 text-sm text-gray-600">
+                                      <DollarSign size={14} className="text-green-600" />
+                                      <span>{serviceName}: {price} ريال/ساعة</span>
+                                    </div>
+                                  );
+                                }
+                                return null;
+                              }
+                            })}
                           </div>
                         )}
 
                         {consultant.bio && (
-                          <p className="text-gray-500 text-sm line-clamp-2 mb-4">
+                          <p className="text-gray-500 text-sm line-clamp-2 mt-3 mb-4">
                             {consultant.bio.length > 100 ? consultant.bio.substring(0, 100) + "..." : consultant.bio}
                           </p>
                         )}
@@ -442,7 +650,7 @@ export default function Home({ onNavigate }: HomeProps) {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            navigateTo(`/consultant/${consultant.id}`);
+                            navigate(`/consultant/${consultant.id}`);
                           }}
                           className="w-full bg-[#1976D2] text-white py-2 rounded-xl hover:bg-[#1565C0] transition font-medium"
                         >

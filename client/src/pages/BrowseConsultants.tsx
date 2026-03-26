@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { MapPin, Award, DollarSign, Star, Briefcase, User, Building, ShoppingBag } from 'lucide-react';
+import { MapPin, Award, DollarSign, Star, Briefcase, User, Building, ShoppingBag, Search, Filter } from 'lucide-react';
 
 interface Consultant {
   id: number;
@@ -25,14 +25,54 @@ interface Consultant {
   products: any[];
 }
 
+// قائمة الدول
+const COUNTRIES = [
+  { code: "ALL", name: "الكل", flag: "🌍" },
+  { code: "SA", name: "السعودية", flag: "🇸🇦" },
+  { code: "AE", name: "الإمارات", flag: "🇦🇪" },
+  { code: "KW", name: "الكويت", flag: "🇰🇼" },
+  { code: "QA", name: "قطر", flag: "🇶🇦" },
+  { code: "BH", name: "البحرين", flag: "🇧🇭" },
+  { code: "OM", name: "عمان", flag: "🇴🇲" },
+  { code: "EG", name: "مصر", flag: "🇪🇬" },
+  { code: "JO", name: "الأردن", flag: "🇯🇴" },
+  { code: "LB", name: "لبنان", flag: "🇱🇧" },
+  { code: "PS", name: "فلسطين", flag: "🇵🇸" },
+  { code: "IQ", name: "العراق", flag: "🇮🇶" },
+  { code: "YE", name: "اليمن", flag: "🇾🇪" },
+  { code: "SD", name: "السودان", flag: "🇸🇩" },
+  { code: "LY", name: "ليبيا", flag: "🇱🇾" },
+  { code: "TN", name: "تونس", flag: "🇹🇳" },
+  { code: "DZ", name: "الجزائر", flag: "🇩🇿" },
+  { code: "MA", name: "المغرب", flag: "🇲🇦" },
+  { code: "TR", name: "تركيا", flag: "🇹🇷" },
+  { code: "PK", name: "باكستان", flag: "🇵🇰" },
+  { code: "ID", name: "إندونيسيا", flag: "🇮🇩" },
+  { code: "MY", name: "ماليزيا", flag: "🇲🇾" },
+  { code: "GB", name: "بريطانيا", flag: "🇬🇧" },
+  { code: "DE", name: "ألمانيا", flag: "🇩🇪" },
+  { code: "FR", name: "فرنسا", flag: "🇫🇷" },
+  { code: "IT", name: "إيطاليا", flag: "🇮🇹" },
+  { code: "ES", name: "إسبانيا", flag: "🇪🇸" },
+  { code: "US", name: "أمريكا", flag: "🇺🇸" },
+  { code: "CA", name: "كندا", flag: "🇨🇦" },
+  { code: "RU", name: "روسيا", flag: "🇷🇺" },
+  { code: "AU", name: "أستراليا", flag: "🇦🇺" },
+  { code: "JP", name: "اليابان", flag: "🇯🇵" },
+  { code: "CN", name: "الصين", flag: "🇨🇳" },
+  { code: "IN", name: "الهند", flag: "🇮🇳" },
+];
+
 export default function BrowseConsultants() {
   const navigate = useNavigate();
   const [consultants, setConsultants] = useState<Consultant[]>([]);
   const [filteredConsultants, setFilteredConsultants] = useState<Consultant[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState("ALL");
   const [selectedSpecialty, setSelectedSpecialty] = useState("");
   const [specialties, setSpecialties] = useState<string[]>([]);
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
 
   useEffect(() => {
     fetchConsultants();
@@ -40,7 +80,7 @@ export default function BrowseConsultants() {
 
   useEffect(() => {
     filterConsultants();
-  }, [searchTerm, selectedSpecialty, consultants]);
+  }, [searchTerm, selectedCountry, selectedSpecialty, consultants]);
 
   const fetchConsultants = async () => {
     setLoading(true);
@@ -62,6 +102,7 @@ export default function BrowseConsultants() {
   const filterConsultants = () => {
     let filtered = [...consultants];
 
+    // فلترة حسب البحث
     if (searchTerm) {
       filtered = filtered.filter(c => 
         (c.full_name?.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -71,6 +112,12 @@ export default function BrowseConsultants() {
       );
     }
 
+    // فلترة حسب الدولة
+    if (selectedCountry !== "ALL") {
+      filtered = filtered.filter(c => c.country === selectedCountry);
+    }
+
+    // فلترة حسب التخصص
     if (selectedSpecialty) {
       filtered = filtered.filter(c => c.specialty === selectedSpecialty);
     }
@@ -102,6 +149,11 @@ export default function BrowseConsultants() {
     return null;
   };
 
+  const getCountryFlag = (countryCode: string) => {
+    const country = COUNTRIES.find(c => c.code === countryCode);
+    return country?.flag || "🌍";
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -109,6 +161,8 @@ export default function BrowseConsultants() {
       </div>
     );
   }
+
+  const selectedCountryObj = COUNTRIES.find(c => c.code === selectedCountry);
 
   return (
     <div className="min-h-screen bg-gray-50 py-6 md:py-12" dir="rtl">
@@ -126,17 +180,54 @@ export default function BrowseConsultants() {
 
         {/* شريط البحث والفلترة */}
         <div className="bg-white rounded-xl md:rounded-2xl shadow-md p-3 md:p-6 mb-6 md:mb-8">
-          <div className="grid md:grid-cols-2 gap-3 md:gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+            {/* بحث */}
             <div>
               <label className="block mb-1 md:mb-2 font-semibold text-gray-700 text-sm md:text-base">🔍 بحث</label>
-              <input
-                type="text"
-                placeholder="ابحث بالاسم أو التخصص..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full border border-gray-300 p-2 md:p-3 rounded-lg md:rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FF9800] text-sm md:text-base"
-              />
+              <div className="relative">
+                <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="ابحث بالاسم أو التخصص..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full border border-gray-300 p-2 md:p-3 pr-10 rounded-lg md:rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FF9800] text-sm md:text-base"
+                />
+              </div>
             </div>
+            
+            {/* اختيار الدولة */}
+            <div>
+              <label className="block mb-1 md:mb-2 font-semibold text-gray-700 text-sm md:text-base">📍 الدولة</label>
+              <div className="relative">
+                <button
+                  onClick={() => setShowCountryDropdown(!showCountryDropdown)}
+                  className="w-full border border-gray-300 p-2 md:p-3 rounded-lg md:rounded-xl text-right bg-white flex justify-between items-center"
+                >
+                  <span>{selectedCountryObj?.flag} {selectedCountryObj?.name}</span>
+                  <span className="text-gray-400">▼</span>
+                </button>
+                {showCountryDropdown && (
+                  <div className="absolute z-20 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    {COUNTRIES.map((country) => (
+                      <div
+                        key={country.code}
+                        onClick={() => {
+                          setSelectedCountry(country.code);
+                          setShowCountryDropdown(false);
+                        }}
+                        className="p-2 md:p-3 hover:bg-gray-100 cursor-pointer text-right flex items-center gap-2"
+                      >
+                        <span>{country.flag}</span>
+                        <span>{country.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* اختيار التخصص */}
             <div>
               <label className="block mb-1 md:mb-2 font-semibold text-gray-700 text-sm md:text-base">📌 التخصص</label>
               <select
@@ -157,6 +248,9 @@ export default function BrowseConsultants() {
         <div className="mb-4 md:mb-6 text-right">
           <p className="text-gray-500 text-sm md:text-base">
             <span className="font-bold text-[#FF9800]">{filteredConsultants.length}</span> مستشار/خبير
+            {selectedCountry !== "ALL" && (
+              <span className="mr-2">من {selectedCountryObj?.flag} {selectedCountryObj?.name}</span>
+            )}
           </p>
         </div>
 
@@ -214,11 +308,18 @@ export default function BrowseConsultants() {
                       : consultant.company_name || "منشأة"}
                   </h3>
                   
-                  {/* التخصص */}
-                  <div className="flex items-center gap-1 md:gap-2 mb-2 md:mb-3">
-                    <span className="text-[#FF9800] font-semibold text-xs md:text-sm">{consultant.specialty || "تخصص غير محدد"}</span>
-                    {consultant.sub_specialty && (
-                      <span className="text-gray-400 text-xs">- {consultant.sub_specialty}</span>
+                  {/* التخصص والدولة */}
+                  <div className="flex items-center justify-between mb-2 md:mb-3">
+                    <div className="flex items-center gap-1 md:gap-2">
+                      <span className="text-[#FF9800] font-semibold text-xs md:text-sm">{consultant.specialty || "تخصص غير محدد"}</span>
+                      {consultant.sub_specialty && (
+                        <span className="text-gray-400 text-xs">- {consultant.sub_specialty}</span>
+                      )}
+                    </div>
+                    {consultant.country && (
+                      <div className="text-xs text-gray-500 flex items-center gap-1">
+                        <span>{getCountryFlag(consultant.country)}</span>
+                      </div>
                     )}
                   </div>
 

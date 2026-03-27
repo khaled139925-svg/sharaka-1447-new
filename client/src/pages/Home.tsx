@@ -34,6 +34,7 @@ import {
   Award,
   DollarSign
 } from "lucide-react";
+import ContactModal from "../components/ContactModal";
 
 interface Consultant {
   id: string;
@@ -244,24 +245,16 @@ export default function Home({ onNavigate }: HomeProps) {
           <div className="max-w-3xl mx-auto px-6">
             <h2 className="text-3xl font-bold mb-6">شراكة… منصة تجمع الخبرة والخدمة والفرص</h2>
             <p className="text-lg leading-8 mb-8">في شراكة يستطيع الأفراد والمؤسسات عرض ما لديهم من معرفة أو خدمة أو منتج، كما يمكنهم الوصول إلى ما يحتاجون إليه من خبرة أو خدمة أو فرصة في مكان واحد.</p>
-            <button onClick={() => setShowContact(true)} className="bg-[#FF9800] hover:bg-orange-500 text-white font-bold py-4 px-8 rounded-lg text-lg transition">تواصل معنا</button>
+            <button
+              onClick={() => setShowContact(true)}
+              className="bg-[#FF9800] hover:bg-orange-500 text-white font-bold py-4 px-8 rounded-lg text-lg transition"
+            >
+              تواصل معنا
+            </button>
           </div>
         </section>
 
-        {showContact && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white w-full max-w-lg p-8 rounded-xl shadow-2xl text-right">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-[#1976D2]">تواصل معنا</h3>
-                <button onClick={() => setShowContact(false)} className="text-xl hover:text-red-500">✕</button>
-              </div>
-              <input type="text" placeholder="الاسم" className="w-full border p-3 rounded mb-4" />
-              <input type="email" placeholder="البريد الإلكتروني" className="w-full border p-3 rounded mb-4" />
-              <textarea placeholder="الرسالة" rows={4} className="w-full border p-3 rounded mb-6" />
-              <button className="w-full bg-[#FF9800] text-white py-3 rounded hover:bg-orange-500 transition">إرسال</button>
-            </div>
-          </div>
-        )}
+        <ContactModal isOpen={showContact} onClose={() => setShowContact(false)} />
       </div>
     );
   }

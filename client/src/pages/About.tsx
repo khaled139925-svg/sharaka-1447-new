@@ -1,14 +1,15 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import emailjs from '@emailjs/browser';
+import ContactModal from "../components/ContactModal";
 
 interface AboutProps {
   onNavigate?: (page: string) => void;
 }
 
 export default function About({ onNavigate }: AboutProps) {
+  const [showContact, setShowContact] = useState(false);
 
-const [showContact, setShowContact] = useState(false);
-
-const text = `
+  const text = `
 عن منصة شراكة
 شراكة — منصة تجمع الخبرة والخدمة والمنتج في مكان واحد
 شراكة منصة رقمية عالمية تجمع بين الخبرات والاستشارات والخدمات والمنتجات والفرص في بيئة واحدة تساعد الأفراد والمؤسسات على الوصول إلى المعرفة والتواصل والتعاون وبناء العلاقات المهنية.
@@ -147,141 +148,79 @@ const text = `
 الاستشارات والخدمات المقدمة عبر المنصة تمثل آراء وخبرات مقدميها، ولا تتحمل المنصة المسؤولية عن القرارات التي يتخذها المستخدم بناءً على تلك الاستشارات.
 تواصل معنا
 للتواصل مع منصة شراكة:
-
-
-
 `;
 
-const paragraphs = text.split("\n").filter(p => p.trim() !== "");
+  const paragraphs = text.split("\n").filter(p => p.trim() !== "");
 
-const titles = [
-"عن منصة شراكة",
-"لماذا تعتبر شراكة منصة مختلفة؟",
-"من نحن",
-"الرؤية",
-"الرسالة",
-"أهداف المنصة",
-"قيم المنصة",
-"منصة تفتح أبوابها للجميع",
-"منصة تلبي احتياجات الحياة",
-"منصة تجمع الخبرة والخدمة والمنتج",
-"كيف تعمل المنصة",
-"الأسئلة الشائعة",
-"سياسة الخصوصية",
-"الشروط والأحكام",
-"إخلاء المسؤولية",
-"تواصل معنا"
-];
+  const titles = [
+    "عن منصة شراكة",
+    "لماذا تعتبر شراكة منصة مختلفة؟",
+    "من نحن",
+    "الرؤية",
+    "الرسالة",
+    "أهداف المنصة",
+    "قيم المنصة",
+    "منصة تفتح أبوابها للجميع",
+    "منصة تلبي احتياجات الحياة",
+    "منصة تجمع الخبرة والخدمة والمنتج",
+    "كيف تعمل المنصة",
+    "الأسئلة الشائعة",
+    "سياسة الخصوصية",
+    "الشروط والأحكام",
+    "إخلاء المسؤولية",
+    "تواصل معنا"
+  ];
 
-return (
+  return (
+    <div className="min-h-screen bg-gray-50 py-16" dir="rtl">
+      <div className="max-w-5xl mx-auto px-6">
+        <div className="mb-8 text-right">
+          <button
+            onClick={() => onNavigate?.("home")}
+            className="text-[#1976D2] hover:text-[#FF9800] text-lg flex items-center gap-2"
+          >
+            <span>🏠</span>
+            <span>الرئيسية</span>
+          </button>
+        </div>
 
-<div className="min-h-screen bg-gray-50 py-16">
+        <h1 className="text-4xl font-bold text-center text-[#FF9800] mb-12">
+          من نحن
+        </h1>
 
-<div className="max-w-5xl mx-auto px-6">
+        <div className="space-y-6">
+          {paragraphs.map((p, i) => {
+            const isTitle = titles.includes(p.trim());
+            const isList = p.startsWith("1.") || p.startsWith("2.") || p.startsWith("3.") ||
+              p.startsWith("4.") || p.startsWith("5.") || p.startsWith("6.") ||
+              p.startsWith("7.") || p.startsWith("8.") || p.startsWith("9.") ||
+              p.startsWith("ال");
 
-<div className="mb-8 text-right">
-  <button
-    onClick={() => onNavigate?.("home")}
-    className="text-[#1976D2] hover:text-[#FF9800] text-lg flex items-center gap-2"
-  >
-    <span>🏠</span>
-    <span>الرئيسية</span>
-  </button>
-</div>
-</div>
-<h1 className="text-4xl font-bold text-center text-[#FF9800] mb-12">
-من نحن
-</h1>
+            return (
+              <div
+                key={i}
+                className={`bg-white shadow-lg rounded-xl p-6 leading-8 text-right ${
+                  isTitle ? "text-[#1976D2] text-xl font-bold" : "text-gray-700"
+                }`}
+              >
+                {p}
+              </div>
+            );
+          })}
+        </div>
 
-<div className="space-y-6">
-
-{paragraphs.map((p,i)=>{
-
-const isTitle = titles.includes(p.trim());
-const isList = p.startsWith("1.") || p.startsWith("2.") || p.startsWith("3.") ||
-p.startsWith("4.") || p.startsWith("5.") || p.startsWith("6.") ||
-p.startsWith("7.") || p.startsWith("8.") || p.startsWith("9.") ||
-p.startsWith("ال");
-
-return(
-
-<div
-key={i}
-className={`bg-white shadow-lg rounded-xl p-6 leading-8 text-right ${
-isTitle ? "text-[#1976D2] text-xl font-bold" : "text-gray-700"
-}`}
->
-{p}
-</div>
-
-);
-
-})}
-</div>
-
-<div className="mt-16 text-center">
-
-<button
-onClick={()=>setShowContact(true)}
-className="bg-[#FF9800] hover:bg-orange-500 text-white font-bold py-4 px-10 rounded-lg text-lg transition"
->
-📩 اضغط للتواصل
-</button>
-
-</div>
-
-{showContact && (
-
-  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-
-    <div className="bg-white w-full max-w-lg p-8 rounded-xl shadow-2xl text-right">
-
-      <div className="flex justify-between items-center mb-6">
-
-        <h3 className="text-xl font-bold text-[#1976D2]">
-          تواصل معنا
-        </h3>
-
-        <button
-          onClick={()=>setShowContact(false)}
-          className="text-xl hover:text-red-500"
-        >
-          ✕
-        </button>
-
+        <div className="mt-16 text-center">
+          <button
+            onClick={() => setShowContact(true)}
+            className="bg-[#FF9800] hover:bg-orange-500 text-white font-bold py-4 px-10 rounded-lg text-lg transition"
+          >
+            📩 اضغط للتواصل
+          </button>
+        </div>
       </div>
 
-      <input
-        type="text"
-        placeholder="الاسم"
-        className="w-full border p-3 rounded mb-4"
-      />
-
-      <input
-        type="email"
-        placeholder="البريد الإلكتروني"
-        className="w-full border p-3 rounded mb-4"
-      />
-
-      <textarea
-        placeholder="الرسالة"
-        rows={4}
-        className="w-full border p-3 rounded mb-6"
-      />
-
-      <button
-        className="w-full bg-[#FF9800] text-white py-3 rounded hover:bg-orange-500 transition"
-      >
-        إرسال
-      </button>
-
+      {/* نافذة التواصل باستخدام ContactModal */}
+      <ContactModal isOpen={showContact} onClose={() => setShowContact(false)} />
     </div>
-
-  </div>
-
-)}
-
-</div>
-
-);
+  );
 }

@@ -1,6 +1,8 @@
+import React from 'react';
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
 import { Upload, X } from 'lucide-react';
+import { Button } from "../components/ui/button";
 
 interface ConsultantSignupProps {
   onNavigate?: (page: string) => void;

@@ -1,6 +1,7 @@
+import React from 'react';
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { Button } from "@/components/ui/button";
+import { Button } from "../components/ui/button";
 import { Mail, Lock, Phone, User, ArrowLeft } from 'lucide-react';
 
 interface ClientSignupProps {

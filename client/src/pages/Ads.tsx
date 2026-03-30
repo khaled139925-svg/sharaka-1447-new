@@ -1,3 +1,4 @@
+import React from 'react';
 import AdCard from "../components/ui/AdCard";
 
 export default function Ads(){

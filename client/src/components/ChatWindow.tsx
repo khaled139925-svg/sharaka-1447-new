@@ -1,15 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
-export default function ChatWindow({ otherUserId, otherUserName, onClose }) {
-  const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState('');
-  const [currentUser, setCurrentUser] = useState(null);
+interface ChatWindowProps {
+  otherUserId: string;       // معرف المستخدم الآخر من auth.users
+  otherUserName: string;     // اسم المستخدم الآخر
+  onClose: () => void;       // دالة الإغلاق (ستقوم بإزالة ?openChat=true في المكون الأب)
+}
 
+export default function ChatWindow({ otherUserId, otherUserName, onClose }: ChatWindowProps) {
+  const [messages, setMessages] = useState<any[]>([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  // جلب المستخدم الحالي
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setCurrentUser(data.user));
   }, []);
 
+  // جلب الرسائل والاشتراك في التحديثات الفورية
   useEffect(() => {
     if (!currentUser || !otherUserId) return;
 
@@ -24,13 +32,13 @@ export default function ChatWindow({ otherUserId, otherUserName, onClose }) {
     };
     fetchMessages();
 
-    // اشتراك خاص بهذه المحادثة
+    // اسم قناة فريد لهذه المحادثة
     const channelName = `chat-${currentUser.id}-${otherUserId}`;
     const subscription = supabase
       .channel(channelName)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
         const msg = payload.new;
-        // أضف الرسالة فقط إذا كانت بين هذين المستخدمين
+        // تأكد أن الرسالة تخص هذه المحادثة (بين المستخدمين)
         if ((msg.sender_id === currentUser.id && msg.receiver_id === otherUserId) ||
             (msg.sender_id === otherUserId && msg.receiver_id === currentUser.id)) {
           setMessages(prev => [...prev, msg]);
@@ -48,7 +56,7 @@ export default function ChatWindow({ otherUserId, otherUserName, onClose }) {
     const { error } = await supabase.from('messages').insert({
       sender_id: currentUser.id,
       receiver_id: otherUserId,
-      message: newMessage,
+      message: newMessage.trim(),
       created_at: new Date(),
     });
     if (!error) setNewMessage('');
@@ -70,8 +78,15 @@ export default function ChatWindow({ otherUserId, otherUserName, onClose }) {
         ))}
       </div>
       <div className="p-2 flex gap-2">
-        <input className="flex-1 border rounded p-2" value={newMessage} onChange={e => setNewMessage(e.target.value)} onKeyPress={e => e.key === 'Enter' && sendMessage()} />
-        <button onClick={sendMessage} className="bg-orange-500 text-white px-3 py-1 rounded">إرسال</button>
+        <input
+          className="flex-1 border rounded p-2"
+          value={newMessage}
+          onChange={(e) => setNewMessage(e.target.value)}
+          onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+        />
+        <button onClick={sendMessage} className="bg-orange-500 text-white px-3 py-1 rounded">
+          إرسال
+        </button>
       </div>
     </div>
   );

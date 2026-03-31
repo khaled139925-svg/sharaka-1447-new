@@ -1,6 +1,5 @@
-import React from 'react';
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 
@@ -10,6 +9,7 @@ interface LoginProps {
 
 export default function Login({ onNavigate }: LoginProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -25,7 +25,6 @@ export default function Login({ onNavigate }: LoginProps) {
     setLoading(true);
     setError("");
 
-    // البحث عن المستخدم بالبريد وكلمة المرور
     const { data, error: loginError } = await supabase
       .from("consultants")
       .select("*")
@@ -39,12 +38,21 @@ export default function Login({ onNavigate }: LoginProps) {
       return;
     }
 
-    // حفظ بيانات المستخدم
     localStorage.setItem("user", JSON.stringify(data));
     localStorage.setItem("isLoggedIn", "true");
-    
+
+    // التوجيه بعد تسجيل الدخول
+    const returnTo = localStorage.getItem("returnTo") || "/dashboard";
+    const openChat = localStorage.getItem("openChat") === "true";
+    localStorage.removeItem("returnTo");
+    localStorage.removeItem("openChat");
+
+    if (openChat) {
+      window.location.href = returnTo + "?openChat=true";
+    } else {
+      navigate(returnTo);
+    }
     setLoading(false);
-    navigate("/dashboard");
   };
 
   const handleForgotPassword = async () => {
@@ -54,8 +62,6 @@ export default function Login({ onNavigate }: LoginProps) {
     }
 
     setForgotLoading(true);
-    
-    // البحث عن المستخدم
     const { data, error } = await supabase
       .from("consultants")
       .select("password")
@@ -68,25 +74,19 @@ export default function Login({ onNavigate }: LoginProps) {
       return;
     }
 
-    // عرض كلمة المرور في رسالة
     setForgotMessage(`🔑 كلمة المرور الخاصة بك هي: ${data.password}`);
-    
-    // إخفاء الرسالة بعد 8 ثواني
     setTimeout(() => {
       setForgotMessage("");
       setShowForgot(false);
       setForgotEmail("");
     }, 8000);
-    
     setForgotLoading(false);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#1976D2]/10 to-[#FF9800]/10 flex items-center justify-center py-16" dir="rtl">
       <div className="max-w-md w-full mx-4">
-        
         <div className="bg-white rounded-2xl shadow-2xl p-8">
-          
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-[#FF9800] mb-2">مرحباً بك</h1>
             <p className="text-gray-500">سجل دخولك للوصول إلى حسابك</p>
@@ -174,7 +174,6 @@ export default function Login({ onNavigate }: LoginProps) {
               <p className="text-gray-600 mb-6 text-center">
                 أدخل بريدك الإلكتروني وستظهر لك كلمة المرور مباشرة
               </p>
-              
               <div className="mb-5">
                 <label className="block mb-2 font-semibold text-gray-700">البريد الإلكتروني</label>
                 <div className="relative">

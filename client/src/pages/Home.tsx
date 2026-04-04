@@ -1,325 +1,273 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "../lib/supabase";
 import logo from "../assets/globe-icon.png";
-import {
-  Globe,
-  Dumbbell,
-  Heart,
-  GraduationCap,
-  Code,
-  Palette,
-  Camera,
-  Utensils,
-  ShoppingCart,
-  Briefcase,
-  Scale,
-  Plane,
-  Leaf,
-  Users,
-  BookOpen,
-  Home as HomeIcon,
-  Sparkles,
-  Baby,
-  Rocket,
-  Ship,
-  TrendingUp,
-  Brain,
-  Stethoscope,
-  Hotel,
-  Info,
-  UserPlus,
-  LogIn,
-  MapPin,
-  Award,
-  DollarSign
-} from "lucide-react";
-import ContactModal from "../components/ContactModal";
 
-interface Consultant {
-  id: string;
-  account_type: string;
-  full_name: string;
-  company_name: string;
-  specialty: string;
-  sub_specialty: string;
-  experience: string;
-  country: string;
-  city: string;
-  profile_image: string;
-  bio: string;
-  selected_services?: string[];
-  consulting_price?: string;
-  training_price?: string;
-  individual_price?: string;
-  workshop_price?: string;
-}
-
-const SPECIALTIES = [
-  { name: "الاستشارات", icon: Brain },
-  { name: "التعليم والتدريب", icon: GraduationCap },
-  { name: "التقنية والبرمجة", icon: Code },
-  { name: "التصميم والإبداع", icon: Palette },
-  { name: "الإعلام وصناعة المحتوى", icon: Camera },
-  { name: "التسويق والتجارة", icon: TrendingUp },
-  { name: "الإدارة وريادة الأعمال", icon: Briefcase },
-  { name: "القانون والمحاماة", icon: Scale },
-  { name: "الطب والصحة", icon: Stethoscope },
-  { name: "الصحة النفسية", icon: Brain },
-  { name: "الرياضة واللياقة", icon: Dumbbell },
-  { name: "التغذية والطبخ", icon: Utensils },
-  { name: "الجمال والعناية", icon: Sparkles },
-  { name: "الأسرة والتربية", icon: Users },
-  { name: "الطفولة", icon: Baby },
-  { name: "الشباب", icon: Rocket },
-  { name: "الهوايات والفنون", icon: Palette },
-  { name: "الأدب والشعر", icon: BookOpen },
-  { name: "السفر والسياحة", icon: Plane },
-  { name: "الحج والعمرة", icon: "🕋" },
-  { name: "الفنادق والضيافة", icon: Hotel },
-  { name: "التجارة الدولية", icon: Globe },
-  { name: "الزراعة", icon: Leaf },
-  { name: "تربية الحيوانات", icon: Heart },
-  { name: "البيئة والطبيعة", icon: Leaf },
-  { name: "المتاجر والتجارة الإلكترونية", icon: ShoppingCart },
-  { name: "النقل والخدمات اللوجستية", icon: Ship },
-  { name: "الاستثمار والمال", icon: TrendingUp },
-  { name: "العقار", icon: HomeIcon },
-  { name: "أنشطة متنوعة", icon: Sparkles },
-];
-
-interface HomeProps {
-  onNavigate?: (page: "home" | "about" | "client-signup" | "consultant-signup") => void;
-}
-
-export default function Home({ onNavigate }: HomeProps) {
+export default function Home() {
   const navigate = useNavigate();
-  const [showMenu, setShowMenu] = useState(false);
-  const [showContact, setShowContact] = useState(false);
-  const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>(null);
-  const [consultants, setConsultants] = useState<Consultant[]>([]);
-  const [filteredConsultants, setFilteredConsultants] = useState<Consultant[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [aboutModalOpen, setAboutModalOpen] = useState(false);
+  const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [contactForm, setContactForm] = useState({ name: "", email: "", message: "" });
 
-  let pressTimer: any;
-
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.shiftKey && e.altKey && e.code === "KeyA") {
-        e.preventDefault();
-        navigate("/admin");
-      }
-    };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [navigate]);
-
-  const navigateTo = (page: string) => {
-    if (page === "admin") navigate("/admin");
-    else if (page === "admin-dashboard") navigate("/admin-dashboard");
-    else if (page === "login") navigate("/login");
-    else if (page === "browse") navigate("/browse");
-    else onNavigate?.(page as any);
+  // أنماط الأزرار
+  const orangeButtonStyle = {
+    background: "#FF9800",
+    color: "#fff",
+    border: "2px solid #e68900",
+    padding: "10px 20px",
+    borderRadius: "8px",
+    fontSize: "16px",
+    cursor: "pointer",
+    transition: "all 0.3s",
+    fontWeight: "bold",
+  };
+  const blueButtonStyle = {
+    ...orangeButtonStyle,
+    background: "#1976D2",
+    border: "2px solid #0d5ba0",
+  };
+  const smallOrangeButton = {
+    ...orangeButtonStyle,
+    padding: "6px 16px",
+    fontSize: "14px",
+  };
+  const smallBlueButton = {
+    ...blueButtonStyle,
+    padding: "6px 16px",
+    fontSize: "14px",
   };
 
+  // حركة الشعار مع إزالة الخلفية البيضاء
+  const logoAnimation = {
+    animation: "logoOrbit 5s ease-in-out infinite",
+    width: "250px",
+    height: "auto",
+    display: "block",
+    margin: "0 auto 20px",
+    mixBlendMode: "multiply",   // يزيل الخلفية البيضاء من الصورة
+  };
+
+  // الشعار الصغير داخل دائرة بيضاء
+  const smallLogoContainer = {
+    width: "50px",
+    height: "50px",
+    backgroundColor: "#fff",
+    borderRadius: "50%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+    cursor: "pointer",
+  };
+  const smallLogoStyle = {
+    width: "35px",
+    height: "auto",
+  };
+
+  // إضافة keyframes للحركة (احتياطي)
+  const styleSheet = document.createElement("style");
+  styleSheet.textContent = `
+    @keyframes logoOrbit {
+      0% { transform: rotate(0deg) translateY(0px) scale(1); }
+      25% { transform: rotate(2deg) translateY(-8px) scale(1.03); }
+      50% { transform: rotate(0deg) translateY(-14px) scale(1.06); }
+      75% { transform: rotate(-2deg) translateY(-8px) scale(1.03); }
+      100% { transform: rotate(0deg) translateY(0px) scale(1); }
+    }
+  `;
+  document.head.appendChild(styleSheet);
+
+  // إزالة أي هوامش من الجذر (تأكيد)
   useEffect(() => {
-    fetchConsultants();
+    document.documentElement.style.margin = "0";
+    document.documentElement.style.padding = "0";
+    document.body.style.margin = "0";
+    document.body.style.padding = "0";
   }, []);
 
-  const fetchConsultants = async () => {
-    const { data, error } = await supabase
-      .from("consultants")
-      .select("*")
-      .order("created_at", { ascending: false });
+  // محتوى "من نحن" الكامل (اختصار للمساحة – يمكنك وضع النص الطويل هنا)
+  const aboutFullText = `عن منصة شراكة
+شراكة — منصة تجمع الخبرة والخدمة والمنتج في مكان واحد
+... (ضع النص الكامل هنا) ...
+تواصل معنا`;
 
-    if (!error && data) {
-      setConsultants(data);
-    }
-  };
+  const paragraphs = aboutFullText.split("\n").filter(p => p.trim() !== "");
+  const titles = [
+    "عن منصة شراكة",
+    "لماذا تعتبر شراكة منصة مختلفة؟",
+    "من نحن",
+    "الرؤية",
+    "الرسالة",
+    "أهداف المنصة",
+    "قيم المنصة",
+    "منصة تفتح أبوابها للجميع",
+    "منصة تلبي احتياجات الحياة",
+    "منصة تجمع الخبرة والخدمة والمنتج",
+    "كيف تعمل المنصة",
+    "الأسئلة الشائعة",
+    "سياسة الخصوصية",
+    "الشروط والأحكام",
+    "إخلاء المسؤولية",
+    "تواصل معنا"
+  ];
 
-  useEffect(() => {
-    if (selectedSpecialty) {
-      let filtered = consultants.filter(c => c.specialty === selectedSpecialty);
-      setFilteredConsultants(filtered);
-      setLoading(false);
-    }
-  }, [selectedSpecialty, consultants]);
+  return (
+    <div style={{ direction: "rtl", fontFamily: "Arabic Typesetting", margin: 0, padding: 0 }}>
+      {/* Header */}
+      <div style={{
+        background: "#fff",
+        padding: "20px 40px",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        margin: 0,
+      }}>
+        <div style={smallLogoContainer} onClick={() => navigate("/")}>
+          <img src={logo} alt="Sharaka" style={smallLogoStyle} />
+        </div>
+        <div style={{ display: "flex", gap: "8px" }}>
+          <button style={smallOrangeButton} onClick={() => navigate("/consultant-signup")}>تسجيل</button>
+          <button style={smallBlueButton} onClick={() => navigate("/login")}>دخول</button>
+        </div>
+      </div>
 
-  const handleSpecialtyClick = (specialtyName: string) => {
-    setSelectedSpecialty(specialtyName);
-    setLoading(true);
-  };
+      {/* Hero Section */}
+      <div style={{
+        minHeight: "70vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        textAlign: "center",
+        padding: "30px 20px",
+      }}>
+        <img src={logo} alt="Sharaka" style={logoAnimation} />
+        <h1 style={{ fontSize: "48px", marginBottom: "15px", color: "#FF9800" }}>اعرض ما لديك… واحصل على ما تريد</h1>
+        <p style={{ fontSize: "28px", maxWidth: "700px", lineHeight: "1.5", marginBottom: "12px", color: "#1976D2" }}>شريك نجاحك</p>
+        <div style={{ display: "flex", gap: "8px", marginTop: "5px" }}>
+          <button style={orangeButtonStyle} onClick={() => navigate("/consultant-signup")}>انضم إلينا</button>
+          <button style={blueButtonStyle} onClick={() => navigate("/browse")}>تصفح الخدمات</button>
+        </div>
+      </div>
 
-  const getImageUrl = (url: string) => {
-    if (!url) return null;
-    if (url.startsWith("http") || url.startsWith("data:image")) return url;
-    const { data } = supabase.storage.from('profile_images').getPublicUrl(url);
-    return data.publicUrl;
-  };
+      {/* Footer */}
+      <div style={{ background: "#1976D2", color: "#fff", textAlign: "center", padding: "70px 20px" }}>
+        <h1 style={{ fontSize: "42px", marginBottom: "15px" }}>شراكة… منصة تجمع الخبرة والخدمة والفرص</h1>
+        <p style={{ fontSize: "22px", maxWidth: "700px", margin: "0 auto 30px", lineHeight: "1.8" }}>
+          في شراكة يستطيع الأفراد والمؤسسات عرض ما لديهم من معرفة أو خدمة أو منتج، كما يمكنهم الوصول إلى ما يحتاجون إليه من خبرة أو خدمة أو فرصة في مكان واحد.
+        </p>
+        <button style={orangeButtonStyle} onClick={() => setAboutModalOpen(true)}>من نحن</button>
+      </div>
 
-  const getCountryFlag = (code: string) => {
-    const flags: { [key: string]: string } = {
-      "SA": "🇸🇦", "AE": "🇦🇪", "KW": "🇰🇼", "QA": "🇶🇦", "BH": "🇧🇭", "OM": "🇴🇲",
-      "EG": "🇪🇬", "JO": "🇯🇴", "LB": "🇱🇧", "PS": "🇵🇸", "IQ": "🇮🇶", "YE": "🇾🇪",
-      "TR": "🇹🇷", "PK": "🇵🇰", "ID": "🇮🇩", "MY": "🇲🇾", "GB": "🇬🇧", "US": "🇺🇸"
-    };
-    return flags[code] || "🌍";
-  };
-
-  if (!selectedSpecialty) {
-    return (
-      <div className="min-h-screen bg-white" dir="rtl">
-
-        <header className="sticky top-0 z-50 bg-white shadow-md">
-          <div className="container mx-auto px-4 py-4 flex items-center">
-            <button className="text-3xl text-[#1976D2] mr-4" onClick={() => setShowMenu(!showMenu)}>☰</button>
-            <div className="flex-1"></div>
+      {/* Modal من نحن */}
+      {aboutModalOpen && (
+        <div
+          style={{
+            position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+            background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center",
+            justifyContent: "center", zIndex: 1000,
+          }}
+          onClick={() => setAboutModalOpen(false)}
+        >
+          <div
+            style={{
+              background: "#fff", width: "90%", maxWidth: "800px", maxHeight: "90%",
+              borderRadius: "12px", overflow: "auto", padding: "20px", position: "relative",
+              direction: "rtl",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
-              onMouseDown={() => { pressTimer = setTimeout(() => navigateTo("admin"), 5000); }}
-              onMouseUp={() => clearTimeout(pressTimer)}
-              onTouchStart={() => { pressTimer = setTimeout(() => navigateTo("admin"), 5000); }}
-              onTouchEnd={() => clearTimeout(pressTimer)}
-              className="px-3 py-2 text-sm font-semibold rounded-lg"
-              style={{ color: "#1976D2", border: "2px solid #1976D2" }}
+              onClick={() => setAboutModalOpen(false)}
+              style={{ position: "absolute", top: "10px", left: "10px", background: "none", border: "none", fontSize: "24px", cursor: "pointer" }}
             >
-              <Globe size={16} className="inline ml-1" />
+              ✕
             </button>
-          </div>
-
-          {showMenu && (
-            <div className="fixed inset-0 bg-black/40 z-50" onClick={() => setShowMenu(false)}>
-              <div onClick={(e) => e.stopPropagation()} className="fixed top-0 right-0 w-80 h-full bg-white shadow-2xl p-6 flex flex-col">
-                <div className="flex items-center justify-between mb-8">
-                  <h2 className="text-xl font-bold text-[#FF9800]">القائمة</h2>
-                  <button onClick={() => setShowMenu(false)} className="text-2xl hover:text-red-500">✕</button>
-                </div>
-                <button onClick={() => { setShowMenu(false); onNavigate?.("about"); }} className="flex items-center gap-3 py-4 px-3 rounded-lg hover:bg-gray-100 transition">
-                  <Info size={20} className="text-[#1976D2]" /><span className="font-medium">من نحن</span>
-                </button>
-                <button onClick={() => { setShowMenu(false); onNavigate?.("consultant-signup"); }} className="flex items-center gap-3 py-4 px-3 rounded-lg hover:bg-gray-100 transition">
-                  <UserPlus size={20} className="text-[#FF9800]" /><span className="font-medium">انضم إلينا</span>
-                </button>
-                <button onClick={() => { setShowMenu(false); navigate("/login"); }} className="flex items-center gap-3 py-4 px-3 rounded-lg hover:bg-gray-100 transition">
-                  <LogIn size={20} className="text-[#1976D2]" /><span className="font-medium">تسجيل الدخول</span>
-                </button>
-              </div>
-            </div>
-          )}
-        </header>
-
-        <section className="pt-24 pb-10 text-center" style={{ backgroundColor: "#F5F5F5" }}>
-          <div className="container mx-auto px-4">
-            <div className="flex justify-center mb-2"><img src={logo} alt="Sharaka" className="logo-float" style={{ height: "200px", mixBlendMode: "multiply" }} /></div>
-            <h2 className="text-4xl font-bold mb-2" style={{ color: "#FF9800" }}>اعرض ما لديك… واحصل على ما تريد</h2>
-            <p className="text-xl" style={{ color: "#1976D2" }}>شريك نجاحك</p>
-            <div className="mt-6 flex flex-col items-center gap-4">
-              <button onClick={() => onNavigate?.("consultant-signup")} className="w-60 bg-[#FF9800] hover:bg-orange-500 text-white font-bold py-4 rounded-lg text-lg transition">انضم الآن</button>
-              <button onClick={() => navigate("/browse")} className="w-60 bg-[#1976D2] hover:bg-blue-700 text-white font-bold py-4 rounded-lg text-lg transition">👥 تصفح الجميع</button>
-            </div>
-          </div>
-        </section>
-
-        <section className="py-16 bg-gray-50">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-              {SPECIALTIES.map((s, i) => {
-                const Icon = s.icon;
+            <h2 style={{ textAlign: "center", color: "#FF9800", marginBottom: "20px" }}>من نحن</h2>
+            <div style={{ lineHeight: "1.8" }}>
+              {paragraphs.map((p, idx) => {
+                const isTitle = titles.includes(p.trim());
                 return (
-                  <div key={i} onClick={() => handleSpecialtyClick(s.name)} className="bg-white rounded-xl shadow-md hover:shadow-xl transition cursor-pointer">
-                    <div className="w-full p-5 text-center">
-                      <div className="flex justify-center mb-3">
-                        <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center">
-                          {typeof s.icon === "string" ? <span className="text-2xl">{s.icon}</span> : <Icon size={30} className="text-[#1976D2]" />}
-                        </div>
-                      </div>
-                      <h3 className="font-bold text-[#FF9800]">{s.name}</h3>
-                    </div>
+                  <div
+                    key={idx}
+                    style={{
+                      marginBottom: "16px",
+                      fontWeight: isTitle ? "bold" : "normal",
+                      fontSize: isTitle ? "1.5rem" : "1rem",
+                      color: isTitle ? "#1976D2" : "#333",
+                      textAlign: "justify",
+                    }}
+                  >
+                    {p}
                   </div>
                 );
               })}
             </div>
+            <div style={{ textAlign: "center", marginTop: "20px" }}>
+              <button style={orangeButtonStyle} onClick={() => setContactModalOpen(true)}>تواصل معنا</button>
+            </div>
           </div>
-        </section>
+        </div>
+      )}
 
-        <section className="py-20 bg-[#1976D2] text-center text-white">
-          <div className="max-w-3xl mx-auto px-6">
-            <h2 className="text-3xl font-bold mb-6">شراكة… منصة تجمع الخبرة والخدمة والفرص</h2>
-            <p className="text-lg leading-8 mb-8">في شراكة يستطيع الأفراد والمؤسسات عرض ما لديهم من معرفة أو خدمة أو منتج، كما يمكنهم الوصول إلى ما يحتاجون إليه من خبرة أو خدمة أو فرصة في مكان واحد.</p>
-            <button
-              onClick={() => setShowContact(true)}
-              className="bg-[#FF9800] hover:bg-orange-500 text-white font-bold py-4 px-8 rounded-lg text-lg transition"
-            >
-              تواصل معنا
-            </button>
-          </div>
-        </section>
-
-        <ContactModal isOpen={showContact} onClose={() => setShowContact(false)} />
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-50 py-6" dir="rtl">
-      <div className="max-w-7xl mx-auto px-3">
-        
-        <button
-          onClick={() => setSelectedSpecialty(null)}
-          className="mb-4 text-[#1976D2] hover:text-[#FF9800] flex items-center gap-1"
+      {/* Modal تواصل */}
+      {contactModalOpen && (
+        <div
+          style={{
+            position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+            background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center",
+            justifyContent: "center", zIndex: 1100,
+          }}
+          onClick={() => setContactModalOpen(false)}
         >
-          <span>←</span>
-          <span>العودة للتخصصات</span>
-        </button>
-
-        <h1 className="text-2xl font-bold text-center text-[#1976D2] mb-6">{selectedSpecialty}</h1>
-
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF9800] mx-auto"></div>
-          </div>
-        ) : filteredConsultants.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-xl">
-            <p className="text-gray-500">لا يوجد مستشارين في هذا التخصص حالياً</p>
-            <button onClick={() => onNavigate?.("consultant-signup")} className="mt-4 bg-[#FF9800] text-white px-6 py-2 rounded-lg">كن أول مستشار في هذا التخصص</button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredConsultants.map((consultant) => (
-              <div
-                key={consultant.id}
-                onClick={() => navigate(`/consultant/${consultant.id}`)}
-                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition cursor-pointer"
+          <div
+            style={{
+              background: "#fff", width: "90%", maxWidth: "500px", borderRadius: "12px",
+              padding: "20px", position: "relative", direction: "rtl",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setContactModalOpen(false)}
+              style={{ position: "absolute", top: "10px", left: "10px", background: "none", border: "none", fontSize: "24px", cursor: "pointer" }}
+            >
+              ✕
+            </button>
+            <h2 style={{ textAlign: "center", color: "#FF9800", marginBottom: "20px" }}>تواصل معنا</h2>
+            <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+              <input
+                type="text"
+                placeholder="الاسم"
+                value={contactForm.name}
+                onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                style={{ padding: "10px", border: "1px solid #ccc", borderRadius: "6px" }}
+              />
+              <input
+                type="email"
+                placeholder="البريد الإلكتروني"
+                value={contactForm.email}
+                onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                style={{ padding: "10px", border: "1px solid #ccc", borderRadius: "6px" }}
+              />
+              <textarea
+                placeholder="الرسالة"
+                rows={5}
+                value={contactForm.message}
+                onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
+                style={{ padding: "10px", border: "1px solid #ccc", borderRadius: "6px" }}
+              />
+              <button
+                style={orangeButtonStyle}
+                onClick={() => {
+                  alert("تم إرسال رسالتك (سيتم تفعيل الإرسال لاحقاً)");
+                  setContactModalOpen(false);
+                }}
               >
-                <div className="h-28 bg-gradient-to-r from-[#1976D2] to-[#FF9800] relative">
-                  {consultant.profile_image && <img src={getImageUrl(consultant.profile_image)} alt="" className="w-full h-full object-cover opacity-30" />}
-                  <div className="absolute -bottom-6 right-2">
-                    <div className="w-12 h-12 rounded-full bg-white shadow-lg border-2 border-white overflow-hidden">
-                      {consultant.profile_image ? <img src={getImageUrl(consultant.profile_image)} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-gray-200 flex items-center justify-center text-xl">{consultant.account_type === "individual" ? "👤" : "🏢"}</div>}
-                    </div>
-                  </div>
-                </div>
-                <div className="pt-8 p-3">
-                  <div className="flex justify-between items-start">
-                    <h3 className="text-base font-bold text-gray-800">{consultant.account_type === "individual" ? consultant.full_name || "مستشار" : consultant.company_name || "منشأة"}</h3>
-                    {consultant.country && <span className="text-sm">{getCountryFlag(consultant.country)}</span>}
-                  </div>
-                  <div className="flex items-center gap-1 mt-1">
-                    <span className="text-[#FF9800] font-semibold text-xs">{consultant.specialty || "تخصص"}</span>
-                    {consultant.sub_specialty && <span className="text-gray-400 text-xs">- {consultant.sub_specialty}</span>}
-                  </div>
-                  {(consultant.country || consultant.city) && (
-                    <div className="flex items-center gap-1 text-gray-500 text-xs mt-1"><MapPin size={10} /><span>{consultant.city && consultant.city}{consultant.country && `، ${consultant.country}`}</span></div>
-                  )}
-                  {consultant.experience && (
-                    <div className="flex items-center gap-1 text-gray-500 text-xs mt-1"><Award size={10} className="text-[#FF9800]" /><span>{consultant.experience} سنوات خبرة</span></div>
-                  )}
-                  <button onClick={(e) => { e.stopPropagation(); navigate(`/consultant/${consultant.id}`); }} className="w-full bg-[#1976D2] text-white py-1.5 rounded-lg hover:bg-[#1565C0] transition text-xs mt-2">عرض التفاصيل</button>
-                </div>
-              </div>
-            ))}
+                إرسال
+              </button>
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,27 +1,25 @@
-import React from 'react'
+import React from "react";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'default' | 'outline' | 'ghost'
-  size?: 'sm' | 'md' | 'lg'
+  children: React.ReactNode;
 }
 
-export function Button({ variant = 'default', size = 'md', className = '', ...props }: ButtonProps) {
-  const baseStyles = 'px-4 py-2 rounded font-medium transition-colors'
-  const variants = {
-    default: 'bg-blue-600 text-white hover:bg-blue-700',
-    outline: 'border border-gray-300 text-gray-700 hover:bg-gray-50',
-    ghost: 'text-gray-700 hover:bg-gray-100',
-  }
-  const sizes = {
-    sm: 'px-3 py-1 text-sm',
-    md: 'px-4 py-2',
-    lg: 'px-6 py-3 text-lg',
-  }
-
+export const Button = ({ children, style, ...props }: ButtonProps) => {
   return (
     <button
-      className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
+      style={{
+        background: "#FF9800",
+        color: "#fff",
+        padding: "12px 25px",
+        border: "none",
+        borderRadius: "8px",
+        cursor: "pointer",
+        fontSize: "16px",
+        ...style,
+      }}
       {...props}
-    />
-  )
-}
+    >
+      {children}
+    </button>
+  );
+};

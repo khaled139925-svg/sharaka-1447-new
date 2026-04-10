@@ -1,62 +1,99 @@
-import { useEffect, useState } from "react";
-import { supabase } from "../lib/supabase";
+import { useNavigate } from "react-router-dom";
 
-export default function ConsultantProfile({ id }:any) {
+export default function ConsultantProfile() {
+  const navigate = useNavigate();
 
-  const [data,setData] = useState<any>(null);
-  const [ads,setAds] = useState<any[]>([]);
-  const [payments,setPayments] = useState<any[]>([]);
+  const user = {
+    name: "أحمد محمد",
+    email: "ahmed@mail.com",
+    phone: "123456789",
+    country: "السعودية",
+    city: "الرياض",
+    image: "https://via.placeholder.com/150",
 
-  useEffect(()=>{
-    load();
-  },[]);
+    services: ["متجر", "جلسات استشارية"],
 
-  const load = async () => {
+    bio: "مطور مواقع وخبير تقني",
 
-    const { data } = await supabase
-      .from("consultants")
-      .select("*")
-      .eq("id", id)
-      .single();
+    contact: {
+      whatsapp: "123456",
+      phone: "123456",
+      email: "ahmed@mail.com",
+      other: "Telegram",
+    },
 
-    setData(data);
+    links: {
+      website: "example.com",
+      linkedin: "linkedin.com",
+      instagram: "instagram.com",
+      youtube: "youtube.com",
+      tiktok: "tiktok.com",
+      telegram: "telegram.com",
+      snapchat: "snapchat.com",
+    },
 
-    const { data:adsData } = await supabase
-      .from("ads")
-      .select("*")
-      .eq("consultant_id", id);
+    ads: [
+      {
+        title: "تصميم موقع",
+        description: "تصميم احترافي",
+        price: "500$",
+        contact: "123456",
+      },
+    ],
 
-    setAds(adsData || []);
-
-    const { data:payData } = await supabase
-      .from("payments")
-      .select("*")
-      .eq("consultant_id", id);
-
-    setPayments(payData || []);
+    payments: [
+      { method: "تحويل بنكي", details: "IBAN XXXXX" },
+      { method: "STC Pay", details: "05555555" },
+    ],
   };
 
-  if (!data) return <div>تحميل...</div>;
-
   return (
-    <div className="p-10">
+    <div style={{ direction: "rtl", padding: "20px" }}>
+      
+      <div onClick={() => navigate(-1)} style={{ cursor: "pointer" }}>
+        ← رجوع
+      </div>
 
-      <img src={data.profile_image} className="w-40 h-40 rounded mb-4" />
+      <div onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
+        🏠 الرئيسية
+      </div>
 
-      <h1>{data.name}</h1>
-      <p>{data.specialty}</p>
-      <p>{data.bio}</p>
+      <img src={user.image} style={{ width: "120px", borderRadius: "50%" }} />
 
-      <h2 className="mt-6">الإعلانات</h2>
-      {ads.map(a=>(
-        <div key={a.id}>{a.title}</div>
+      <h2>{user.name}</h2>
+      <p>{user.country} - {user.city}</p>
+
+      <h3>الخدمات</h3>
+      {user.services.map((s, i) => (
+        <p key={i}>🔹 {s}</p>
       ))}
 
-      <h2 className="mt-6">طرق الدفع</h2>
-      {payments.map(p=>(
-        <div key={p.id}>{p.method} - {p.details}</div>
+      <h3>نبذة</h3>
+      <p>{user.bio}</p>
+
+      <h3>طرق الاتصال</h3>
+      <p>واتساب: {user.contact.whatsapp}</p>
+      <p>هاتف: {user.contact.phone}</p>
+      <p>بريد: {user.contact.email}</p>
+
+      <h3>الروابط</h3>
+      {Object.entries(user.links).map(([k, v]) => (
+        <p key={k}>{k}: {v}</p>
       ))}
 
+      <h3>الإعلانات</h3>
+      {user.ads.map((ad, i) => (
+        <div key={i}>
+          <p>{ad.title}</p>
+          <p>{ad.description}</p>
+          <p>{ad.price}</p>
+        </div>
+      ))}
+
+      <h3>طرق الدفع</h3>
+      {user.payments.map((p, i) => (
+        <p key={i}>{p.method} - {p.details}</p>
+      ))}
     </div>
   );
 }

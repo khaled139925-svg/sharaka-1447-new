@@ -1,94 +1,75 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Home } from "lucide-react";
 
-const SPECIALTIES = [
-  { name: "الاستشارات", icon: "🧠" },
-  { name: "التعليم والتدريب", icon: "🎓" },
-  { name: "التقنية والبرمجة", icon: "💻" },
-  { name: "التصميم والإبداع", icon: "🎨" },
-  { name: "الإعلام وصناعة المحتوى", icon: "📷" },
-  { name: "التسويق والتجارة", icon: "📈" },
-  { name: "الإدارة وريادة الأعمال", icon: "💼" },
-  { name: "القانون والمحاماة", icon: "⚖️" },
-  { name: "الطب والصحة", icon: "🩺" },
-  { name: "الصحة النفسية", icon: "🧠" },
-  { name: "الرياضة واللياقة", icon: "🏋️" },
-  { name: "التغذية والطبخ", icon: "🍽️" },
-  { name: "الجمال والعناية", icon: "✨" },
-  { name: "الأسرة والتربية", icon: "👨‍👩‍👧" },
-  { name: "الطفولة", icon: "👶" },
-  { name: "الشباب", icon: "🚀" },
-  { name: "الهوايات والفنون", icon: "🎨" },
-  { name: "الأدب والشعر", icon: "📚" },
-  { name: "السفر والسياحة", icon: "✈️" },
-  { name: "الحج والعمرة", icon: "🕋" },
-  { name: "الفنادق والضيافة", icon: "🏨" },
-  { name: "التجارة الدولية", icon: "🌍" },
-  { name: "الزراعة", icon: "🌱" },
-  { name: "تربية الحيوانات", icon: "🐾" },
-  { name: "البيئة والطبيعة", icon: "🌿" },
-  { name: "المتاجر والتجارة الإلكترونية", icon: "🛒" },
-  { name: "النقل والخدمات اللوجستية", icon: "🚢" },
-  { name: "الاستثمار والمال", icon: "💰" },
-  { name: "العقار", icon: "🏠" },
-  { name: "أنشطة متنوعة", icon: "✨" },
+const categories = [
+  "تقنية","تسويق","تصميم","تعليم","استشارات","قانون","محاسبة","صحة",
+  "رياضة","تغذية","تطوير ذات","إدارة","برمجة","ذكاء اصطناعي","أمن سيبراني",
+  "تجارة","عقارات","تصوير","مونتاج","كتابة","ترجمة","دعم فني","خدمة عملاء",
+  "لوجستيات","صناعة محتوى","إعلانات","SEO","تحليل بيانات","هندسة","أخرى"
+];
+
+const users = [
+  { name: "محمد أحمد", category: "تقنية" },
+  { name: "شركة الإبداع", category: "تسويق" },
 ];
 
 export default function Browse() {
-  const navigate = useNavigate();
+  const [selected, setSelected] = useState("");
+  const navigate = useNavigate(); // 🔥 مهم
 
   return (
-    <div style={{ direction: "rtl", padding: "30px", textAlign: "center" }}>
-      
-      {/* 🏠 الرئيسية */}
-      <div
-        onClick={() => navigate("/")}
-        style={{ cursor: "pointer", marginBottom: "20px" }}
-      >
-        🏠 الرئيسية
+    <div className="page">
+
+      {/* زر الرجوع */}
+      <div className="home-btn" onClick={() => navigate("/")}>
+        <Home size={22} />
       </div>
 
-      {/* تصفح الجميع */}
-      <button
-        onClick={() => navigate("/browse/all")}
-        style={{
-          marginBottom: "30px",
-          padding: "12px 25px",
-          background: "#FF9800",
-          color: "#fff",
-          border: "none",
-          borderRadius: "10px",
-          fontSize: "18px",
-          cursor: "pointer",
-        }}
-      >
-        تصفح الجميع
-      </button>
+      {/* الأعلى */}
+      <div className="top-bar">
+        <button className="login">دخول</button>
+        <button className="signup">تسجيل</button>
+        <button className="about">من نحن</button>
+      </div>
 
-      {/* الأيقونات */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill,minmax(120px,1fr))",
-          gap: "15px",
-        }}
-      >
-        {SPECIALTIES.map((item, i) => (
-          <div
-            key={i}
-            onClick={() => navigate(`/browse/${item.name}`)}
-            style={{
-              background: "#fff",
-              padding: "15px",
-              borderRadius: "12px",
-              cursor: "pointer",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-            }}
-          >
-            <div style={{ fontSize: "30px" }}>{item.icon}</div>
-            <div style={{ fontSize: "12px" }}>{item.name}</div>
+      {/* البحث */}
+      <div className="search-box">
+        <select value={selected} onChange={(e) => setSelected(e.target.value)}>
+          <option value="">اختر التخصص</option>
+
+          {categories.map((c, i) => (
+            <option key={i} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
+
+        {selected === "أخرى" && (
+          <input placeholder="اكتب تخصصك..." />
+        )}
+      </div>
+
+      {/* البطاقات */}
+      <div className="cards">
+        {users.map((u, i) => (
+          <div key={i} className="card">
+            <div className="avatar"></div>
+
+            <h3>{u.name}</h3>
+            <p>{u.category}</p>
+
+            {/* 🔥 هذا هو التعديل المهم */}
+            <button
+              className="details"
+              onClick={() => navigate(`/profile/${u.name}`)}
+            >
+              عرض التفاصيل
+            </button>
           </div>
         ))}
       </div>
+
     </div>
   );
 }

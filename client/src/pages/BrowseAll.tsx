@@ -1,51 +1,51 @@
-import React from 'react';
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 
-export default function BrowseAll({ onNavigate }:any) {
+export default function Browse() {
+  const [users, setUsers] = useState<any[]>([]);
+  const navigate = useNavigate();
 
-  const [data,setData] = useState<any[]>([]);
+  useEffect(() => {
+    getUsers();
+  }, []);
 
-  useEffect(()=>{
-    fetchData();
-  },[]);
+  async function getUsers() {
+    const { data, error } = await supabase.from("users").select("*");
 
-  const fetchData = async () => {
-    const { data } = await supabase.from("consultants").select("*");
-    setData(data || []);
-  };
+    if (error) {
+      console.log(error);
+      return;
+    }
+
+    setUsers(data || []);
+  }
 
   return (
-    <div className="p-10">
+    <div className="page">
+      <div className="cards">
+        {users.map((u) => (
+          <div key={u.id} className="card">
+            <div
+              className="avatar"
+              style={{
+                backgroundImage: `url(${u.avatar})`,
+                backgroundSize: "cover",
+                width: "80px",
+                height: "80px",
+                borderRadius: "50%"
+              }}
+            ></div>
 
-      <h1 className="text-2xl mb-6">تصفح الجميع</h1>
+            <h3>{u.name}</h3>
+            <p>{u.category}</p>
 
-      <div className="grid md:grid-cols-3 gap-6">
-
-        {data.map((c)=>(
-          <div key={c.id} className="border p-4 rounded shadow">
-
-            <img
-              src={c.profile_image}
-              className="w-full h-40 object-cover rounded mb-3"
-            />
-
-            <h3 className="font-bold">{c.name}</h3>
-            <p>{c.specialty}</p>
-            <p className="text-sm text-gray-600">{c.bio}</p>
-
-            <button
-              onClick={()=>onNavigate("profile", c.id)}
-              className="mt-3 bg-blue-600 text-white px-3 py-1 rounded"
-            >
-              تفاصيل
+            <button onClick={() => navigate(`/profile/${u.name}`)}>
+              عرض التفاصيل
             </button>
-
           </div>
         ))}
-
       </div>
-
     </div>
   );
 }

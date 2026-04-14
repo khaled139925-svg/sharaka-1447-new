@@ -3,14 +3,13 @@ import { supabase } from "../lib/supabase";
 import { useNavigate } from "react-router-dom";
 
 export default function Signup() {
-  const navigate = useNavigate();
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  async function handleSignup() {
-    // 1️⃣ إنشاء حساب
+  const navigate = useNavigate();
+
+  async function signup() {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -21,58 +20,27 @@ export default function Signup() {
       return;
     }
 
-    const user = data.user;
+    if (!data.user) return;
 
-    if (!user) return;
-
-    // 2️⃣ حفظ في جدول users
-    const { error: dbError } = await supabase.from("users").insert([
+    await supabase.from("users").insert([
       {
-        id: user.id,
+        id: data.user.id,
         name: name,
-        email: email,
-        category: "جديد",
-        bio: "",
-        avatar: "",
       },
     ]);
 
-    if (dbError) {
-      console.log(dbError);
-      alert("خطأ في حفظ البيانات");
-      return;
-    }
-
-    // 3️⃣ تحويل إلى البروفايل
-    navigate(`/profile/${user.id}`);
+    navigate(`/profile/${data.user.id}`);
   }
 
   return (
-    <div className="page">
+    <div style={{ maxWidth: 400, margin: "auto" }}>
+      <h2>تسجيل</h2>
 
-      <h2>إنشاء حساب</h2>
+      <input placeholder="الاسم" onChange={(e) => setName(e.target.value)} />
+      <input placeholder="email" onChange={(e) => setEmail(e.target.value)} />
+      <input type="password" placeholder="password" onChange={(e) => setPassword(e.target.value)} />
 
-      <input
-        placeholder="الاسم"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
-
-      <input
-        placeholder="البريد الإلكتروني"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-
-      <input
-        placeholder="كلمة المرور"
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-
-      <button onClick={handleSignup}>تسجيل</button>
-
+      <button onClick={signup}>تسجيل</button>
     </div>
   );
 }

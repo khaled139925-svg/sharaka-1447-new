@@ -1,7 +1,6 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = "https://nurtwpcbzmagipgrrjrw.supabase.co";
+const supabaseUrl = "https://lvoecyolzmfowqsbnbdf.supabase.co"
+const supabaseKey = "sb_publishable_PcBO73tlwPZ3rUJs-fDfDQ_Kn07rnbp"
 
-const supabaseKey = "sb_publishable_WU4QdPZD7ibentvjMarmiQ_vFYSD6vW";
-
-export const supabase = createClient(supabaseUrl, supabaseKey);
+export const supabase = createClient(supabaseUrl, supabaseKey)

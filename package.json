@@ -10,11 +10,16 @@
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
-    "@supabase/supabase-js": "^2.103.0",
+    "@supabase/supabase-js": "^2.103.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
     "lucide-react": "^0.263.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.30.3"
+    "react-router-dom": "^6.30.3",
+    "stream-chat": "^9.41.1",
+    "stream-chat-react": "^14.0.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.37",
@@ -24,5 +29,18 @@
     "postcss": "^8.5.9",
     "tailwindcss": "^3.4.19",
     "vite": "^5.0.8"
-  }
+  },
+  "description": "هذا المشروع مبني باستخدام تقنية **React** و **Vite** و **Tailwind CSS**.",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/khaled139925-svg/sharaka-1447-new.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/khaled139925-svg/sharaka-1447-new/issues"
+  },
+  "homepage": "https://github.com/khaled139925-svg/sharaka-1447-new#readme"
 }

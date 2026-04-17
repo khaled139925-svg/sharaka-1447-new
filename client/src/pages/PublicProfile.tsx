@@ -2,53 +2,45 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 
-export default function Profile() {
+export default function PublicProfile() {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [posts, setPosts] = useState<any[]>([]);
   const [followersCount, setFollowersCount] = useState(0);
+  const [isFollowing, setIsFollowing] = useState(false);
   const [followingList, setFollowingList] = useState<any[]>([]);
   const [followersList, setFollowersList] = useState<any[]>([]);
   const [showFollowing, setShowFollowing] = useState(false);
   const [showFollowers, setShowFollowers] = useState(false);
-  const [showUpload, setShowUpload] = useState(false);
-  const [content, setContent] = useState("");
-  const [file, setFile] = useState<any>(null);
-  const [uploading, setUploading] = useState(false);
-  const [editing, setEditing] = useState(false);
-  const [newName, setNewName] = useState("");
-  const [newBio, setNewBio] = useState("");
-  const [newSpecialty, setNewSpecialty] = useState("");
-  const [newPhone, setNewPhone] = useState("");
-  const [newEmail, setNewEmail] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [newAvatar, setNewAvatar] = useState<File | null>(null);
-  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // States للمنشورات التفاعلية
-  const [likesMap, setLikesMap] = useState<Record<number, number>>({});
-  const [userLikesMap, setUserLikesMap] = useState<Record<number, boolean>>({});
-  const [commentsMap, setCommentsMap] = useState<Record<number, any[]>>({});
-  const [showComments, setShowComments] = useState<Record<number, boolean>>({});
-  const [newComment, setNewComment] = useState<Record<number, string>>({});
+  // States للتفاعلات
+  const [likesMap, setLikesMap] = useState<Record<string, number>>({});
+  const [userLikesMap, setUserLikesMap] = useState<Record<string, boolean>>({});
+  const [commentsMap, setCommentsMap] = useState<Record<string, any[]>>({});
+  const [showComments, setShowComments] = useState<Record<string, boolean>>({});
+  const [newComment, setNewComment] = useState<Record<string, string>>({});
   const [selectedPost, setSelectedPost] = useState<any>(null);
   const [showShareModal, setShowShareModal] = useState(false);
-  const [sharePostId, setSharePostId] = useState<number | null>(null);
+  const [sharePostId, setSharePostId] = useState<string | null>(null);
   const [usersList, setUsersList] = useState<any[]>([]);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [shareMessage, setShareMessage] = useState("");
 
   useEffect(() => {
-    const localUser = JSON.parse(localStorage.getItem("user") || "null");
-    if (!localUser) {
+    const viewUserStr = localStorage.getItem("viewUser");
+    if (!viewUserStr) {
       navigate("/");
       return;
     }
-    setUser(localUser);
-    loadUserData(localUser.id);
+    const viewUser = JSON.parse(viewUserStr);
+    setUser(viewUser);
+    loadUserData(viewUser.id);
+    checkIfFollowing(viewUser.id);
   }, []);
 
-  async function loadUserData(userId: string) {
+  async function loadUserData(userId: number) {
+    // جلب المنشورات
     const { data: postsData } = await supabase
       .from("posts")
       .select("*")
@@ -70,9 +62,9 @@ export default function Profile() {
 
   async function loadPostsInteractions(postsArray: any[]) {
     const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
-    const likesCounts: Record<number, number> = {};
-    const userLikes: Record<number, boolean> = {};
-    const comments: Record<number, any[]> = {};
+    const likesCounts: Record<string, number> = {};
+    const userLikes: Record<string, boolean> = {};
+    const comments: Record<string, any[]> = {};
 
     for (const post of postsArray) {
       const { count } = await supabase
@@ -103,7 +95,7 @@ export default function Profile() {
     setCommentsMap(comments);
   }
 
-  async function loadFollowLists(userId: string) {
+  async function loadFollowLists(userId: number) {
     const { data: following } = await supabase
       .from("follows")
       .select("following_id")
@@ -135,44 +127,60 @@ export default function Profile() {
     }
   }
 
-  const handleUpload = async () => {
-    if (!file || !user) {
-      alert("❌ اختر ملف أولاً");
+  async function checkIfFollowing(followingId: number) {
+    const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+    if (!currentUser.id) {
+      setIsFollowing(false);
+      setLoading(false);
       return;
     }
-    setUploading(true);
-    const timestamp = Date.now();
-    const extension = file.name.split('.').pop();
-    const safeFileName = `${timestamp}.${extension}`;
-    const filePath = `posts/${safeFileName}`;
-    const { error: uploadError } = await supabase.storage.from("posts").upload(filePath, file);
-    if (uploadError) {
-      alert("❌ فشل رفع الملف: " + uploadError.message);
-      setUploading(false);
+    const { data } = await supabase
+      .from("follows")
+      .select("id")
+      .eq("follower_id", currentUser.id)
+      .eq("following_id", followingId)
+      .maybeSingle();
+    setIsFollowing(!!data);
+    setLoading(false);
+  }
+
+  const handleFollow = async () => {
+    const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+    if (!currentUser.id) {
+      alert("يجب تسجيل الدخول أولاً");
       return;
     }
-    const { data: urlData } = supabase.storage.from("posts").getPublicUrl(filePath);
-    const mediaUrl = urlData.publicUrl;
-    const { error: dbError } = await supabase.from("posts").insert({
-      user_id: user.id,
-      media_url: mediaUrl,
-      media_type: file.type.startsWith("video") ? "video" : "image",
-      content: content || "",
-    });
-    if (dbError) {
-      alert("❌ خطأ في حفظ المنشور: " + dbError.message);
-      setUploading(false);
-      return;
+
+    if (isFollowing) {
+      const { error } = await supabase
+        .from("follows")
+        .delete()
+        .eq("follower_id", currentUser.id)
+        .eq("following_id", user.id);
+      if (!error) {
+        setIsFollowing(false);
+        setFollowersCount(prev => prev - 1);
+        alert("✅ تم إلغاء المتابعة");
+        loadFollowLists(user.id);
+      } else {
+        alert("❌ فشل إلغاء المتابعة: " + error.message);
+      }
+    } else {
+      const { error } = await supabase
+        .from("follows")
+        .insert({ follower_id: currentUser.id, following_id: user.id });
+      if (!error) {
+        setIsFollowing(true);
+        setFollowersCount(prev => prev + 1);
+        alert("✅ تمت المتابعة");
+        loadFollowLists(user.id);
+      } else {
+        alert("❌ فشلت المتابعة: " + error.message);
+      }
     }
-    alert("✅ تم النشر بنجاح");
-    setShowUpload(false);
-    setContent("");
-    setFile(null);
-    setUploading(false);
-    loadUserData(user.id);
   };
 
-  const handleLike = async (postId: number) => {
+  const handleLike = async (postId: string) => {
     const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
     if (!currentUser.id) {
       alert("يجب تسجيل الدخول أولاً");
@@ -195,7 +203,7 @@ export default function Profile() {
     }
   };
 
-  const handleAddComment = async (postId: number) => {
+  const handleAddComment = async (postId: string) => {
     const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
     if (!currentUser.id) {
       alert("يجب تسجيل الدخول أولاً");
@@ -217,11 +225,12 @@ export default function Profile() {
     }
   };
 
-  const openShareModal = async (postId: number) => {
+  const openShareModal = async (postId: string) => {
+    const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
     const { data } = await supabase
       .from("consultants")
       .select("id, full_name, avatar_url")
-      .neq("id", user.id);
+      .neq("id", currentUser.id || 0);
     setUsersList(data || []);
     setSharePostId(postId);
     setSelectedUser(null);
@@ -250,101 +259,33 @@ export default function Profile() {
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   };
 
-  // ✅ دالة حذف المنشور
-  const handleDeletePost = async (postId: number, mediaUrl: string) => {
-    if (!confirm("⚠️ هل أنت متأكد من حذف هذا المنشور؟ لا يمكن التراجع.")) return;
-
-    const { error: dbError } = await supabase
-      .from("posts")
-      .delete()
-      .eq("id", postId);
-
-    if (dbError) {
-      alert("❌ فشل حذف المنشور: " + dbError.message);
+  // ✅ دالة المراسلة عبر واتساب
+  const handleWhatsAppMessage = () => {
+    if (!user.phone) {
+      alert(`عذراً، ${user.full_name} لم يُضف رقم هاتف للتواصل عبر واتساب بعد.`);
       return;
     }
-
-    try {
-      const filePath = mediaUrl.split('/posts/')[1];
-      if (filePath) {
-        await supabase.storage.from("posts").remove([filePath]);
-      }
-    } catch (err) {
-      console.error("خطأ في حذف الملف:", err);
+    // تنظيف الرقم: إزالة المسافات والشرطات والأقواس، وإزالة الصفر البادئ إن وجد
+    let phone = user.phone.replace(/[\s\-\(\)]/g, '');
+    if (phone.startsWith('0')) {
+      phone = phone.substring(1);
     }
-
-    setPosts(prevPosts => prevPosts.filter(p => p.id !== postId));
-    alert("✅ تم حذف المنشور");
-  };
-
-  const handleEdit = () => {
-    setEditing(true);
-    setNewName(user.full_name || "");
-    setNewBio(user.bio || "");
-    setNewSpecialty(user.specialty || "");
-    setNewPhone(user.phone || "");
-    setNewEmail(user.email || "");
-    setNewPassword("");
-    setNewAvatar(null);
-  };
-
-  const uploadNewAvatar = async (file: File): Promise<string | null> => {
-    const ext = file.name.split('.').pop();
-    const fileName = `avatar_${user.id}_${Date.now()}.${ext}`;
-    const filePath = `avatars/${fileName}`;
-    const { error } = await supabase.storage.from("media").upload(filePath, file);
-    if (error) return null;
-    const { data } = supabase.storage.from("media").getPublicUrl(filePath);
-    return data.publicUrl;
-  };
-
-  const saveEdit = async () => {
-    const updates: any = {};
-    if (newName !== user.full_name) updates.full_name = newName;
-    if (newBio !== user.bio) updates.bio = newBio;
-    if (newSpecialty !== user.specialty) updates.specialty = newSpecialty;
-    if (newPhone !== user.phone) updates.phone = newPhone;
-    if (newEmail !== user.email) updates.email = newEmail;
-    if (newPassword.trim() !== "") updates.password = newPassword;
-
-    let avatarUrl = user.avatar_url;
-    if (newAvatar) {
-      setAvatarUploading(true);
-      const uploadedUrl = await uploadNewAvatar(newAvatar);
-      if (uploadedUrl) avatarUrl = uploadedUrl;
-      else alert("⚠️ فشل رفع الصورة");
-      setAvatarUploading(false);
-    }
-    if (avatarUrl !== user.avatar_url) updates.avatar_url = avatarUrl;
-
-    if (Object.keys(updates).length === 0 && avatarUrl === user.avatar_url) {
-      setEditing(false);
-      return;
-    }
-
-    const { error } = await supabase
-      .from("consultants")
-      .update(updates)
-      .eq("id", user.id);
-
-    if (error) {
-      alert("❌ فشل التعديل: " + error.message);
-      return;
-    }
-
-    const updatedUser = { ...user, ...updates, avatar_url: avatarUrl };
-    setUser(updatedUser);
-    localStorage.setItem("user", JSON.stringify(updatedUser));
-    alert("✅ تم تعديل الحساب");
-    setEditing(false);
-    window.location.reload();
+    // إذا كان الرقم بدون رمز دولة، يمكنك إضافة رمز افتراضي (مثل 966 للسعودية)
+    // لكن الأفضل أن يكون الرقم مخزناً بالصيغة الدولية مسبقاً.
+    // سنفترض أن الرقم يدخل مع رمز الدولة.
+    const whatsappLink = `https://wa.me/${phone}`;
+    window.open(whatsappLink, '_blank');
   };
 
   if (!user) return <div style={{ padding: 20 }}>⚠️ جاري التحميل...</div>;
+  if (loading) return <div style={{ padding: 20 }}>⏳ جاري التحقق...</div>;
 
   return (
     <div style={{ padding: 20, maxWidth: 500, margin: "auto" }}>
-      <button onClick={() => navigate("/")} style={btnRed}>رجوع</button>
+      <button onClick={() => {
+        localStorage.removeItem("viewUser");
+        navigate("/");
+      }} style={btnRed}>رجوع</button>
       <div style={card}>
         <div style={avatar}>
           {user.avatar_url ? (
@@ -356,46 +297,22 @@ export default function Profile() {
         <div style={{ margin: "10px 0", color: "#555" }}>
           <div>📧 {user.email || "غير مضاف"}</div>
           <div>📞 {user.phone || "غير مضاف"}</div>
-          <div>🔧 {user.specialty || "بدون تخصص"}</div>
         </div>
         <div style={{ display: "flex", justifyContent: "center", gap: 20, margin: "10px 0" }}>
           <span>📌 {posts.length} منشور</span>
           <span>👥 {followersCount} متابع</span>
         </div>
-
-        {editing && (
-          <div style={{ marginTop: 10 }}>
-            <input value={newName} onChange={(e) => setNewName(e.target.value)} style={input} placeholder="الاسم الكامل" />
-            <textarea value={newBio} onChange={(e) => setNewBio(e.target.value)} style={input} placeholder="نبذة" rows={2} />
-            <input value={newSpecialty} onChange={(e) => setNewSpecialty(e.target.value)} style={input} placeholder="التخصص" />
-            <input value={newPhone} onChange={(e) => setNewPhone(e.target.value)} style={input} placeholder="رقم الجوال" />
-            <input value={newEmail} onChange={(e) => setNewEmail(e.target.value)} style={input} placeholder="البريد الإلكتروني" />
-            <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} style={input} placeholder="كلمة مرور جديدة" />
-            <input type="file" accept="image/*" onChange={(e) => setNewAvatar(e.target.files?.[0] || null)} />
-            <button style={btnGreen} onClick={saveEdit} disabled={avatarUploading}>
-              {avatarUploading ? "جاري رفع الصورة..." : "حفظ جميع التعديلات"}
-            </button>
-            <button style={{ ...btnRed, marginTop: 5 }} onClick={() => setEditing(false)}>إلغاء</button>
-          </div>
-        )}
-
         <div style={btnRow}>
-          <button style={btnBlue} onClick={handleEdit}>تعديل الحساب</button>
-          <button style={btnPurple} onClick={() => setShowUpload(true)}>إضافة منشور</button>
+          {/* زر مراسلة عبر واتساب */}
+          <button style={btnDark} onClick={handleWhatsAppMessage}>
+            💬 واتساب
+          </button>
+          <button style={isFollowing ? btnRed : btnGreen} onClick={handleFollow}>
+            {isFollowing ? "إلغاء المتابعة" : "متابعة"}
+          </button>
         </div>
 
-        {showUpload && (
-          <div style={{ marginTop: 20 }}>
-            <textarea placeholder="اكتب وصفاً (اختياري)..." value={content} onChange={(e) => setContent(e.target.value)} style={input} rows={2} />
-            <input type="file" accept="image/*,video/*" onChange={(e: any) => setFile(e.target.files[0])} />
-            <button style={btnPurple} onClick={handleUpload} disabled={uploading}>
-              {uploading ? "جاري النشر..." : "نشر"}
-            </button>
-            <button style={btnRed} onClick={() => setShowUpload(false)}>إلغاء</button>
-          </div>
-        )}
-
-        {/* عرض المنشورات مع زر الحذف */}
+        {/* عرض المنشورات مع التفاعلات */}
         <div style={{ marginTop: 30 }}>
           <h3>المنشورات</h3>
           {posts.length === 0 && <p>لا توجد منشورات بعد</p>}
@@ -422,16 +339,8 @@ export default function Profile() {
                 >
                   🔍 تكبير
                 </button>
-                {/* زر الحذف */}
-                <button
-                  onClick={() => handleDeletePost(post.id, post.media_url)}
-                  style={{ position: "absolute", top: 10, left: 10, background: "#ef4444", color: "#fff", border: "none", borderRadius: 20, padding: "5px 10px", cursor: "pointer", fontSize: 12, zIndex: 2 }}
-                >
-                  🗑️ حذف
-                </button>
               </div>
               {post.content && <p style={{ marginTop: 8 }}>{post.content}</p>}
-              
               <div style={postActions}>
                 <button style={actionBtn} onClick={() => handleLike(post.id)}>
                   {userLikesMap[post.id] ? "❤️" : "🤍"} {likesMap[post.id] || 0}
@@ -442,7 +351,6 @@ export default function Profile() {
                 <button style={actionBtn} onClick={() => openShareModal(post.id)}>📤 مشاركة</button>
                 <button style={actionBtn} onClick={() => shareWhatsApp(post)}>📱 واتساب</button>
               </div>
-
               {showComments[post.id] && (
                 <div style={commentsSection}>
                   {commentsMap[post.id]?.map((c: any) => (
@@ -466,7 +374,7 @@ export default function Profile() {
           ))}
         </div>
 
-        {/* مودال عرض المنشور مكبر */}
+        {/* مودال تكبير المنشور */}
         {selectedPost && (
           <div style={modalOverlay} onClick={() => setSelectedPost(null)}>
             <div style={modalContent} onClick={(e) => e.stopPropagation()}>
@@ -489,7 +397,7 @@ export default function Profile() {
               <select onChange={(e) => {
                 const user = usersList.find(u => u.id === parseInt(e.target.value));
                 setSelectedUser(user);
-              }}>
+              }} style={{ width: "100%", padding: 8, marginBottom: 10 }}>
                 <option value="">اختر عضواً</option>
                 {usersList.map(u => <option key={u.id} value={u.id}>{u.full_name}</option>)}
               </select>
@@ -504,16 +412,16 @@ export default function Profile() {
         <div style={{ marginTop: 20, borderTop: "1px solid #eee", paddingTop: 15 }}>
           <div style={{ display: "flex", justifyContent: "center", gap: 20 }}>
             <button style={btnSmall} onClick={() => { setShowFollowing(true); setShowFollowers(false); }}>
-              👥 أتابعهم ({followingList.length})
+              👥 يتابعهم ({followingList.length})
             </button>
             <button style={btnSmall} onClick={() => { setShowFollowers(true); setShowFollowing(false); }}>
-              👤 متابعيني ({followersList.length})
+              👤 متابعوه ({followersList.length})
             </button>
           </div>
           {showFollowing && (
             <div style={listContainer}>
-              <h4>الحسابات التي أتابعها</h4>
-              {followingList.length === 0 && <p>لا تتابع أي حساب بعد</p>}
+              <h4>الحسابات التي يتابعها {user.full_name}</h4>
+              {followingList.length === 0 && <p>لا يتابع أي حساب بعد</p>}
               {followingList.map(f => (
                 <div key={f.id} style={listItem}>
                   <div style={listAvatar}>{f.avatar_url ? <img src={f.avatar_url} style={{ width: 30, height: 30, borderRadius: "50%" }} /> : "👤"}</div>
@@ -525,7 +433,7 @@ export default function Profile() {
           )}
           {showFollowers && (
             <div style={listContainer}>
-              <h4>المتابعون لي</h4>
+              <h4>المتابعون لـ {user.full_name}</h4>
               {followersList.length === 0 && <p>لا يوجد متابعون بعد</p>}
               {followersList.map(f => (
                 <div key={f.id} style={listItem}>
@@ -542,14 +450,13 @@ export default function Profile() {
   );
 }
 
-// الأنماط (بدون تغيير)
+// الأنماط (نفس المستخدمة في Profile)
 const card = { background: "#fff", padding: 20, borderRadius: 16, textAlign: "center" as const, boxShadow: "0 5px 20px rgba(0,0,0,0.1)" };
 const avatar = { width: 100, height: 100, borderRadius: "50%", overflow: "hidden", margin: "auto", background: "#f0f0f0", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40 };
 const btnRow = { display: "flex", gap: 10, justifyContent: "center", marginTop: 15 };
 const input = { width: "100%", padding: 10, marginTop: 10, borderRadius: 8, border: "1px solid #ddd", fontFamily: "inherit" };
-const btnBlue = { background: "#3b82f6", color: "#fff", padding: "10px 15px", border: "none", borderRadius: 8, cursor: "pointer" };
 const btnGreen = { background: "#22c55e", color: "#fff", padding: "10px 15px", border: "none", borderRadius: 8, cursor: "pointer" };
-const btnPurple = { background: "#8b5cf6", color: "#fff", padding: "10px 15px", border: "none", borderRadius: 8, cursor: "pointer" };
+const btnDark = { background: "#111827", color: "#fff", padding: "10px 15px", border: "none", borderRadius: 8, cursor: "pointer" };
 const btnRed = { background: "#ef4444", color: "#fff", padding: "8px 12px", border: "none", borderRadius: 8, marginBottom: 10, cursor: "pointer" };
 const btnSmall = { background: "#e2e8f0", color: "#1e293b", padding: "6px 12px", border: "none", borderRadius: 20, cursor: "pointer", fontSize: 14 };
 const btnRedSmall = { background: "#ef4444", color: "#fff", padding: "6px 12px", border: "none", borderRadius: 8, cursor: "pointer", marginTop: 10 };

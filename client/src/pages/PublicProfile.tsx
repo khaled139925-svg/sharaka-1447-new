@@ -40,7 +40,6 @@ export default function PublicProfile() {
   }, []);
 
   async function loadUserData(userId: number) {
-    // جلب المنشورات
     const { data: postsData } = await supabase
       .from("posts")
       .select("*")
@@ -259,26 +258,50 @@ export default function PublicProfile() {
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   };
 
-  // ✅ دالة المراسلة عبر واتساب
   const handleWhatsAppMessage = () => {
     if (!user.phone) {
       alert(`عذراً، ${user.full_name} لم يُضف رقم هاتف للتواصل عبر واتساب بعد.`);
       return;
     }
-    // تنظيف الرقم: إزالة المسافات والشرطات والأقواس، وإزالة الصفر البادئ إن وجد
     let phone = user.phone.replace(/[\s\-\(\)]/g, '');
     if (phone.startsWith('0')) {
       phone = phone.substring(1);
     }
-    // إذا كان الرقم بدون رمز دولة، يمكنك إضافة رمز افتراضي (مثل 966 للسعودية)
-    // لكن الأفضل أن يكون الرقم مخزناً بالصيغة الدولية مسبقاً.
-    // سنفترض أن الرقم يدخل مع رمز الدولة.
     const whatsappLink = `https://wa.me/${phone}`;
     window.open(whatsappLink, '_blank');
   };
 
   if (!user) return <div style={{ padding: 20 }}>⚠️ جاري التحميل...</div>;
   if (loading) return <div style={{ padding: 20 }}>⏳ جاري التحقق...</div>;
+
+  // أنماط جديدة للمنشورات
+  const mediaContainer = {
+    position: "relative" as const,
+    width: "100%",
+    aspectRatio: "1 / 1", // نسبة مربعة مثل Instagram
+    backgroundColor: "#f0f0f0",
+    borderRadius: 8,
+    overflow: "hidden",
+  };
+  const mediaStyle = {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover" as const,
+    cursor: "pointer",
+  };
+  const zoomBtn = {
+    position: "absolute" as const,
+    top: 10,
+    right: 10,
+    background: "rgba(0,0,0,0.6)",
+    color: "#fff",
+    border: "none",
+    borderRadius: 20,
+    padding: "5px 10px",
+    cursor: "pointer",
+    fontSize: 12,
+    zIndex: 2,
+  };
 
   return (
     <div style={{ padding: 20, maxWidth: 500, margin: "auto" }}>
@@ -303,7 +326,6 @@ export default function PublicProfile() {
           <span>👥 {followersCount} متابع</span>
         </div>
         <div style={btnRow}>
-          {/* زر مراسلة عبر واتساب */}
           <button style={btnDark} onClick={handleWhatsAppMessage}>
             💬 واتساب
           </button>
@@ -312,35 +334,31 @@ export default function PublicProfile() {
           </button>
         </div>
 
-        {/* عرض المنشورات مع التفاعلات */}
+        {/* عرض المنشورات مع التفاعلات (تم إزالة مشاركة وواتساب من تحت المنشور) */}
         <div style={{ marginTop: 30 }}>
           <h3>المنشورات</h3>
           {posts.length === 0 && <p>لا توجد منشورات بعد</p>}
           {posts.map(post => (
             <div key={post.id} style={postCard}>
-              <div style={{ position: "relative" }}>
+              <div style={mediaContainer}>
                 {post.media_type === "image" ? (
                   <img
                     src={post.media_url}
-                    style={{ width: "100%", borderRadius: 8, cursor: "pointer" }}
+                    style={mediaStyle}
                     onClick={() => setSelectedPost(post)}
                   />
                 ) : (
                   <video
                     src={post.media_url}
                     controls
-                    style={{ width: "100%", borderRadius: 8, cursor: "pointer" }}
+                    style={mediaStyle}
                     onClick={() => setSelectedPost(post)}
                   />
                 )}
-                <button
-                  onClick={() => setSelectedPost(post)}
-                  style={{ position: "absolute", top: 10, right: 10, background: "rgba(0,0,0,0.6)", color: "#fff", border: "none", borderRadius: 20, padding: "5px 10px", cursor: "pointer" }}
-                >
-                  🔍 تكبير
-                </button>
+                <button onClick={() => setSelectedPost(post)} style={zoomBtn}>🔍 تكبير</button>
               </div>
               {post.content && <p style={{ marginTop: 8 }}>{post.content}</p>}
+              {/* أزرار التفاعل: إعجاب وتعليق فقط (بدون مشاركة وواتساب) */}
               <div style={postActions}>
                 <button style={actionBtn} onClick={() => handleLike(post.id)}>
                   {userLikesMap[post.id] ? "❤️" : "🤍"} {likesMap[post.id] || 0}
@@ -348,8 +366,6 @@ export default function PublicProfile() {
                 <button style={actionBtn} onClick={() => setShowComments(prev => ({ ...prev, [post.id]: !prev[post.id] }))}>
                   💬 {commentsMap[post.id]?.length || 0}
                 </button>
-                <button style={actionBtn} onClick={() => openShareModal(post.id)}>📤 مشاركة</button>
-                <button style={actionBtn} onClick={() => shareWhatsApp(post)}>📱 واتساب</button>
               </div>
               {showComments[post.id] && (
                 <div style={commentsSection}>
@@ -389,7 +405,7 @@ export default function PublicProfile() {
           </div>
         )}
 
-        {/* مودال المشاركة الداخلية */}
+        {/* مودال المشاركة الداخلية (لم نزلها، تبقى كما هي) */}
         {showShareModal && (
           <div style={modalOverlay} onClick={() => setShowShareModal(false)}>
             <div style={modalContentSmall} onClick={(e) => e.stopPropagation()}>
@@ -450,7 +466,7 @@ export default function PublicProfile() {
   );
 }
 
-// الأنماط (نفس المستخدمة في Profile)
+// الأنماط (نفس القديمة مع إضافة الثوابت الجديدة)
 const card = { background: "#fff", padding: 20, borderRadius: 16, textAlign: "center" as const, boxShadow: "0 5px 20px rgba(0,0,0,0.1)" };
 const avatar = { width: 100, height: 100, borderRadius: "50%", overflow: "hidden", margin: "auto", background: "#f0f0f0", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40 };
 const btnRow = { display: "flex", gap: 10, justifyContent: "center", marginTop: 15 };

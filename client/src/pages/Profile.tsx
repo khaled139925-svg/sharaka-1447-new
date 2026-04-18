@@ -25,15 +25,14 @@ export default function Profile() {
   const [newAvatar, setNewAvatar] = useState<File | null>(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
 
-  // States للمنشورات التفاعلية
-  const [likesMap, setLikesMap] = useState<Record<number, number>>({});
-  const [userLikesMap, setUserLikesMap] = useState<Record<number, boolean>>({});
-  const [commentsMap, setCommentsMap] = useState<Record<number, any[]>>({});
-  const [showComments, setShowComments] = useState<Record<number, boolean>>({});
-  const [newComment, setNewComment] = useState<Record<number, string>>({});
+  const [likesMap, setLikesMap] = useState<Record<string, number>>({});
+  const [userLikesMap, setUserLikesMap] = useState<Record<string, boolean>>({});
+  const [commentsMap, setCommentsMap] = useState<Record<string, any[]>>({});
+  const [showComments, setShowComments] = useState<Record<string, boolean>>({});
+  const [newComment, setNewComment] = useState<Record<string, string>>({});
   const [selectedPost, setSelectedPost] = useState<any>(null);
   const [showShareModal, setShowShareModal] = useState(false);
-  const [sharePostId, setSharePostId] = useState<number | null>(null);
+  const [sharePostId, setSharePostId] = useState<string | null>(null);
   const [usersList, setUsersList] = useState<any[]>([]);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [shareMessage, setShareMessage] = useState("");
@@ -70,9 +69,9 @@ export default function Profile() {
 
   async function loadPostsInteractions(postsArray: any[]) {
     const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
-    const likesCounts: Record<number, number> = {};
-    const userLikes: Record<number, boolean> = {};
-    const comments: Record<number, any[]> = {};
+    const likesCounts: Record<string, number> = {};
+    const userLikes: Record<string, boolean> = {};
+    const comments: Record<string, any[]> = {};
 
     for (const post of postsArray) {
       const { count } = await supabase
@@ -172,7 +171,7 @@ export default function Profile() {
     loadUserData(user.id);
   };
 
-  const handleLike = async (postId: number) => {
+  const handleLike = async (postId: string) => {
     const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
     if (!currentUser.id) {
       alert("يجب تسجيل الدخول أولاً");
@@ -195,7 +194,7 @@ export default function Profile() {
     }
   };
 
-  const handleAddComment = async (postId: number) => {
+  const handleAddComment = async (postId: string) => {
     const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
     if (!currentUser.id) {
       alert("يجب تسجيل الدخول أولاً");
@@ -217,7 +216,7 @@ export default function Profile() {
     }
   };
 
-  const openShareModal = async (postId: number) => {
+  const openShareModal = async (postId: string) => {
     const { data } = await supabase
       .from("consultants")
       .select("id, full_name, avatar_url")
@@ -250,31 +249,57 @@ export default function Profile() {
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   };
 
-  // ✅ دالة حذف المنشور
-  const handleDeletePost = async (postId: number, mediaUrl: string) => {
+  // ✅ دالة حذف المنشور (تعتمد على media_url بدلاً من post.id)
+  const handleDeletePost = async (postId: any, mediaUrl: string) => {
     if (!confirm("⚠️ هل أنت متأكد من حذف هذا المنشور؟ لا يمكن التراجع.")) return;
 
-    const { error: dbError } = await supabase
-      .from("posts")
-      .delete()
-      .eq("id", postId);
+    console.log("محاولة حذف المنشور باستخدام media_url:", mediaUrl);
 
-    if (dbError) {
-      alert("❌ فشل حذف المنشور: " + dbError.message);
+    // 1. البحث عن المنشور باستخدام media_url
+    const { data: post, error: findError } = await supabase
+      .from("posts")
+      .select("id")
+      .eq("media_url", mediaUrl)
+      .maybeSingle();
+
+    if (findError || !post) {
+      console.error("لم يتم العثور على المنشور:", findError);
+      alert("❌ لم يتم العثور على المنشور");
       return;
     }
 
+    console.log("تم العثور على المنشور بالمعرف:", post.id);
+
+    // 2. حذف المنشور باستخدام المعرف الصحيح من قاعدة البيانات
+    const { error: deleteError } = await supabase
+      .from("posts")
+      .delete()
+      .eq("id", post.id);
+
+    if (deleteError) {
+      console.error("خطأ في حذف المنشور:", deleteError);
+      alert("❌ فشل حذف المنشور: " + deleteError.message);
+      return;
+    }
+
+    // 3. حذف الملف من التخزين
     try {
       const filePath = mediaUrl.split('/posts/')[1];
       if (filePath) {
-        await supabase.storage.from("posts").remove([filePath]);
+        const { error: storageError } = await supabase.storage.from("posts").remove([filePath]);
+        if (storageError) console.error("خطأ في حذف الملف:", storageError);
+        else console.log("تم حذف الملف:", filePath);
       }
     } catch (err) {
-      console.error("خطأ في حذف الملف:", err);
+      console.error("استثناء أثناء حذف الملف:", err);
     }
 
-    setPosts(prevPosts => prevPosts.filter(p => p.id !== postId));
+    // 4. تحديث الواجهة مباشرة
+    setPosts(prevPosts => prevPosts.filter(p => p.media_url !== mediaUrl));
     alert("✅ تم حذف المنشور");
+
+    // 5. إعادة تحميل للتأكد (اختياري)
+    await loadUserData(user.id);
   };
 
   const handleEdit = () => {
@@ -439,8 +464,6 @@ export default function Profile() {
                 <button style={actionBtn} onClick={() => setShowComments(prev => ({ ...prev, [post.id]: !prev[post.id] }))}>
                   💬 {commentsMap[post.id]?.length || 0}
                 </button>
-                <button style={actionBtn} onClick={() => openShareModal(post.id)}>📤 مشاركة</button>
-                <button style={actionBtn} onClick={() => shareWhatsApp(post)}>📱 واتساب</button>
               </div>
 
               {showComments[post.id] && (

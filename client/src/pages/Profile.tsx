@@ -249,13 +249,11 @@ export default function Profile() {
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   };
 
-  // ✅ دالة حذف المنشور (تعتمد على media_url بدلاً من post.id)
   const handleDeletePost = async (postId: any, mediaUrl: string) => {
     if (!confirm("⚠️ هل أنت متأكد من حذف هذا المنشور؟ لا يمكن التراجع.")) return;
 
     console.log("محاولة حذف المنشور باستخدام media_url:", mediaUrl);
 
-    // 1. البحث عن المنشور باستخدام media_url
     const { data: post, error: findError } = await supabase
       .from("posts")
       .select("id")
@@ -270,7 +268,6 @@ export default function Profile() {
 
     console.log("تم العثور على المنشور بالمعرف:", post.id);
 
-    // 2. حذف المنشور باستخدام المعرف الصحيح من قاعدة البيانات
     const { error: deleteError } = await supabase
       .from("posts")
       .delete()
@@ -282,7 +279,6 @@ export default function Profile() {
       return;
     }
 
-    // 3. حذف الملف من التخزين
     try {
       const filePath = mediaUrl.split('/posts/')[1];
       if (filePath) {
@@ -294,11 +290,8 @@ export default function Profile() {
       console.error("استثناء أثناء حذف الملف:", err);
     }
 
-    // 4. تحديث الواجهة مباشرة
     setPosts(prevPosts => prevPosts.filter(p => p.media_url !== mediaUrl));
     alert("✅ تم حذف المنشور");
-
-    // 5. إعادة تحميل للتأكد (اختياري)
     await loadUserData(user.id);
   };
 
@@ -367,10 +360,16 @@ export default function Profile() {
 
   if (!user) return <div style={{ padding: 20 }}>⚠️ جاري التحميل...</div>;
 
+  // هنا تم التعديل: إزالة maxWidth و padding و card، وجعل المنشورات بعرض كامل
   return (
-    <div style={{ padding: 20, maxWidth: 500, margin: "auto" }}>
-      <button onClick={() => navigate("/")} style={btnRed}>رجوع</button>
-      <div style={card}>
+    <div style={{ backgroundColor: "#fafafa", minHeight: "100vh" }}>
+      {/* شريط الرجوع (تم تعديل موقعه قليلاً ليتناسب مع التصميم الجديد) */}
+      <div style={{ padding: "10px 16px", background: "#fff", borderBottom: "1px solid #dbdbdb" }}>
+        <button onClick={() => navigate("/")} style={{ background: "none", border: "none", fontSize: 24, cursor: "pointer" }}>←</button>
+      </div>
+
+      {/* معلومات الحساب (بطاقة خارجية ولكن بدون حدود جانبية) */}
+      <div style={{ padding: "16px", background: "#fff", borderBottom: "1px solid #dbdbdb" }}>
         <div style={avatar}>
           {user.avatar_url ? (
             <img src={user.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -419,153 +418,205 @@ export default function Profile() {
             <button style={btnRed} onClick={() => setShowUpload(false)}>إلغاء</button>
           </div>
         )}
+      </div>
 
-        {/* عرض المنشورات مع زر الحذف */}
-        <div style={{ marginTop: 30 }}>
-          <h3>المنشورات</h3>
-          {posts.length === 0 && <p>لا توجد منشورات بعد</p>}
-          {posts.map(post => (
-            <div key={post.id} style={postCard}>
-              <div style={{ position: "relative" }}>
-                {post.media_type === "image" ? (
-                  <img
-                    src={post.media_url}
-                    style={{ width: "100%", borderRadius: 8, cursor: "pointer" }}
-                    onClick={() => setSelectedPost(post)}
-                  />
-                ) : (
-                  <video
-                    src={post.media_url}
-                    controls
-                    style={{ width: "100%", borderRadius: 8, cursor: "pointer" }}
-                    onClick={() => setSelectedPost(post)}
-                  />
-                )}
-                <button
+      {/* عرض المنشورات - بدون أي إطارات، بعرض كامل */}
+      <div>
+        {posts.length === 0 && <p style={{ textAlign: "center", padding: 20 }}>لا توجد منشورات بعد</p>}
+        {posts.map(post => (
+          <div key={post.id} style={{ marginBottom: 20, backgroundColor: "#fff" }}>
+            <div style={{ position: "relative" }}>
+              {post.media_type === "image" ? (
+                <img
+                  src={post.media_url}
+                  style={{ width: "100%", display: "block", cursor: "pointer" }}
                   onClick={() => setSelectedPost(post)}
-                  style={{ position: "absolute", top: 10, right: 10, background: "rgba(0,0,0,0.6)", color: "#fff", border: "none", borderRadius: 20, padding: "5px 10px", cursor: "pointer" }}
-                >
-                  🔍 تكبير
-                </button>
-                {/* زر الحذف */}
-                <button
-                  onClick={() => handleDeletePost(post.id, post.media_url)}
-                  style={{ position: "absolute", top: 10, left: 10, background: "#ef4444", color: "#fff", border: "none", borderRadius: 20, padding: "5px 10px", cursor: "pointer", fontSize: 12, zIndex: 2 }}
-                >
-                  🗑️ حذف
-                </button>
-              </div>
-              {post.content && <p style={{ marginTop: 8 }}>{post.content}</p>}
-              
-              <div style={postActions}>
-                <button style={actionBtn} onClick={() => handleLike(post.id)}>
-                  {userLikesMap[post.id] ? "❤️" : "🤍"} {likesMap[post.id] || 0}
-                </button>
-                <button style={actionBtn} onClick={() => setShowComments(prev => ({ ...prev, [post.id]: !prev[post.id] }))}>
-                  💬 {commentsMap[post.id]?.length || 0}
-                </button>
-              </div>
+                />
+              ) : (
+                <video
+                  src={post.media_url}
+                  controls
+                  style={{ width: "100%", display: "block", cursor: "pointer" }}
+                  onClick={() => setSelectedPost(post)}
+                />
+              )}
+              <button
+                onClick={() => setSelectedPost(post)}
+                style={{ position: "absolute", top: 10, right: 10, background: "rgba(0,0,0,0.6)", color: "#fff", border: "none", borderRadius: 20, padding: "5px 10px", cursor: "pointer" }}
+              >
+                🔍 تكبير
+              </button>
+              <button
+                onClick={() => handleDeletePost(post.id, post.media_url)}
+                style={{ position: "absolute", top: 10, left: 10, background: "#ef4444", color: "#fff", border: "none", borderRadius: 20, padding: "5px 10px", cursor: "pointer", fontSize: 12, zIndex: 2 }}
+              >
+                🗑️ حذف
+              </button>
+            </div>
+            {post.content && <p style={{ padding: "8px 12px", margin: 0 }}>{post.content}</p>}
+            <div style={{ padding: "4px 12px 12px", display: "flex", gap: 20 }}>
+              <button style={actionBtn} onClick={() => handleLike(post.id)}>
+                {userLikesMap[post.id] ? "❤️" : "🤍"} {likesMap[post.id] || 0}
+              </button>
+              <button style={actionBtn} onClick={() => setShowComments(prev => ({ ...prev, [post.id]: !prev[post.id] }))}>
+                💬 {commentsMap[post.id]?.length || 0}
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
 
-              {showComments[post.id] && (
-                <div style={commentsSection}>
-                  {commentsMap[post.id]?.map((c: any) => (
-                    <div key={c.id} style={commentItem}>
+      {/* مودال التعليقات - نافذة منبثقة كبيرة */}
+      {Object.keys(showComments).some(key => showComments[key]) && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(0,0,0,0.8)",
+          zIndex: 1000,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}>
+          <div style={{
+            backgroundColor: "#fff",
+            width: "90%",
+            maxWidth: 500,
+            maxHeight: "80%",
+            borderRadius: 12,
+            overflow: "auto",
+            padding: 16,
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
+              <h4>التعليقات</h4>
+              <button onClick={() => setShowComments({})} style={btnRedSmall}>إغلاق</button>
+            </div>
+            {(() => {
+              const postId = Object.keys(showComments).find(key => showComments[key]);
+              if (!postId) return null;
+              return (
+                <>
+                  {commentsMap[postId]?.map((c: any) => (
+                    <div key={c.id} style={{ marginBottom: 8 }}>
                       <strong>{c.consultants?.full_name || "مستخدم"}</strong>: {c.content}
                     </div>
                   ))}
-                  <div style={{ display: "flex", gap: 5, marginTop: 5 }}>
+                  <div style={{ display: "flex", gap: 5, marginTop: 10 }}>
                     <input
                       type="text"
                       placeholder="اكتب تعليقاً..."
-                      value={newComment[post.id] || ""}
-                      onChange={(e) => setNewComment(prev => ({ ...prev, [post.id]: e.target.value }))}
-                      style={{ flex: 1, padding: 5, borderRadius: 8, border: "1px solid #ddd" }}
+                      value={newComment[postId] || ""}
+                      onChange={(e) => setNewComment(prev => ({ ...prev, [postId]: e.target.value }))}
+                      style={{ flex: 1, padding: 8, borderRadius: 20, border: "1px solid #ddd" }}
                     />
-                    <button style={btnSmall} onClick={() => handleAddComment(post.id)}>نشر</button>
+                    <button style={btnSmall} onClick={() => handleAddComment(postId)}>نشر</button>
                   </div>
-                </div>
-              )}
+                </>
+              );
+            })()}
+          </div>
+        </div>
+      )}
+
+      {/* مودال عرض المنشور مكبر (ملء الشاشة) */}
+      {selectedPost && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "#000",
+          zIndex: 1000,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexDirection: "column",
+        }} onClick={() => setSelectedPost(null)}>
+          <button
+            onClick={() => setSelectedPost(null)}
+            style={{ position: "absolute", top: 20, right: 20, background: "none", border: "none", color: "#fff", fontSize: 30, cursor: "pointer" }}
+          >✖</button>
+          {selectedPost.media_type === "image" ? (
+            <img src={selectedPost.media_url} style={{ maxWidth: "90%", maxHeight: "90%", objectFit: "contain" }} />
+          ) : (
+            <video src={selectedPost.media_url} controls autoPlay style={{ maxWidth: "90%", maxHeight: "90%" }} />
+          )}
+          {selectedPost.content && <p style={{ color: "#fff", marginTop: 10 }}>{selectedPost.content}</p>}
+        </div>
+      )}
+
+      {/* مودال المشاركة الداخلية - نافذة أكبر */}
+      {showShareModal && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(0,0,0,0.8)",
+          zIndex: 1000,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }} onClick={() => setShowShareModal(false)}>
+          <div style={{
+            backgroundColor: "#fff",
+            width: "90%",
+            maxWidth: 400,
+            padding: 20,
+            borderRadius: 12,
+          }} onClick={(e) => e.stopPropagation()}>
+            <h4>إرسال المنشور إلى عضو</h4>
+            <select onChange={(e) => {
+              const user = usersList.find(u => u.id === parseInt(e.target.value));
+              setSelectedUser(user);
+            }} style={{ width: "100%", padding: 8, marginBottom: 10 }}>
+              <option value="">اختر عضواً</option>
+              {usersList.map(u => <option key={u.id} value={u.id}>{u.full_name}</option>)}
+            </select>
+            <textarea placeholder="رسالة (اختياري)" value={shareMessage} onChange={(e) => setShareMessage(e.target.value)} style={input} rows={3} />
+            <button style={btnGreen} onClick={sendInternalShare}>إرسال</button>
+            <button style={btnRed} onClick={() => setShowShareModal(false)}>إلغاء</button>
+          </div>
+        </div>
+      )}
+
+      {/* قوائم المتابعة - تفتح كصفحة كاملة */}
+      {(showFollowing || showFollowers) && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "#fff",
+          zIndex: 1000,
+          overflowY: "auto",
+          padding: 20,
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+            <h3>{showFollowing ? "الحسابات التي أتابعها" : "المتابعون لي"}</h3>
+            <button onClick={() => { setShowFollowing(false); setShowFollowers(false); }} style={btnRedSmall}>إغلاق</button>
+          </div>
+          {(showFollowing ? followingList : followersList).length === 0 && <p>لا توجد بيانات</p>}
+          {(showFollowing ? followingList : followersList).map(f => (
+            <div key={f.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: 12, borderBottom: "1px solid #eee" }}>
+              <div style={{ width: 50, height: 50, borderRadius: "50%", overflow: "hidden", background: "#ccc" }}>
+                {f.avatar_url ? <img src={f.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : "👤"}
+              </div>
+              <div><strong>{f.full_name}</strong><br /><small>{f.specialty || ""}</small></div>
             </div>
           ))}
         </div>
-
-        {/* مودال عرض المنشور مكبر */}
-        {selectedPost && (
-          <div style={modalOverlay} onClick={() => setSelectedPost(null)}>
-            <div style={modalContent} onClick={(e) => e.stopPropagation()}>
-              <button style={closeModalBtn} onClick={() => setSelectedPost(null)}>✖</button>
-              {selectedPost.media_type === "image" ? (
-                <img src={selectedPost.media_url} style={{ maxWidth: "90%", maxHeight: "80vh" }} />
-              ) : (
-                <video src={selectedPost.media_url} controls autoPlay style={{ maxWidth: "90%", maxHeight: "80vh" }} />
-              )}
-              {selectedPost.content && <p>{selectedPost.content}</p>}
-            </div>
-          </div>
-        )}
-
-        {/* مودال المشاركة الداخلية */}
-        {showShareModal && (
-          <div style={modalOverlay} onClick={() => setShowShareModal(false)}>
-            <div style={modalContentSmall} onClick={(e) => e.stopPropagation()}>
-              <h4>إرسال المنشور إلى عضو</h4>
-              <select onChange={(e) => {
-                const user = usersList.find(u => u.id === parseInt(e.target.value));
-                setSelectedUser(user);
-              }}>
-                <option value="">اختر عضواً</option>
-                {usersList.map(u => <option key={u.id} value={u.id}>{u.full_name}</option>)}
-              </select>
-              <textarea placeholder="رسالة (اختياري)" value={shareMessage} onChange={(e) => setShareMessage(e.target.value)} style={input} rows={2} />
-              <button style={btnGreen} onClick={sendInternalShare}>إرسال</button>
-              <button style={btnRed} onClick={() => setShowShareModal(false)}>إلغاء</button>
-            </div>
-          </div>
-        )}
-
-        {/* قوائم المتابعة */}
-        <div style={{ marginTop: 20, borderTop: "1px solid #eee", paddingTop: 15 }}>
-          <div style={{ display: "flex", justifyContent: "center", gap: 20 }}>
-            <button style={btnSmall} onClick={() => { setShowFollowing(true); setShowFollowers(false); }}>
-              👥 أتابعهم ({followingList.length})
-            </button>
-            <button style={btnSmall} onClick={() => { setShowFollowers(true); setShowFollowing(false); }}>
-              👤 متابعيني ({followersList.length})
-            </button>
-          </div>
-          {showFollowing && (
-            <div style={listContainer}>
-              <h4>الحسابات التي أتابعها</h4>
-              {followingList.length === 0 && <p>لا تتابع أي حساب بعد</p>}
-              {followingList.map(f => (
-                <div key={f.id} style={listItem}>
-                  <div style={listAvatar}>{f.avatar_url ? <img src={f.avatar_url} style={{ width: 30, height: 30, borderRadius: "50%" }} /> : "👤"}</div>
-                  <div><strong>{f.full_name}</strong><br /><small>{f.specialty || ""}</small></div>
-                </div>
-              ))}
-              <button style={btnRedSmall} onClick={() => setShowFollowing(false)}>إغلاق</button>
-            </div>
-          )}
-          {showFollowers && (
-            <div style={listContainer}>
-              <h4>المتابعون لي</h4>
-              {followersList.length === 0 && <p>لا يوجد متابعون بعد</p>}
-              {followersList.map(f => (
-                <div key={f.id} style={listItem}>
-                  <div style={listAvatar}>{f.avatar_url ? <img src={f.avatar_url} style={{ width: 30, height: 30, borderRadius: "50%" }} /> : "👤"}</div>
-                  <div><strong>{f.full_name}</strong><br /><small>{f.specialty || ""}</small></div>
-                </div>
-              ))}
-              <button style={btnRedSmall} onClick={() => setShowFollowers(false)}>إغلاق</button>
-            </div>
-          )}
-        </div>
-      </div>
+      )}
     </div>
   );
 }
 
-// الأنماط (بدون تغيير)
+// الأنماط (جميعها موجودة ولم نمسح شيئاً)
 const card = { background: "#fff", padding: 20, borderRadius: 16, textAlign: "center" as const, boxShadow: "0 5px 20px rgba(0,0,0,0.1)" };
 const avatar = { width: 100, height: 100, borderRadius: "50%", overflow: "hidden", margin: "auto", background: "#f0f0f0", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40 };
 const btnRow = { display: "flex", gap: 10, justifyContent: "center", marginTop: 15 };

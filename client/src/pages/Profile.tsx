@@ -3,6 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import html2canvas from "html2canvas";
 
+// دالة تنظيف رقم الهاتف ليتوافق مع واتساب
+const formatPhoneNumber = (phone: string): string => {
+  let cleaned = phone.replace(/\D/g, "");
+  if (cleaned.startsWith("00")) cleaned = cleaned.substring(2);
+  if (cleaned.startsWith("0")) cleaned = cleaned.substring(1);
+  if (cleaned.length <= 9) cleaned = "92" + cleaned;
+  return cleaned;
+};
+
 export default function Profile() {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
@@ -38,13 +47,13 @@ export default function Profile() {
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [shareMessage, setShareMessage] = useState("");
 
-  // حالة الفاتورة (جديدة)
+  // حالة الفاتورة (مطورة)
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [invoiceData, setInvoiceData] = useState({
+    type: "invoice", // invoice | quote
     receiver_name: "",
     receiver_phone: "",
-    service: "",
-    price: "",
+    items: [{ description: "", price: "" }],
     payment_method: ""
   });
   const [signature, setSignature] = useState<File | null>(null);
@@ -54,11 +63,29 @@ export default function Profile() {
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const invoiceRef = useRef<HTMLDivElement>(null);
 
-  // تعريف نمط الجدول للفاتورة
-  const td = {
-    border: "1px solid #ddd",
-    padding: 10,
-    textAlign: "center" as const
+  const td = { border: "1px solid #ddd", padding: 10, textAlign: "center" as const };
+
+  // حساب المجموع
+  const total = invoiceData.items.reduce((sum, item) => {
+    const price = parseFloat(item.price) || 0;
+    return sum + price;
+  }, 0);
+
+  // دوال البنود
+  const addItem = () => {
+    setInvoiceData({
+      ...invoiceData,
+      items: [...invoiceData.items, { description: "", price: "" }]
+    });
+  };
+  const removeItem = (index: number) => {
+    const newItems = invoiceData.items.filter((_, i) => i !== index);
+    setInvoiceData({ ...invoiceData, items: newItems });
+  };
+  const handleItemChange = (index: number, field: "description" | "price", value: string) => {
+    const newItems = [...invoiceData.items];
+    newItems[index][field] = value;
+    setInvoiceData({ ...invoiceData, items: newItems });
   };
 
   useEffect(() => {
@@ -81,13 +108,11 @@ export default function Profile() {
     if (postsData) {
       await loadPostsInteractions(postsData);
     }
-
     const { count } = await supabase
       .from("follows")
       .select("*", { count: "exact", head: true })
       .eq("following_id", userId);
     setFollowersCount(count || 0);
-
     await loadFollowLists(userId);
   }
 
@@ -96,14 +121,12 @@ export default function Profile() {
     const likesCounts: Record<string, number> = {};
     const userLikes: Record<string, boolean> = {};
     const comments: Record<string, any[]> = {};
-
     for (const post of postsArray) {
       const { count } = await supabase
         .from("likes")
         .select("*", { count: "exact", head: true })
         .eq("post_id", post.id);
       likesCounts[post.id] = count || 0;
-
       if (currentUser.id) {
         const { data: likeData } = await supabase
           .from("likes")
@@ -113,7 +136,6 @@ export default function Profile() {
           .maybeSingle();
         userLikes[post.id] = !!likeData;
       }
-
       const { data: commentsData } = await supabase
         .from("comments")
         .select("*, consultants(full_name, avatar_url)")
@@ -138,10 +160,7 @@ export default function Profile() {
         .select("id, full_name, avatar_url, specialty")
         .in("id", followingIds);
       setFollowingList(followingUsers || []);
-    } else {
-      setFollowingList([]);
-    }
-
+    } else setFollowingList([]);
     const { data: followers } = await supabase
       .from("follows")
       .select("follower_id")
@@ -153,9 +172,7 @@ export default function Profile() {
         .select("id, full_name, avatar_url, specialty")
         .in("id", followerIds);
       setFollowersList(followersUsers || []);
-    } else {
-      setFollowersList([]);
-    }
+    } else setFollowersList([]);
   }
 
   const handleUpload = async () => {
@@ -275,34 +292,27 @@ export default function Profile() {
 
   const handleDeletePost = async (postId: any, mediaUrl: string) => {
     if (!confirm("⚠️ هل أنت متأكد من حذف هذا المنشور؟ لا يمكن التراجع.")) return;
-
     console.log("محاولة حذف المنشور باستخدام media_url:", mediaUrl);
-
     const { data: post, error: findError } = await supabase
       .from("posts")
       .select("id")
       .eq("media_url", mediaUrl)
       .maybeSingle();
-
     if (findError || !post) {
       console.error("لم يتم العثور على المنشور:", findError);
       alert("❌ لم يتم العثور على المنشور");
       return;
     }
-
     console.log("تم العثور على المنشور بالمعرف:", post.id);
-
     const { error: deleteError } = await supabase
       .from("posts")
       .delete()
       .eq("id", post.id);
-
     if (deleteError) {
       console.error("خطأ في حذف المنشور:", deleteError);
       alert("❌ فشل حذف المنشور: " + deleteError.message);
       return;
     }
-
     try {
       const filePath = mediaUrl.split('/posts/')[1];
       if (filePath) {
@@ -310,10 +320,7 @@ export default function Profile() {
         if (storageError) console.error("خطأ في حذف الملف:", storageError);
         else console.log("تم حذف الملف:", filePath);
       }
-    } catch (err) {
-      console.error("استثناء أثناء حذف الملف:", err);
-    }
-
+    } catch (err) { console.error("استثناء أثناء حذف الملف:", err); }
     setPosts(prevPosts => prevPosts.filter(p => p.media_url !== mediaUrl));
     alert("✅ تم حذف المنشور");
     await loadUserData(user.id);
@@ -363,17 +370,14 @@ export default function Profile() {
       setEditing(false);
       return;
     }
-
     const { error } = await supabase
       .from("consultants")
       .update(updates)
       .eq("id", user.id);
-
     if (error) {
       alert("❌ فشل التعديل: " + error.message);
       return;
     }
-
     const updatedUser = { ...user, ...updates, avatar_url: avatarUrl };
     setUser(updatedUser);
     localStorage.setItem("user", JSON.stringify(updatedUser));
@@ -382,67 +386,113 @@ export default function Profile() {
     window.location.reload();
   };
 
-  // 🔥 دالة إرسال الفاتورة (تحويل إلى صورة ورفع وإرسال واتساب)
+  // دالة إرسال الفاتورة المطورة
   const sendInvoice = async () => {
     if (!invoiceRef.current) {
       alert("❌ لم يتم العثور على الفاتورة");
       return;
     }
+
     const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
     if (!currentUser.id) {
       alert("❌ يجب تسجيل الدخول");
       return;
     }
 
+    const cleanedPhone = formatPhoneNumber(invoiceData.receiver_phone);
+
+    if (!cleanedPhone || cleanedPhone.length < 10) {
+      alert("❌ رقم الهاتف غير صحيح");
+      return;
+    }
+
     const invNumber = `INV-${Date.now()}`;
     setInvoiceNumber(invNumber);
 
-    // تحديث رقم الفاتورة في العنصر (اختياري)
     const pTag = invoiceRef.current.querySelector("p:first-of-type");
     if (pTag) pTag.innerHTML = `رقم: ${invNumber}`;
 
     const canvas = await html2canvas(invoiceRef.current, { useCORS: true, scale: 2 });
+
     canvas.toBlob(async (blob) => {
-      if (!blob) return;
+      if (!blob) {
+        alert("❌ فشل إنشاء الصورة");
+        return;
+      }
+
       const fileName = `invoice-${invNumber}.png`;
+
       const { error: uploadError } = await supabase.storage
         .from("invoices")
         .upload(fileName, blob, { contentType: "image/png" });
+
       if (uploadError) {
         alert("❌ فشل رفع الصورة: " + uploadError.message);
         return;
       }
-      const { data: urlData } = supabase.storage.from("invoices").getPublicUrl(fileName);
+
+      const { data: urlData } = supabase.storage
+        .from("invoices")
+        .getPublicUrl(fileName);
+
       const imageUrl = urlData.publicUrl;
 
-      // حفظ الفاتورة في قاعدة البيانات
-      const { error: dbError } = await supabase.from("invoices").insert({
+      await supabase.from("invoices").insert({
         sender_id: currentUser.id,
         sender_name: currentUser.full_name,
         sender_phone: currentUser.phone,
         sender_logo: currentUser.avatar_url,
         receiver_name: invoiceData.receiver_name,
         receiver_phone: invoiceData.receiver_phone,
-        service: invoiceData.service,
-        price: invoiceData.price,
+        type: invoiceData.type,
+        items: invoiceData.items,
+        total: total,
         payment_method: invoiceData.payment_method,
         pdf_url: imageUrl,
         status: "pending"
       });
-      if (dbError) console.error("❌ فشل حفظ الفاتورة: " + dbError.message);
-      else console.log("✅ تم حفظ الفاتورة");
 
-      // إرسال رابط الصورة عبر واتساب
-      const rawPhone = invoiceData.receiver_phone.replace(/\D/g, "").replace(/^0/, "");
-      const message = `فاتورة رقم: ${invNumber}\nالخدمة: ${invoiceData.service}\nالسعر: ${invoiceData.price}\nرابط الفاتورة:\n${imageUrl}`;
-      const whatsappUrl = `https://wa.me/${rawPhone}?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, "_blank");
+      const message = `${invoiceData.type === "invoice" ? "فاتورة" : "عرض سعر"}
+رقم: ${invNumber}
+
+${invoiceData.items.map(i => `• ${i.description} - ${i.price}`).join("\n")}
+
+المجموع: ${total}
+
+رابط الفاتورة:
+${imageUrl}`;
+
+      const encodedMessage = encodeURIComponent(message);
+
+      const waLink1 = `https://wa.me/${cleanedPhone}?text=${encodedMessage}`;
+      const waLink2 = `https://api.whatsapp.com/send?phone=${cleanedPhone}&text=${encodedMessage}`;
+
+      console.log("WA1:", waLink1);
+      console.log("WA2:", waLink2);
+
+      const win = window.open(waLink1, "_blank");
+
+      setTimeout(() => {
+        if (!win || win.closed || typeof win.closed === "undefined") {
+          window.open(waLink2, "_blank");
+        }
+      }, 800);
 
       alert("✅ تم إرسال الفاتورة وحفظها");
+
       setShowInvoiceModal(false);
-      setInvoiceData({ receiver_name: "", receiver_phone: "", service: "", price: "", payment_method: "" });
-      setSignature(null); setStamp(null);
-      setSignaturePreview(null); setStampPreview(null);
+      setInvoiceData({
+        type: "invoice",
+        receiver_name: "",
+        receiver_phone: "",
+        items: [{ description: "", price: "" }],
+        payment_method: ""
+      });
+
+      setSignature(null);
+      setStamp(null);
+      setSignaturePreview(null);
+      setStampPreview(null);
       setInvoiceNumber("");
     });
   };
@@ -454,9 +504,7 @@ export default function Profile() {
       <button onClick={() => navigate("/")} style={btnRed}>رجوع</button>
       <div style={card}>
         <div style={avatar}>
-          {user.avatar_url ? (
-            <img src={user.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          ) : "👤"}
+          {user.avatar_url ? <img src={user.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : "👤"}
         </div>
         <h2>{user.full_name}</h2>
         <p>{user.bio || "لا يوجد نبذة"}</p>
@@ -669,7 +717,7 @@ export default function Profile() {
           </div>
         )}
 
-        {/* مودال إنشاء فاتورة (تصميم جديد + useRef) */}
+        {/* مودال إنشاء فاتورة (مطور) - مع تصحيح هيكل الجدول */}
         {showInvoiceModal && (
           <div style={{
             position: "fixed",
@@ -686,39 +734,68 @@ export default function Profile() {
             <div style={{
               backgroundColor: "#fff",
               width: "90%",
-              maxWidth: 400,
+              maxWidth: 500,
               padding: 20,
               borderRadius: 12,
+              maxHeight: "90%",
+              overflowY: "auto",
             }} onClick={(e) => e.stopPropagation()}>
-              <h3>إنشاء فاتورة</h3>
+              <h3>إنشاء مستند</h3>
+
+              <select
+                value={invoiceData.type}
+                onChange={(e) => setInvoiceData({ ...invoiceData, type: e.target.value })}
+                style={input}
+              >
+                <option value="invoice">فاتورة</option>
+                <option value="quote">عرض سعر</option>
+              </select>
+
               <input placeholder="اسم المستلم" value={invoiceData.receiver_name} onChange={e => setInvoiceData({...invoiceData, receiver_name: e.target.value})} style={input} />
               <input placeholder="رقم الجوال" value={invoiceData.receiver_phone} onChange={e => setInvoiceData({...invoiceData, receiver_phone: e.target.value})} style={input} />
-              <input placeholder="الخدمة" value={invoiceData.service} onChange={e => setInvoiceData({...invoiceData, service: e.target.value})} style={input} />
-              <input placeholder="السعر" value={invoiceData.price} onChange={e => setInvoiceData({...invoiceData, price: e.target.value})} style={input} />
-              <input placeholder="طريقة الدفع" value={invoiceData.payment_method} onChange={e => setInvoiceData({...invoiceData, payment_method: e.target.value})} style={input} />
+              <input placeholder="طريقة الدفع (اختياري)" value={invoiceData.payment_method} onChange={e => setInvoiceData({...invoiceData, payment_method: e.target.value})} style={input} />
+
+              <label>البنود (بيان - سعر)</label>
+              {invoiceData.items.map((item, idx) => (
+                <div key={idx} style={{ display: "flex", gap: 5, marginBottom: 8 }}>
+                  <input
+                    type="text"
+                    placeholder={`البيان ${idx + 1}`}
+                    value={item.description}
+                    onChange={(e) => handleItemChange(idx, "description", e.target.value)}
+                    style={{ flex: 2, ...input }}
+                  />
+                  <input
+                    type="text"
+                    placeholder="السعر"
+                    value={item.price}
+                    onChange={(e) => handleItemChange(idx, "price", e.target.value)}
+                    style={{ flex: 1, ...input }}
+                  />
+                  {invoiceData.items.length > 1 && (
+                    <button onClick={() => removeItem(idx)} style={{ ...btnRedSmall, padding: "0 10px" }}>✖</button>
+                  )}
+                </div>
+              ))}
+              <button onClick={addItem} style={{ ...btnGreen, padding: "5px 12px", fontSize: 12 }}>+ إضافة بيان</button>
+
+              <p style={{ marginTop: 10, fontWeight: "bold" }}>المجموع: {total}</p>
+
               <div style={{ marginTop: 10 }}>
                 <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if(f) { setStamp(f); const reader = new FileReader(); reader.onloadend = () => setStampPreview(reader.result as string); reader.readAsDataURL(f); } }} />
                 <br />
                 <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if(f) { setSignature(f); const reader = new FileReader(); reader.onloadend = () => setSignaturePreview(reader.result as string); reader.readAsDataURL(f); } }} />
               </div>
-              {stampPreview && <img src={stampPreview} style={{ width: 50, height: 50, marginTop: 5 }} />}
-              {signaturePreview && <img src={signaturePreview} style={{ width: 50, height: 50, marginTop: 5 }} />}
+              {stampPreview && <img src={stampPreview} style={{ width: 50, height: 50 }} />}
+              {signaturePreview && <img src={signaturePreview} style={{ width: 50, height: 50 }} />}
 
-              {/* عنصر الفاتورة المرئي (للتحويل إلى صورة) */}
               <div ref={invoiceRef} id="invoice" style={{
-                width: 800,
-                padding: 30,
-                background: "#fff",
-                fontFamily: "Arial",
-                direction: "rtl",
-                color: "#000",
-                position: "absolute",
-                top: -9999,
-                left: -9999,
+                width: 800, padding: 30, background: "#fff", fontFamily: "Arial", direction: "rtl",
+                color: "#000", position: "absolute", top: -9999, left: -9999
               }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <div>
-                    <h2 style={{ margin: 0 }}>فاتورة</h2>
+                    <h2>{invoiceData.type === "invoice" ? "فاتورة" : "عرض سعر"}</h2>
                     <p>رقم: {invoiceNumber || "غير محدد"}</p>
                     <p>التاريخ: {new Date().toLocaleDateString()}</p>
                   </div>
@@ -729,18 +806,35 @@ export default function Profile() {
                   <div><h4>من:</h4><p>{user.full_name}</p><p>{user.phone}</p></div>
                   <div><h4>إلى:</h4><p>{invoiceData.receiver_name}</p><p>{invoiceData.receiver_phone}</p></div>
                 </div>
+
+                {/* تم تصحيح الجدول هنا */}
                 <table style={{ width: "100%", marginTop: 30, borderCollapse: "collapse" }}>
-                  <thead><tr style={{ background: "#f3f4f6" }}><th style={td}>الخدمة</th><th style={td}>السعر</th></tr></thead>
-                  <tbody><tr><td style={td}>{invoiceData.service}</td><td style={td}>{invoiceData.price} ريال</td></tr></tbody>
+                  <thead>
+                    <tr style={{ background: "#f3f4f6" }}>
+                      <th style={td}>البيان</th>
+                      <th style={td}>السعر</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {invoiceData.items.map((item, i) => (
+                      <tr key={i}>
+                        <td style={td}>{item.description}</td>
+                        <td style={td}>{item.price}</td>
+                      </tr>
+                    ))}
+                  </tbody>
                 </table>
+
+                <div style={{ marginTop: 20, fontWeight: "bold" }}>المجموع: {total}</div>
                 <div style={{ marginTop: 20 }}><p><strong>طريقة الدفع:</strong> {invoiceData.payment_method}</p></div>
+
                 <div style={{ display: "flex", justifyContent: "space-between", marginTop: 60 }}>
                   <div><p>الختم</p>{stampPreview ? <img src={stampPreview} width="120" /> : (user.avatar_url && <img src={user.avatar_url} width="80" />)}</div>
                   <div><p>التوقيع</p>{signaturePreview ? <img src={signaturePreview} width="120" /> : (user.avatar_url && <img src={user.avatar_url} width="80" />)}</div>
                 </div>
               </div>
 
-              <button style={btnGreen} onClick={sendInvoice}>إرسال الفاتورة</button>
+              <button style={btnGreen} onClick={sendInvoice}>إرسال المستند</button>
               <button style={btnRed} onClick={() => setShowInvoiceModal(false)}>إلغاء</button>
             </div>
           </div>

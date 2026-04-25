@@ -47,16 +47,15 @@ const MenuDrawer: React.FC = () => {
               <button onClick={() => { navigate("/profile"); closeMenu(); }} style={menuItem}>
                 <User size={20} /> ملفي الشخصي
               </button>
-              {/* رابط فاتورتي */}
-              <button onClick={() => { navigate("/my-invoice"); closeMenu(); }} style={menuItem}>
-                <FileText size={20} /> فاتورتي
+              {/* زر فواتيري */}
+              <button onClick={() => { navigate("/my-invoices"); closeMenu(); }} style={menuItem}>
+                <FileText size={20} /> فواتيري
               </button>
               {currentUser.is_admin && (
                 <>
                   <button onClick={() => { navigate("/admin"); closeMenu(); }} style={menuItem}>
                     <Shield size={20} /> لوحة التحكم
                   </button>
-                  {/* إعدادات الاشتراك للمدير */}
                   <button onClick={() => { navigate("/admin-settings"); closeMenu(); }} style={menuItem}>
                     <Settings size={20} /> إعدادات الاشتراك
                   </button>

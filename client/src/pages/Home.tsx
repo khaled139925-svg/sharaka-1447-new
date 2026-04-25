@@ -178,7 +178,7 @@ export default function Home() {
           {!currentUser ? (
             <>
               <button onClick={() => setShowLogin(true)} style={btnBlueSmall}>دخول</button>
-              <button onClick={() => setShowRegister(true)} style={btnOrangeSmall}>تسجيل</button>
+              <button onClick={() => window.location.href = "/signup"} style={btnOrangeSmall}>تسجيل</button>
             </>
           ) : (
             <button onClick={() => {
@@ -223,7 +223,7 @@ export default function Home() {
         ))}
       </div>
 
-      {/* نماذج تسجيل الدخول والتسجيل كما هي */}
+      {/* نافذة تسجيل الدخول المنبثقة */}
       {showLogin && (
         <div style={overlay}>
           <div style={modal}>
@@ -232,7 +232,8 @@ export default function Home() {
               <input type="email" placeholder="Email" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} style={input} />
               <input type="password" placeholder="Password" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} style={input} />
               {loginError && <div style={{ color: "red", marginBottom: 10 }}>{loginError}</div>}
-              <button type="submit" style={btnBlue}>دخول</button>
+              {/* ✅ زر الدخول أصبح برتقالياً مطابقاً لزر التسجيل */}
+              <button type="submit" style={btnOrange}>دخول</button>
               <button
                 type="button"
                 onClick={async () => {
@@ -251,6 +252,7 @@ export default function Home() {
         </div>
       )}
 
+      {/* نافذة التسجيل المنبثقة */}
       {showRegister && (
         <div style={overlay}>
           <div style={modal}>
@@ -301,6 +303,7 @@ const input: any = {
   border: "1px solid #ddd",
 };
 
+// زر أزرق (احتياطي)
 const btnBlue: any = {
   background: "#2563eb",
   color: "#fff",
@@ -308,8 +311,10 @@ const btnBlue: any = {
   border: "none",
   width: "100%",
   borderRadius: 8,
+  cursor: "pointer",
 };
 
+// ✅ الزر البرتقالي الموحد للدخول والتسجيل
 const btnOrange: any = {
   background: "#f97316",
   color: "#fff",
@@ -317,6 +322,8 @@ const btnOrange: any = {
   border: "none",
   width: "100%",
   borderRadius: 8,
+  cursor: "pointer",
+  fontWeight: "bold",
 };
 
 const btnBlueSmall: any = {
@@ -325,6 +332,7 @@ const btnBlueSmall: any = {
   padding: "8px 16px",
   borderRadius: 8,
   border: "none",
+  cursor: "pointer",
 };
 
 const btnOrangeSmall: any = {
@@ -333,6 +341,7 @@ const btnOrangeSmall: any = {
   padding: "8px 16px",
   borderRadius: 8,
   border: "none",
+  cursor: "pointer",
 };
 
 const btnAdmin: any = {

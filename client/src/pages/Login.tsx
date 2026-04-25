@@ -1,45 +1,115 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 
 export default function Login() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
+    setLoading(true);
+
     const { data, error } = await supabase
       .from("consultants")
-      .select("id, full_name")
+      .select("*")
       .eq("email", email)
       .eq("password", password)
       .single();
+
     if (error || !data) {
-      setError("البريد أو كلمة المرور غير صحيحة");
-    } else {
-      localStorage.setItem("user", JSON.stringify(data));
-      navigate("/");
+      setError("الإيميل أو كلمة المرور غير صحيحة");
+      setLoading(false);
+      return;
     }
+
+    if (data.is_active === false) {
+      setError("هذا الحساب مجمد، رجاء التواصل مع الإدارة");
+      setLoading(false);
+      return;
+    }
+
+    localStorage.setItem("user", JSON.stringify(data));
+    navigate("/profile");
     setLoading(false);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-6 rounded shadow-md w-96">
-        <h2 className="text-2xl font-bold text-center mb-4">تسجيل الدخول</h2>
-        <form onSubmit={handleLogin} className="space-y-3">
-          <input type="email" placeholder="البريد الإلكتروني" value={email} onChange={e => setEmail(e.target.value)} className="w-full border p-2 rounded" required />
-          <input type="password" placeholder="كلمة المرور" value={password} onChange={e => setPassword(e.target.value)} className="w-full border p-2 rounded" required />
-          {error && <div className="text-red-500">{error}</div>}
-          <button type="submit" disabled={loading} className="w-full bg-orange-500 text-white py-2 rounded">دخول</button>
-          <Link to="/signup" className="block text-center text-blue-600">إنشاء حساب جديد</Link>
-        </form>
-      </div>
+    <div
+      style={{
+        maxWidth: 500,
+        margin: "40px auto",
+        padding: 20,
+        background: "#fff",
+        borderRadius: 16,
+        position: "relative",
+      }}
+    >
+      {/* زر الإغلاق */}
+      <button
+        onClick={() => navigate("/")}
+        style={{
+          position: "absolute",
+          top: 15,
+          right: 20,
+          background: "transparent",
+          border: "none",
+          fontSize: 24,
+          cursor: "pointer",
+          color: "#888",
+        }}
+        aria-label="إغلاق"
+      >
+        ✖
+      </button>
+
+      <h2 style={{ textAlign: "center" }}>تسجيل الدخول</h2>
+      <form onSubmit={handleLogin}>
+        <input
+          type="email"
+          placeholder="البريد الإلكتروني"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          style={inputStyle}
+          required
+        />
+        <input
+          type="password"
+          placeholder="كلمة المرور"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          style={inputStyle}
+          required
+        />
+        {error && <div style={{ color: "red", marginBottom: 10 }}>{error}</div>}
+        <button type="submit" style={btnStyle} disabled={loading}>
+          {loading ? "جاري الدخول..." : "دخول"}
+        </button>
+      </form>
     </div>
   );
 }
+
+const inputStyle = {
+  width: "100%",
+  padding: 10,
+  marginBottom: 15,
+  borderRadius: 8,
+  border: "1px solid #ddd",
+  boxSizing: "border-box" as const,
+};
+
+const btnStyle = {
+  background: "#f97316", // اللون البرتقالي (مطابق لزر التسجيل)
+  color: "#fff",
+  padding: 10,
+  width: "100%",
+  borderRadius: 8,
+  border: "none",
+  cursor: "pointer",
+  fontWeight: "bold",
+};

@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import html2canvas from "html2canvas";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -36,6 +37,29 @@ export default function Profile() {
   const [usersList, setUsersList] = useState<any[]>([]);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [shareMessage, setShareMessage] = useState("");
+
+  // حالة الفاتورة (جديدة)
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [invoiceData, setInvoiceData] = useState({
+    receiver_name: "",
+    receiver_phone: "",
+    service: "",
+    price: "",
+    payment_method: ""
+  });
+  const [signature, setSignature] = useState<File | null>(null);
+  const [stamp, setStamp] = useState<File | null>(null);
+  const [signaturePreview, setSignaturePreview] = useState<string | null>(null);
+  const [stampPreview, setStampPreview] = useState<string | null>(null);
+  const [invoiceNumber, setInvoiceNumber] = useState("");
+  const invoiceRef = useRef<HTMLDivElement>(null);
+
+  // تعريف نمط الجدول للفاتورة
+  const td = {
+    border: "1px solid #ddd",
+    padding: 10,
+    textAlign: "center" as const
+  };
 
   useEffect(() => {
     const localUser = JSON.parse(localStorage.getItem("user") || "null");
@@ -358,18 +382,77 @@ export default function Profile() {
     window.location.reload();
   };
 
+  // 🔥 دالة إرسال الفاتورة (تحويل إلى صورة ورفع وإرسال واتساب)
+  const sendInvoice = async () => {
+    if (!invoiceRef.current) {
+      alert("❌ لم يتم العثور على الفاتورة");
+      return;
+    }
+    const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+    if (!currentUser.id) {
+      alert("❌ يجب تسجيل الدخول");
+      return;
+    }
+
+    const invNumber = `INV-${Date.now()}`;
+    setInvoiceNumber(invNumber);
+
+    // تحديث رقم الفاتورة في العنصر (اختياري)
+    const pTag = invoiceRef.current.querySelector("p:first-of-type");
+    if (pTag) pTag.innerHTML = `رقم: ${invNumber}`;
+
+    const canvas = await html2canvas(invoiceRef.current, { useCORS: true, scale: 2 });
+    canvas.toBlob(async (blob) => {
+      if (!blob) return;
+      const fileName = `invoice-${invNumber}.png`;
+      const { error: uploadError } = await supabase.storage
+        .from("invoices")
+        .upload(fileName, blob, { contentType: "image/png" });
+      if (uploadError) {
+        alert("❌ فشل رفع الصورة: " + uploadError.message);
+        return;
+      }
+      const { data: urlData } = supabase.storage.from("invoices").getPublicUrl(fileName);
+      const imageUrl = urlData.publicUrl;
+
+      // حفظ الفاتورة في قاعدة البيانات
+      const { error: dbError } = await supabase.from("invoices").insert({
+        sender_id: currentUser.id,
+        sender_name: currentUser.full_name,
+        sender_phone: currentUser.phone,
+        sender_logo: currentUser.avatar_url,
+        receiver_name: invoiceData.receiver_name,
+        receiver_phone: invoiceData.receiver_phone,
+        service: invoiceData.service,
+        price: invoiceData.price,
+        payment_method: invoiceData.payment_method,
+        pdf_url: imageUrl,
+        status: "pending"
+      });
+      if (dbError) console.error("❌ فشل حفظ الفاتورة: " + dbError.message);
+      else console.log("✅ تم حفظ الفاتورة");
+
+      // إرسال رابط الصورة عبر واتساب
+      const rawPhone = invoiceData.receiver_phone.replace(/\D/g, "").replace(/^0/, "");
+      const message = `فاتورة رقم: ${invNumber}\nالخدمة: ${invoiceData.service}\nالسعر: ${invoiceData.price}\nرابط الفاتورة:\n${imageUrl}`;
+      const whatsappUrl = `https://wa.me/${rawPhone}?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, "_blank");
+
+      alert("✅ تم إرسال الفاتورة وحفظها");
+      setShowInvoiceModal(false);
+      setInvoiceData({ receiver_name: "", receiver_phone: "", service: "", price: "", payment_method: "" });
+      setSignature(null); setStamp(null);
+      setSignaturePreview(null); setStampPreview(null);
+      setInvoiceNumber("");
+    });
+  };
+
   if (!user) return <div style={{ padding: 20 }}>⚠️ جاري التحميل...</div>;
 
-  // هنا تم التعديل: إزالة maxWidth و padding و card، وجعل المنشورات بعرض كامل
   return (
-    <div style={{ backgroundColor: "#fafafa", minHeight: "100vh" }}>
-      {/* شريط الرجوع (تم تعديل موقعه قليلاً ليتناسب مع التصميم الجديد) */}
-      <div style={{ padding: "10px 16px", background: "#fff", borderBottom: "1px solid #dbdbdb" }}>
-        <button onClick={() => navigate("/")} style={{ background: "none", border: "none", fontSize: 24, cursor: "pointer" }}>←</button>
-      </div>
-
-      {/* معلومات الحساب (بطاقة خارجية ولكن بدون حدود جانبية) */}
-      <div style={{ padding: "16px", background: "#fff", borderBottom: "1px solid #dbdbdb" }}>
+    <div style={{ padding: 20, maxWidth: 500, margin: "auto" }}>
+      <button onClick={() => navigate("/")} style={btnRed}>رجوع</button>
+      <div style={card}>
         <div style={avatar}>
           {user.avatar_url ? (
             <img src={user.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -406,6 +489,8 @@ export default function Profile() {
         <div style={btnRow}>
           <button style={btnBlue} onClick={handleEdit}>تعديل الحساب</button>
           <button style={btnPurple} onClick={() => setShowUpload(true)}>إضافة منشور</button>
+          <button style={btnGreen} onClick={() => setShowInvoiceModal(true)}>🧾 فاتورة</button>
+          <button style={btnBlue} onClick={() => navigate("/my-invoices")}>📂 فواتيري</button>
         </div>
 
         {showUpload && (
@@ -418,205 +503,283 @@ export default function Profile() {
             <button style={btnRed} onClick={() => setShowUpload(false)}>إلغاء</button>
           </div>
         )}
-      </div>
 
-      {/* عرض المنشورات - بدون أي إطارات، بعرض كامل */}
-      <div>
-        {posts.length === 0 && <p style={{ textAlign: "center", padding: 20 }}>لا توجد منشورات بعد</p>}
-        {posts.map(post => (
-          <div key={post.id} style={{ marginBottom: 20, backgroundColor: "#fff" }}>
-            <div style={{ position: "relative" }}>
-              {post.media_type === "image" ? (
-                <img
-                  src={post.media_url}
-                  style={{ width: "100%", display: "block", cursor: "pointer" }}
+        {/* عرض المنشورات - تم إزالة الإطار والحدود */}
+        <div style={{ marginTop: 30 }}>
+          <h3>المنشورات</h3>
+          {posts.length === 0 && <p>لا توجد منشورات بعد</p>}
+          {posts.map(post => (
+            <div key={post.id} style={{ marginBottom: 20, backgroundColor: "#fff" }}>
+              <div style={{ position: "relative" }}>
+                {post.media_type === "image" ? (
+                  <img
+                    src={post.media_url}
+                    style={{ width: "100%", display: "block", cursor: "pointer" }}
+                    onClick={() => setSelectedPost(post)}
+                  />
+                ) : (
+                  <video
+                    src={post.media_url}
+                    controls
+                    style={{ width: "100%", display: "block", cursor: "pointer" }}
+                    onClick={() => setSelectedPost(post)}
+                  />
+                )}
+                <button
                   onClick={() => setSelectedPost(post)}
-                />
-              ) : (
-                <video
-                  src={post.media_url}
-                  controls
-                  style={{ width: "100%", display: "block", cursor: "pointer" }}
-                  onClick={() => setSelectedPost(post)}
-                />
-              )}
-              <button
-                onClick={() => setSelectedPost(post)}
-                style={{ position: "absolute", top: 10, right: 10, background: "rgba(0,0,0,0.6)", color: "#fff", border: "none", borderRadius: 20, padding: "5px 10px", cursor: "pointer" }}
-              >
-                🔍 تكبير
-              </button>
-              <button
-                onClick={() => handleDeletePost(post.id, post.media_url)}
-                style={{ position: "absolute", top: 10, left: 10, background: "#ef4444", color: "#fff", border: "none", borderRadius: 20, padding: "5px 10px", cursor: "pointer", fontSize: 12, zIndex: 2 }}
-              >
-                🗑️ حذف
-              </button>
-            </div>
-            {post.content && <p style={{ padding: "8px 12px", margin: 0 }}>{post.content}</p>}
-            <div style={{ padding: "4px 12px 12px", display: "flex", gap: 20 }}>
-              <button style={actionBtn} onClick={() => handleLike(post.id)}>
-                {userLikesMap[post.id] ? "❤️" : "🤍"} {likesMap[post.id] || 0}
-              </button>
-              <button style={actionBtn} onClick={() => setShowComments(prev => ({ ...prev, [post.id]: !prev[post.id] }))}>
-                💬 {commentsMap[post.id]?.length || 0}
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* مودال التعليقات - نافذة منبثقة كبيرة */}
-      {Object.keys(showComments).some(key => showComments[key]) && (
-        <div style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "rgba(0,0,0,0.8)",
-          zIndex: 1000,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}>
-          <div style={{
-            backgroundColor: "#fff",
-            width: "90%",
-            maxWidth: 500,
-            maxHeight: "80%",
-            borderRadius: 12,
-            overflow: "auto",
-            padding: 16,
-          }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
-              <h4>التعليقات</h4>
-              <button onClick={() => setShowComments({})} style={btnRedSmall}>إغلاق</button>
-            </div>
-            {(() => {
-              const postId = Object.keys(showComments).find(key => showComments[key]);
-              if (!postId) return null;
-              return (
-                <>
-                  {commentsMap[postId]?.map((c: any) => (
-                    <div key={c.id} style={{ marginBottom: 8 }}>
-                      <strong>{c.consultants?.full_name || "مستخدم"}</strong>: {c.content}
-                    </div>
-                  ))}
-                  <div style={{ display: "flex", gap: 5, marginTop: 10 }}>
-                    <input
-                      type="text"
-                      placeholder="اكتب تعليقاً..."
-                      value={newComment[postId] || ""}
-                      onChange={(e) => setNewComment(prev => ({ ...prev, [postId]: e.target.value }))}
-                      style={{ flex: 1, padding: 8, borderRadius: 20, border: "1px solid #ddd" }}
-                    />
-                    <button style={btnSmall} onClick={() => handleAddComment(postId)}>نشر</button>
-                  </div>
-                </>
-              );
-            })()}
-          </div>
-        </div>
-      )}
-
-      {/* مودال عرض المنشور مكبر (ملء الشاشة) */}
-      {selectedPost && (
-        <div style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "#000",
-          zIndex: 1000,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexDirection: "column",
-        }} onClick={() => setSelectedPost(null)}>
-          <button
-            onClick={() => setSelectedPost(null)}
-            style={{ position: "absolute", top: 20, right: 20, background: "none", border: "none", color: "#fff", fontSize: 30, cursor: "pointer" }}
-          >✖</button>
-          {selectedPost.media_type === "image" ? (
-            <img src={selectedPost.media_url} style={{ maxWidth: "90%", maxHeight: "90%", objectFit: "contain" }} />
-          ) : (
-            <video src={selectedPost.media_url} controls autoPlay style={{ maxWidth: "90%", maxHeight: "90%" }} />
-          )}
-          {selectedPost.content && <p style={{ color: "#fff", marginTop: 10 }}>{selectedPost.content}</p>}
-        </div>
-      )}
-
-      {/* مودال المشاركة الداخلية - نافذة أكبر */}
-      {showShareModal && (
-        <div style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "rgba(0,0,0,0.8)",
-          zIndex: 1000,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }} onClick={() => setShowShareModal(false)}>
-          <div style={{
-            backgroundColor: "#fff",
-            width: "90%",
-            maxWidth: 400,
-            padding: 20,
-            borderRadius: 12,
-          }} onClick={(e) => e.stopPropagation()}>
-            <h4>إرسال المنشور إلى عضو</h4>
-            <select onChange={(e) => {
-              const user = usersList.find(u => u.id === parseInt(e.target.value));
-              setSelectedUser(user);
-            }} style={{ width: "100%", padding: 8, marginBottom: 10 }}>
-              <option value="">اختر عضواً</option>
-              {usersList.map(u => <option key={u.id} value={u.id}>{u.full_name}</option>)}
-            </select>
-            <textarea placeholder="رسالة (اختياري)" value={shareMessage} onChange={(e) => setShareMessage(e.target.value)} style={input} rows={3} />
-            <button style={btnGreen} onClick={sendInternalShare}>إرسال</button>
-            <button style={btnRed} onClick={() => setShowShareModal(false)}>إلغاء</button>
-          </div>
-        </div>
-      )}
-
-      {/* قوائم المتابعة - تفتح كصفحة كاملة */}
-      {(showFollowing || showFollowers) && (
-        <div style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "#fff",
-          zIndex: 1000,
-          overflowY: "auto",
-          padding: 20,
-        }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-            <h3>{showFollowing ? "الحسابات التي أتابعها" : "المتابعون لي"}</h3>
-            <button onClick={() => { setShowFollowing(false); setShowFollowers(false); }} style={btnRedSmall}>إغلاق</button>
-          </div>
-          {(showFollowing ? followingList : followersList).length === 0 && <p>لا توجد بيانات</p>}
-          {(showFollowing ? followingList : followersList).map(f => (
-            <div key={f.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: 12, borderBottom: "1px solid #eee" }}>
-              <div style={{ width: 50, height: 50, borderRadius: "50%", overflow: "hidden", background: "#ccc" }}>
-                {f.avatar_url ? <img src={f.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : "👤"}
+                  style={{ position: "absolute", top: 10, right: 10, background: "rgba(0,0,0,0.6)", color: "#fff", border: "none", borderRadius: 20, padding: "5px 10px", cursor: "pointer" }}
+                >
+                  🔍 تكبير
+                </button>
+                <button
+                  onClick={() => handleDeletePost(post.id, post.media_url)}
+                  style={{ position: "absolute", top: 10, left: 10, background: "#ef4444", color: "#fff", border: "none", borderRadius: 20, padding: "5px 10px", cursor: "pointer", fontSize: 12, zIndex: 2 }}
+                >
+                  🗑️ حذف
+                </button>
               </div>
-              <div><strong>{f.full_name}</strong><br /><small>{f.specialty || ""}</small></div>
+              {post.content && <p style={{ padding: "8px 12px", margin: 0 }}>{post.content}</p>}
+              <div style={{ padding: "4px 12px 12px", display: "flex", gap: 20 }}>
+                <button style={actionBtn} onClick={() => handleLike(post.id)}>
+                  {userLikesMap[post.id] ? "❤️" : "🤍"} {likesMap[post.id] || 0}
+                </button>
+                <button style={actionBtn} onClick={() => setShowComments(prev => ({ ...prev, [post.id]: !prev[post.id] }))}>
+                  💬 {commentsMap[post.id]?.length || 0}
+                </button>
+              </div>
             </div>
           ))}
         </div>
-      )}
+
+        {/* مودال التعليقات - نافذة منبثقة كبيرة */}
+        {Object.keys(showComments).some(key => showComments[key]) && (
+          <div style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.8)",
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}>
+            <div style={{
+              backgroundColor: "#fff",
+              width: "90%",
+              maxWidth: 500,
+              maxHeight: "80%",
+              borderRadius: 12,
+              overflow: "auto",
+              padding: 16,
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
+                <h4>التعليقات</h4>
+                <button onClick={() => setShowComments({})} style={btnRedSmall}>إغلاق</button>
+              </div>
+              {(() => {
+                const postId = Object.keys(showComments).find(key => showComments[key]);
+                if (!postId) return null;
+                return (
+                  <>
+                    {commentsMap[postId]?.map((c: any) => (
+                      <div key={c.id} style={{ marginBottom: 8 }}>
+                        <strong>{c.consultants?.full_name || "مستخدم"}</strong>: {c.content}
+                      </div>
+                    ))}
+                    <div style={{ display: "flex", gap: 5, marginTop: 10 }}>
+                      <input
+                        type="text"
+                        placeholder="اكتب تعليقاً..."
+                        value={newComment[postId] || ""}
+                        onChange={(e) => setNewComment(prev => ({ ...prev, [postId]: e.target.value }))}
+                        style={{ flex: 1, padding: 8, borderRadius: 20, border: "1px solid #ddd" }}
+                      />
+                      <button style={btnSmall} onClick={() => handleAddComment(postId)}>نشر</button>
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
+          </div>
+        )}
+
+        {/* مودال عرض المنشور مكبر (ملء الشاشة) */}
+        {selectedPost && (
+          <div style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "#000",
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexDirection: "column",
+          }} onClick={() => setSelectedPost(null)}>
+            <button
+              onClick={() => setSelectedPost(null)}
+              style={{ position: "absolute", top: 20, right: 20, background: "none", border: "none", color: "#fff", fontSize: 30, cursor: "pointer" }}
+            >✖</button>
+            {selectedPost.media_type === "image" ? (
+              <img src={selectedPost.media_url} style={{ maxWidth: "90%", maxHeight: "90%", objectFit: "contain" }} />
+            ) : (
+              <video src={selectedPost.media_url} controls autoPlay style={{ maxWidth: "90%", maxHeight: "90%" }} />
+            )}
+            {selectedPost.content && <p style={{ color: "#fff", marginTop: 10 }}>{selectedPost.content}</p>}
+          </div>
+        )}
+
+        {/* مودال المشاركة الداخلية - نافذة أكبر */}
+        {showShareModal && (
+          <div style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.8)",
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }} onClick={() => setShowShareModal(false)}>
+            <div style={{
+              backgroundColor: "#fff",
+              width: "90%",
+              maxWidth: 400,
+              padding: 20,
+              borderRadius: 12,
+            }} onClick={(e) => e.stopPropagation()}>
+              <h4>إرسال المنشور إلى عضو</h4>
+              <select onChange={(e) => {
+                const user = usersList.find(u => u.id === parseInt(e.target.value));
+                setSelectedUser(user);
+              }} style={{ width: "100%", padding: 8, marginBottom: 10 }}>
+                <option value="">اختر عضواً</option>
+                {usersList.map(u => <option key={u.id} value={u.id}>{u.full_name}</option>)}
+              </select>
+              <textarea placeholder="رسالة (اختياري)" value={shareMessage} onChange={(e) => setShareMessage(e.target.value)} style={input} rows={3} />
+              <button style={btnGreen} onClick={sendInternalShare}>إرسال</button>
+              <button style={btnRed} onClick={() => setShowShareModal(false)}>إلغاء</button>
+            </div>
+          </div>
+        )}
+
+        {/* مودال إنشاء فاتورة (تصميم جديد + useRef) */}
+        {showInvoiceModal && (
+          <div style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.8)",
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }} onClick={() => setShowInvoiceModal(false)}>
+            <div style={{
+              backgroundColor: "#fff",
+              width: "90%",
+              maxWidth: 400,
+              padding: 20,
+              borderRadius: 12,
+            }} onClick={(e) => e.stopPropagation()}>
+              <h3>إنشاء فاتورة</h3>
+              <input placeholder="اسم المستلم" value={invoiceData.receiver_name} onChange={e => setInvoiceData({...invoiceData, receiver_name: e.target.value})} style={input} />
+              <input placeholder="رقم الجوال" value={invoiceData.receiver_phone} onChange={e => setInvoiceData({...invoiceData, receiver_phone: e.target.value})} style={input} />
+              <input placeholder="الخدمة" value={invoiceData.service} onChange={e => setInvoiceData({...invoiceData, service: e.target.value})} style={input} />
+              <input placeholder="السعر" value={invoiceData.price} onChange={e => setInvoiceData({...invoiceData, price: e.target.value})} style={input} />
+              <input placeholder="طريقة الدفع" value={invoiceData.payment_method} onChange={e => setInvoiceData({...invoiceData, payment_method: e.target.value})} style={input} />
+              <div style={{ marginTop: 10 }}>
+                <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if(f) { setStamp(f); const reader = new FileReader(); reader.onloadend = () => setStampPreview(reader.result as string); reader.readAsDataURL(f); } }} />
+                <br />
+                <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if(f) { setSignature(f); const reader = new FileReader(); reader.onloadend = () => setSignaturePreview(reader.result as string); reader.readAsDataURL(f); } }} />
+              </div>
+              {stampPreview && <img src={stampPreview} style={{ width: 50, height: 50, marginTop: 5 }} />}
+              {signaturePreview && <img src={signaturePreview} style={{ width: 50, height: 50, marginTop: 5 }} />}
+
+              {/* عنصر الفاتورة المرئي (للتحويل إلى صورة) */}
+              <div ref={invoiceRef} id="invoice" style={{
+                width: 800,
+                padding: 30,
+                background: "#fff",
+                fontFamily: "Arial",
+                direction: "rtl",
+                color: "#000",
+                position: "absolute",
+                top: -9999,
+                left: -9999,
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div>
+                    <h2 style={{ margin: 0 }}>فاتورة</h2>
+                    <p>رقم: {invoiceNumber || "غير محدد"}</p>
+                    <p>التاريخ: {new Date().toLocaleDateString()}</p>
+                  </div>
+                  {user.avatar_url && <img src={user.avatar_url} crossOrigin="anonymous" style={{ width: 80 }} />}
+                </div>
+                <hr />
+                <div style={{ display: "flex", justifyContent: "space-between", marginTop: 20 }}>
+                  <div><h4>من:</h4><p>{user.full_name}</p><p>{user.phone}</p></div>
+                  <div><h4>إلى:</h4><p>{invoiceData.receiver_name}</p><p>{invoiceData.receiver_phone}</p></div>
+                </div>
+                <table style={{ width: "100%", marginTop: 30, borderCollapse: "collapse" }}>
+                  <thead><tr style={{ background: "#f3f4f6" }}><th style={td}>الخدمة</th><th style={td}>السعر</th></tr></thead>
+                  <tbody><tr><td style={td}>{invoiceData.service}</td><td style={td}>{invoiceData.price} ريال</td></tr></tbody>
+                </table>
+                <div style={{ marginTop: 20 }}><p><strong>طريقة الدفع:</strong> {invoiceData.payment_method}</p></div>
+                <div style={{ display: "flex", justifyContent: "space-between", marginTop: 60 }}>
+                  <div><p>الختم</p>{stampPreview ? <img src={stampPreview} width="120" /> : (user.avatar_url && <img src={user.avatar_url} width="80" />)}</div>
+                  <div><p>التوقيع</p>{signaturePreview ? <img src={signaturePreview} width="120" /> : (user.avatar_url && <img src={user.avatar_url} width="80" />)}</div>
+                </div>
+              </div>
+
+              <button style={btnGreen} onClick={sendInvoice}>إرسال الفاتورة</button>
+              <button style={btnRed} onClick={() => setShowInvoiceModal(false)}>إلغاء</button>
+            </div>
+          </div>
+        )}
+
+        {/* قوائم المتابعة - تفتح كصفحة كاملة */}
+        {(showFollowing || showFollowers) && (
+          <div style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "#fff",
+            zIndex: 1000,
+            overflowY: "auto",
+            padding: 20,
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+              <h3>{showFollowing ? "الحسابات التي أتابعها" : "المتابعون لي"}</h3>
+              <button onClick={() => { setShowFollowing(false); setShowFollowers(false); }} style={btnRedSmall}>إغلاق</button>
+            </div>
+            {(showFollowing ? followingList : followersList).length === 0 && <p>لا توجد بيانات</p>}
+            {(showFollowing ? followingList : followersList).map(f => (
+              <div key={f.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: 12, borderBottom: "1px solid #eee" }}>
+                <div style={{ width: 50, height: 50, borderRadius: "50%", overflow: "hidden", background: "#ccc" }}>
+                  {f.avatar_url ? <img src={f.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : "👤"}
+                </div>
+                <div><strong>{f.full_name}</strong><br /><small>{f.specialty || ""}</small></div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-// الأنماط (جميعها موجودة ولم نمسح شيئاً)
+// الأنماط (جميعها موجودة)
 const card = { background: "#fff", padding: 20, borderRadius: 16, textAlign: "center" as const, boxShadow: "0 5px 20px rgba(0,0,0,0.1)" };
 const avatar = { width: 100, height: 100, borderRadius: "50%", overflow: "hidden", margin: "auto", background: "#f0f0f0", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40 };
 const btnRow = { display: "flex", gap: 10, justifyContent: "center", marginTop: 15 };

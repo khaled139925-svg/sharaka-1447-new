@@ -2,6 +2,16 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 
+/*
+  🔧 ملاحظة: يجب تنفيذ أوامر SQL التالية (مرة واحدة فقط) في Supabase SQL Editor:
+
+  alter table invoices
+  add column if not exists sender_name text;
+
+  alter table invoices
+  add column if not exists sender_logo text;
+*/
+
 export default function PublicProfile() {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
@@ -14,7 +24,7 @@ export default function PublicProfile() {
   const [showFollowers, setShowFollowers] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // States للتفاعلات
+  // التفاعلات
   const [likesMap, setLikesMap] = useState<Record<string, number>>({});
   const [userLikesMap, setUserLikesMap] = useState<Record<string, boolean>>({});
   const [commentsMap, setCommentsMap] = useState<Record<string, any[]>>({});
@@ -26,6 +36,16 @@ export default function PublicProfile() {
   const [usersList, setUsersList] = useState<any[]>([]);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [shareMessage, setShareMessage] = useState("");
+
+  // الفاتورة
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [invoiceData, setInvoiceData] = useState({
+    receiver_name: "",
+    receiver_phone: "",
+    service: "",
+    price: "",
+    payment_method: ""
+  });
 
   useEffect(() => {
     const viewUserStr = localStorage.getItem("viewUser");
@@ -274,19 +294,49 @@ export default function PublicProfile() {
   if (!user) return <div style={{ padding: 20 }}>⚠️ جاري التحميل...</div>;
   if (loading) return <div style={{ padding: 20 }}>⏳ جاري التحقق...</div>;
 
+  // أنماط المنشورات
+  const mediaContainer = {
+    position: "relative" as const,
+    width: "100%",
+    aspectRatio: "1 / 1",
+    backgroundColor: "#f0f0f0",
+    borderRadius: 8,
+    overflow: "hidden",
+  };
+  const mediaStyle = {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover" as const,
+    cursor: "pointer",
+  };
+  const zoomBtn = {
+    position: "absolute" as const,
+    top: 10,
+    right: 10,
+    background: "rgba(0,0,0,0.6)",
+    color: "#fff",
+    border: "none",
+    borderRadius: 20,
+    padding: "5px 10px",
+    cursor: "pointer",
+    fontSize: 12,
+    zIndex: 2,
+  };
+
+  const currentUserId = JSON.parse(localStorage.getItem("user") || "{}")?.id;
+
   return (
-    // تصميم جديد بنفس طريقة Profile: بدون maxWidth وبدون card، وشريط علوي بسيط
-    <div style={{ backgroundColor: "#fafafa", minHeight: "100vh" }}>
-      {/* شريط الرجوع */}
-      <div style={{ padding: "10px 16px", background: "#fff", borderBottom: "1px solid #dbdbdb" }}>
-        <button onClick={() => {
+    <div style={{ padding: 20, maxWidth: 500, margin: "auto" }}>
+      <button
+        onClick={() => {
           localStorage.removeItem("viewUser");
           navigate("/");
-        }} style={{ background: "none", border: "none", fontSize: 24, cursor: "pointer" }}>←</button>
-      </div>
-
-      {/* معلومات الحساب (بدون حدود جانبية) */}
-      <div style={{ padding: "16px", background: "#fff", borderBottom: "1px solid #dbdbdb" }}>
+        }}
+        style={btnRed}
+      >
+        رجوع
+      </button>
+      <div style={card}>
         <div style={avatar}>
           {user.avatar_url ? (
             <img src={user.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -295,212 +345,284 @@ export default function PublicProfile() {
         <h2>{user.full_name}</h2>
         <p>{user.bio || "لا يوجد نبذة"}</p>
         <div style={{ margin: "10px 0", color: "#555" }}>
-          <div>📧 {user.email || "غير مضاف"}</div>
           <div>📞 {user.phone || "غير مضاف"}</div>
         </div>
         <div style={{ display: "flex", justifyContent: "center", gap: 20, margin: "10px 0" }}>
           <span>📌 {posts.length} منشور</span>
           <span>👥 {followersCount} متابع</span>
         </div>
+
+        {/* أزرار الإجراءات */}
         <div style={btnRow}>
           <button style={btnDark} onClick={handleWhatsAppMessage}>💬 واتساب</button>
+
+          {/* زر إنشاء فاتورة يظهر فقط لصاحب الحساب */}
+          {currentUserId === user.id && (
+            <button
+              style={btnGreen}
+              onClick={() => {
+                const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+                if (!currentUser.id) {
+                  alert("❌ يجب تسجيل الدخول أولاً");
+                  return;
+                }
+                setShowInvoiceModal(true);
+              }}
+            >
+              🧾 إنشاء فاتورة
+            </button>
+          )}
+
           <button style={isFollowing ? btnRed : btnGreen} onClick={handleFollow}>
             {isFollowing ? "إلغاء المتابعة" : "متابعة"}
           </button>
         </div>
-      </div>
 
-      {/* عرض المنشورات - بعرض كامل بدون إطارات */}
-      <div>
-        {posts.length === 0 && <p style={{ textAlign: "center", padding: 20 }}>لا توجد منشورات بعد</p>}
-        {posts.map(post => (
-          <div key={post.id} style={{ marginBottom: 20, backgroundColor: "#fff" }}>
-            <div style={{ position: "relative" }}>
-              {post.media_type === "image" ? (
-                <img
-                  src={post.media_url}
-                  style={{ width: "100%", display: "block", cursor: "pointer" }}
-                  onClick={() => setSelectedPost(post)}
-                />
-              ) : (
-                <video
-                  src={post.media_url}
-                  controls
-                  style={{ width: "100%", display: "block", cursor: "pointer" }}
-                  onClick={() => setSelectedPost(post)}
-                />
-              )}
-              <button
-                onClick={() => setSelectedPost(post)}
-                style={{ position: "absolute", top: 10, right: 10, background: "rgba(0,0,0,0.6)", color: "#fff", border: "none", borderRadius: 20, padding: "5px 10px", cursor: "pointer" }}
-              >
-                🔍 تكبير
-              </button>
-            </div>
-            {post.content && <p style={{ padding: "8px 12px", margin: 0 }}>{post.content}</p>}
-            <div style={{ padding: "4px 12px 12px", display: "flex", gap: 20 }}>
-              <button style={actionBtn} onClick={() => handleLike(post.id)}>
-                {userLikesMap[post.id] ? "❤️" : "🤍"} {likesMap[post.id] || 0}
-              </button>
-              <button style={actionBtn} onClick={() => setShowComments(prev => ({ ...prev, [post.id]: !prev[post.id] }))}>
-                💬 {commentsMap[post.id]?.length || 0}
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* مودال التعليقات (نافذة منبثقة كبيرة) */}
-      {Object.keys(showComments).some(key => showComments[key]) && (
-        <div style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "rgba(0,0,0,0.8)",
-          zIndex: 1000,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}>
-          <div style={{
-            backgroundColor: "#fff",
-            width: "90%",
-            maxWidth: 500,
-            maxHeight: "80%",
-            borderRadius: 12,
-            overflow: "auto",
-            padding: 16,
-          }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
-              <h4>التعليقات</h4>
-              <button onClick={() => setShowComments({})} style={btnRedSmall}>إغلاق</button>
-            </div>
-            {(() => {
-              const postId = Object.keys(showComments).find(key => showComments[key]);
-              if (!postId) return null;
-              return (
-                <>
-                  {commentsMap[postId]?.map((c: any) => (
-                    <div key={c.id} style={{ marginBottom: 8 }}>
+        {/* المنشورات */}
+        <div style={{ marginTop: 30 }}>
+          <h3>المنشورات</h3>
+          {posts.length === 0 && <p>لا توجد منشورات بعد</p>}
+          {posts.map((post) => (
+            <div key={post.id} style={postCard}>
+              <div style={mediaContainer}>
+                {post.media_type === "image" ? (
+                  <img src={post.media_url} style={mediaStyle} onClick={() => setSelectedPost(post)} />
+                ) : (
+                  <video src={post.media_url} controls style={mediaStyle} onClick={() => setSelectedPost(post)} />
+                )}
+                <button onClick={() => setSelectedPost(post)} style={zoomBtn}>
+                  🔍 تكبير
+                </button>
+              </div>
+              {post.content && <p style={{ marginTop: 8 }}>{post.content}</p>}
+              <div style={postActions}>
+                <button style={actionBtn} onClick={() => handleLike(post.id)}>
+                  {userLikesMap[post.id] ? "❤️" : "🤍"} {likesMap[post.id] || 0}
+                </button>
+                <button style={actionBtn} onClick={() => setShowComments((prev) => ({ ...prev, [post.id]: !prev[post.id] }))}>
+                  💬 {commentsMap[post.id]?.length || 0}
+                </button>
+              </div>
+              {showComments[post.id] && (
+                <div style={commentsSection}>
+                  {commentsMap[post.id]?.map((c: any) => (
+                    <div key={c.id} style={commentItem}>
                       <strong>{c.consultants?.full_name || "مستخدم"}</strong>: {c.content}
                     </div>
                   ))}
-                  <div style={{ display: "flex", gap: 5, marginTop: 10 }}>
+                  <div style={{ display: "flex", gap: 5, marginTop: 5 }}>
                     <input
                       type="text"
                       placeholder="اكتب تعليقاً..."
-                      value={newComment[postId] || ""}
-                      onChange={(e) => setNewComment(prev => ({ ...prev, [postId]: e.target.value }))}
-                      style={{ flex: 1, padding: 8, borderRadius: 20, border: "1px solid #ddd" }}
+                      value={newComment[post.id] || ""}
+                      onChange={(e) => setNewComment((prev) => ({ ...prev, [post.id]: e.target.value }))}
+                      style={{ flex: 1, padding: 5, borderRadius: 8, border: "1px solid #ddd" }}
                     />
-                    <button style={btnSmall} onClick={() => handleAddComment(postId)}>نشر</button>
+                    <button style={btnSmall} onClick={() => handleAddComment(post.id)}>
+                      نشر
+                    </button>
                   </div>
-                </>
-              );
-            })()}
-          </div>
-        </div>
-      )}
-
-      {/* مودال تكبير المنشور (ملء الشاشة) */}
-      {selectedPost && (
-        <div style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "#000",
-          zIndex: 1000,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexDirection: "column",
-        }} onClick={() => setSelectedPost(null)}>
-          <button
-            onClick={() => setSelectedPost(null)}
-            style={{ position: "absolute", top: 20, right: 20, background: "none", border: "none", color: "#fff", fontSize: 30, cursor: "pointer" }}
-          >✖</button>
-          {selectedPost.media_type === "image" ? (
-            <img src={selectedPost.media_url} style={{ maxWidth: "90%", maxHeight: "90%", objectFit: "contain" }} />
-          ) : (
-            <video src={selectedPost.media_url} controls autoPlay style={{ maxWidth: "90%", maxHeight: "90%" }} />
-          )}
-          {selectedPost.content && <p style={{ color: "#fff", marginTop: 10 }}>{selectedPost.content}</p>}
-        </div>
-      )}
-
-      {/* مودال المشاركة الداخلية */}
-      {showShareModal && (
-        <div style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "rgba(0,0,0,0.8)",
-          zIndex: 1000,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }} onClick={() => setShowShareModal(false)}>
-          <div style={{
-            backgroundColor: "#fff",
-            width: "90%",
-            maxWidth: 400,
-            padding: 20,
-            borderRadius: 12,
-          }} onClick={(e) => e.stopPropagation()}>
-            <h4>إرسال المنشور إلى عضو</h4>
-            <select onChange={(e) => {
-              const user = usersList.find(u => u.id === parseInt(e.target.value));
-              setSelectedUser(user);
-            }} style={{ width: "100%", padding: 8, marginBottom: 10 }}>
-              <option value="">اختر عضواً</option>
-              {usersList.map(u => <option key={u.id} value={u.id}>{u.full_name}</option>)}
-            </select>
-            <textarea placeholder="رسالة (اختياري)" value={shareMessage} onChange={(e) => setShareMessage(e.target.value)} style={input} rows={3} />
-            <button style={btnGreen} onClick={sendInternalShare}>إرسال</button>
-            <button style={btnRed} onClick={() => setShowShareModal(false)}>إلغاء</button>
-          </div>
-        </div>
-      )}
-
-      {/* قوائم المتابعة - تفتح كصفحة كاملة */}
-      {(showFollowing || showFollowers) && (
-        <div style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "#fff",
-          zIndex: 1000,
-          overflowY: "auto",
-          padding: 20,
-        }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-            <h3>{showFollowing ? "الحسابات التي يتابعها" : "المتابعون"}</h3>
-            <button onClick={() => { setShowFollowing(false); setShowFollowers(false); }} style={btnRedSmall}>إغلاق</button>
-          </div>
-          {(showFollowing ? followingList : followersList).length === 0 && <p>لا توجد بيانات</p>}
-          {(showFollowing ? followingList : followersList).map(f => (
-            <div key={f.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: 12, borderBottom: "1px solid #eee" }}>
-              <div style={{ width: 50, height: 50, borderRadius: "50%", overflow: "hidden", background: "#ccc" }}>
-                {f.avatar_url ? <img src={f.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : "👤"}
-              </div>
-              <div><strong>{f.full_name}</strong><br /><small>{f.specialty || ""}</small></div>
+                </div>
+              )}
             </div>
           ))}
         </div>
-      )}
+
+        {/* مودال تكبير الميديا */}
+        {selectedPost && (
+          <div style={modalOverlay} onClick={() => setSelectedPost(null)}>
+            <div style={modalContent} onClick={(e) => e.stopPropagation()}>
+              <button style={closeModalBtn} onClick={() => setSelectedPost(null)}>
+                ✖
+              </button>
+              {selectedPost.media_type === "image" ? (
+                <img src={selectedPost.media_url} style={{ maxWidth: "90%", maxHeight: "80vh" }} />
+              ) : (
+                <video src={selectedPost.media_url} controls autoPlay style={{ maxWidth: "90%", maxHeight: "80vh" }} />
+              )}
+              {selectedPost.content && <p>{selectedPost.content}</p>}
+            </div>
+          </div>
+        )}
+
+        {/* مودال المشاركة الداخلية */}
+        {showShareModal && (
+          <div style={modalOverlay} onClick={() => setShowShareModal(false)}>
+            <div style={modalContentSmall} onClick={(e) => e.stopPropagation()}>
+              <h4>إرسال المنشور إلى عضو</h4>
+              <select
+                onChange={(e) => {
+                  const user = usersList.find((u) => u.id === parseInt(e.target.value));
+                  setSelectedUser(user);
+                }}
+                style={{ width: "100%", padding: 8, marginBottom: 10 }}
+              >
+                <option value="">اختر عضواً</option>
+                {usersList.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.full_name}
+                  </option>
+                ))}
+              </select>
+              <textarea
+                placeholder="رسالة (اختياري)"
+                value={shareMessage}
+                onChange={(e) => setShareMessage(e.target.value)}
+                style={input}
+                rows={2}
+              />
+              <button style={btnGreen} onClick={sendInternalShare}>
+                إرسال
+              </button>
+              <button style={btnRed} onClick={() => setShowShareModal(false)}>
+                إلغاء
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* مودال إنشاء فاتورة (محدث) */}
+        {showInvoiceModal && (
+          <div style={modalOverlay} onClick={() => setShowInvoiceModal(false)}>
+            <div style={modalContentSmallStyle} onClick={(e) => e.stopPropagation()}>
+              <h3>إنشاء فاتورة</h3>
+              <input
+                placeholder="اسم المستلم"
+                value={invoiceData.receiver_name}
+                onChange={(e) => setInvoiceData({ ...invoiceData, receiver_name: e.target.value })}
+                style={input}
+              />
+              <input
+                placeholder="رقم الجوال"
+                value={invoiceData.receiver_phone}
+                onChange={(e) => setInvoiceData({ ...invoiceData, receiver_phone: e.target.value })}
+                style={input}
+              />
+              <input
+                placeholder="الخدمة"
+                value={invoiceData.service}
+                onChange={(e) => setInvoiceData({ ...invoiceData, service: e.target.value })}
+                style={input}
+              />
+              <input
+                placeholder="السعر"
+                type="number"
+                value={invoiceData.price}
+                onChange={(e) => setInvoiceData({ ...invoiceData, price: e.target.value })}
+                style={input}
+              />
+              <input
+                placeholder="طريقة الدفع"
+                value={invoiceData.payment_method}
+                onChange={(e) => setInvoiceData({ ...invoiceData, payment_method: e.target.value })}
+                style={input}
+              />
+
+              <button
+                style={btnGreen}
+                onClick={async () => {
+                  const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+
+                  // نص الفاتورة المرسلة (محل مشكلة الترميز)
+                  const invoiceText =
+                    "🧾 فاتورة جديدة\n\n" +
+                    "👤 من: " + currentUser.full_name + "\n" +
+                    "📞 إلى: " + invoiceData.receiver_phone + "\n\n" +
+                    "🛠 الخدمة: " + invoiceData.service + "\n" +
+                    "💰 السعر: " + invoiceData.price + "\n" +
+                    "💳 الدفع: " + invoiceData.payment_method;
+
+                  // إرسال عبر واتساب
+                  const phone = invoiceData.receiver_phone.replace(/\D/g, "");
+                  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(invoiceText)}`, "_blank");
+
+                  // حفظ الفاتورة في قاعدة البيانات
+                  const { error } = await supabase.from("invoices").insert({
+                    sender_id: currentUser.id,
+                    sender_name: currentUser.full_name,
+                    sender_logo: currentUser.avatar_url,
+                    receiver_id: user.id,
+                    receiver_name: invoiceData.receiver_name,
+                    receiver_phone: invoiceData.receiver_phone,
+                    service: invoiceData.service,
+                    price: Number(invoiceData.price),
+                    payment_method: invoiceData.payment_method
+                  });
+
+                  if (!error) {
+                    alert("✅ تم إرسال الفاتورة وحفظها");
+                    setShowInvoiceModal(false);
+                  } else {
+                    alert("❌ " + error.message);
+                  }
+                }}
+              >
+                إرسال الفاتورة
+              </button>
+
+              <button style={btnRed} onClick={() => setShowInvoiceModal(false)}>
+                إلغاء
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* قوائم المتابعة */}
+        <div style={{ marginTop: 20, borderTop: "1px solid #eee", paddingTop: 15 }}>
+          <div style={{ display: "flex", justifyContent: "center", gap: 20 }}>
+            <button style={btnSmall} onClick={() => { setShowFollowing(true); setShowFollowers(false); }}>
+              👥 يتابعهم ({followingList.length})
+            </button>
+            <button style={btnSmall} onClick={() => { setShowFollowers(true); setShowFollowing(false); }}>
+              👤 متابعوه ({followersList.length})
+            </button>
+          </div>
+          {showFollowing && (
+            <div style={listContainer}>
+              <h4>الحسابات التي يتابعها {user.full_name}</h4>
+              {followingList.length === 0 && <p>لا يتابع أي حساب بعد</p>}
+              {followingList.map((f) => (
+                <div key={f.id} style={listItem}>
+                  <div style={listAvatar}>
+                    {f.avatar_url ? <img src={f.avatar_url} style={{ width: 30, height: 30, borderRadius: "50%" }} /> : "👤"}
+                  </div>
+                  <div>
+                    <strong>{f.full_name}</strong>
+                    <br />
+                    <small>{f.specialty || ""}</small>
+                  </div>
+                </div>
+              ))}
+              <button style={btnRedSmall} onClick={() => setShowFollowing(false)}>إغلاق</button>
+            </div>
+          )}
+          {showFollowers && (
+            <div style={listContainer}>
+              <h4>المتابعون لـ {user.full_name}</h4>
+              {followersList.length === 0 && <p>لا يوجد متابعون بعد</p>}
+              {followersList.map((f) => (
+                <div key={f.id} style={listItem}>
+                  <div style={listAvatar}>
+                    {f.avatar_url ? <img src={f.avatar_url} style={{ width: 30, height: 30, borderRadius: "50%" }} /> : "👤"}
+                  </div>
+                  <div>
+                    <strong>{f.full_name}</strong>
+                    <br />
+                    <small>{f.specialty || ""}</small>
+                  </div>
+                </div>
+              ))}
+              <button style={btnRedSmall} onClick={() => setShowFollowers(false)}>إغلاق</button>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
 
-// الأنماط (تم الحفاظ على جميع الأنماط القديمة وإضافة الأنماط الجديدة)
+// الأنماط (بدون تغيير)
+const card = { background: "#fff", padding: 20, borderRadius: 16, textAlign: "center" as const, boxShadow: "0 5px 20px rgba(0,0,0,0.1)" };
 const avatar = { width: 100, height: 100, borderRadius: "50%", overflow: "hidden", margin: "auto", background: "#f0f0f0", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40 };
 const btnRow = { display: "flex", gap: 10, justifyContent: "center", marginTop: 15 };
 const input = { width: "100%", padding: 10, marginTop: 10, borderRadius: 8, border: "1px solid #ddd", fontFamily: "inherit" };
@@ -512,6 +634,7 @@ const btnRedSmall = { background: "#ef4444", color: "#fff", padding: "6px 12px",
 const listContainer = { marginTop: 15, background: "#f8fafc", padding: 12, borderRadius: 12, maxHeight: 300, overflowY: "auto" as const, textAlign: "left" as const };
 const listItem = { display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: "1px solid #e2e8f0" };
 const listAvatar = { width: 40, height: 40, borderRadius: "50%", overflow: "hidden", background: "#cbd5e1", display: "flex", alignItems: "center", justifyContent: "center" };
+const postCard = { marginBottom: 20, border: "1px solid #eee", borderRadius: 12, padding: 10 };
 const postActions = { display: "flex", gap: 15, justifyContent: "space-around", marginTop: 10 };
 const actionBtn = { background: "transparent", border: "none", cursor: "pointer", fontSize: 16, padding: "5px 10px", borderRadius: 20 };
 const commentsSection = { marginTop: 10, padding: 10, background: "#f9f9f9", borderRadius: 8 };
@@ -519,4 +642,14 @@ const commentItem = { marginBottom: 5, fontSize: 14 };
 const modalOverlay = { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.8)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 };
 const modalContent = { background: "#fff", padding: 20, borderRadius: 12, maxWidth: "90%", maxHeight: "90%", textAlign: "center" as const };
 const modalContentSmall = { background: "#fff", padding: 20, borderRadius: 12, width: 300, textAlign: "center" as const };
+const modalContentSmallStyle = {
+  background: "#fff",
+  padding: 20,
+  borderRadius: 12,
+  width: "90%",
+  maxWidth: 400,
+  display: "flex",
+  flexDirection: "column",
+  gap: 10
+};
 const closeModalBtn = { position: "absolute", top: 10, right: 10, background: "#ef4444", color: "#fff", border: "none", borderRadius: "50%", width: 30, height: 30, cursor: "pointer" };

@@ -5,6 +5,14 @@ import Signup from "./pages/Signup";
 import Profile from "./pages/Profile";
 import PublicProfile from "./pages/PublicProfile";
 import AdminPanel from "./pages/AdminPanel";
+import AdminSettings from './pages/AdminSettings';
+import MyInvoice from './pages/MyInvoice';
+import MyInvoices from "./pages/MyInvoices";
+
+
+
+
+
 
 function App() {
   return (
@@ -16,6 +24,14 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/public-profile" element={<PublicProfile />} />
         <Route path="/admin" element={<AdminPanel />} />
+        <Route path="/admin-settings" element={<AdminSettings />} />
+        <Route path="/my-invoice" element={<MyInvoice />} />
+        <Route path="/signup" element={<Signup key={Date.now()} />} />
+         <Route path="/my-invoices" element={<MyInvoices />} />
+         
+
+
+
       </Routes>
     </BrowserRouter>
   );

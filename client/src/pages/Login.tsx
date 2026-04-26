@@ -1,29 +1,18 @@
-import React, { useState } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 
-interface LoginProps {
-  onNavigate?: (page: string) => void;
-}
-
-export default function Login({ onNavigate }: LoginProps) {
+export default function Login() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [showForgot, setShowForgot] = useState(false);
-  const [forgotEmail, setForgotEmail] = useState("");
-  const [forgotMessage, setForgotMessage] = useState("");
-  const [forgotLoading, setForgotLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
+    setLoading(true);
 
     const { data, error: loginError } = await supabase
       .from("consultants")
@@ -33,188 +22,37 @@ export default function Login({ onNavigate }: LoginProps) {
       .single();
 
     if (loginError || !data) {
-      setError("البريد الإلكتروني أو كلمة المرور غير صحيحة");
+      setError("الإيميل أو كلمة المرور غير صحيحة");
+      setLoading(false);
+      return;
+    }
+
+    if (data.is_active === false) {
+      setError("هذا الحساب مجمد، رجاء التواصل مع الإدارة");
       setLoading(false);
       return;
     }
 
     localStorage.setItem("user", JSON.stringify(data));
     localStorage.setItem("isLoggedIn", "true");
-
-    // التوجيه بعد تسجيل الدخول
-    const returnTo = localStorage.getItem("returnTo") || "/dashboard";
-    const openChat = localStorage.getItem("openChat") === "true";
-    localStorage.removeItem("returnTo");
-    localStorage.removeItem("openChat");
-
-    if (openChat) {
-      window.location.href = returnTo + "?openChat=true";
-    } else {
-      navigate(returnTo);
-    }
+    navigate("/profile");
     setLoading(false);
   };
 
-  const handleForgotPassword = async () => {
-    if (!forgotEmail) {
-      setForgotMessage("الرجاء إدخال البريد الإلكتروني");
-      return;
-    }
-
-    setForgotLoading(true);
-    const { data, error } = await supabase
-      .from("consultants")
-      .select("password")
-      .eq("email", forgotEmail)
-      .single();
-
-    if (error || !data) {
-      setForgotMessage("❌ البريد الإلكتروني غير مسجل في النظام");
-      setForgotLoading(false);
-      return;
-    }
-
-    setForgotMessage(`🔑 كلمة المرور الخاصة بك هي: ${data.password}`);
-    setTimeout(() => {
-      setForgotMessage("");
-      setShowForgot(false);
-      setForgotEmail("");
-    }, 8000);
-    setForgotLoading(false);
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1976D2]/10 to-[#FF9800]/10 flex items-center justify-center py-16" dir="rtl">
-      <div className="max-w-md w-full mx-4">
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-[#FF9800] mb-2">مرحباً بك</h1>
-            <p className="text-gray-500">سجل دخولك للوصول إلى حسابك</p>
-          </div>
-
-          {!showForgot ? (
-            <form onSubmit={handleLogin}>
-              <div className="mb-5">
-                <label className="block mb-2 font-semibold text-gray-700">البريد الإلكتروني</label>
-                <div className="relative">
-                  <Mail className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full border border-gray-300 rounded-xl p-3 pr-12 focus:outline-none focus:ring-2 focus:ring-[#FF9800] focus:border-transparent"
-                    placeholder="example@email.com"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="mb-5">
-                <label className="block mb-2 font-semibold text-gray-700">كلمة المرور</label>
-                <div className="relative">
-                  <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full border border-gray-300 rounded-xl p-3 pr-12 focus:outline-none focus:ring-2 focus:ring-[#FF9800] focus:border-transparent"
-                    placeholder="••••••••"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                </div>
-              </div>
-
-              <div className="text-left mb-6">
-                <button
-                  type="button"
-                  onClick={() => setShowForgot(true)}
-                  className="text-sm text-[#1976D2] hover:text-[#FF9800] transition"
-                >
-                  نسيت كلمة المرور؟
-                </button>
-              </div>
-
-              {error && (
-                <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-xl text-sm">
-                  {error}
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-[#FF9800] hover:bg-orange-500 text-white font-bold py-3 rounded-xl transition flex items-center justify-center gap-2"
-              >
-                {loading ? "جاري تسجيل الدخول..." : "تسجيل الدخول"}
-                <ArrowRight size={18} />
-              </button>
-
-              <div className="mt-6 text-center">
-                <p className="text-gray-500">
-                  ليس لديك حساب؟{" "}
-                  <button
-                    type="button"
-                    onClick={() => onNavigate?.("consultant-signup")}
-                    className="text-[#1976D2] hover:text-[#FF9800] font-semibold"
-                  >
-                    انضم إلينا
-                  </button>
-                </p>
-              </div>
-            </form>
-          ) : (
-            <div>
-              <p className="text-gray-600 mb-6 text-center">
-                أدخل بريدك الإلكتروني وستظهر لك كلمة المرور مباشرة
-              </p>
-              <div className="mb-5">
-                <label className="block mb-2 font-semibold text-gray-700">البريد الإلكتروني</label>
-                <div className="relative">
-                  <Mail className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                  <input
-                    type="email"
-                    value={forgotEmail}
-                    onChange={(e) => setForgotEmail(e.target.value)}
-                    className="w-full border border-gray-300 rounded-xl p-3 pr-12 focus:outline-none focus:ring-2 focus:ring-[#FF9800]"
-                    placeholder="example@email.com"
-                  />
-                </div>
-              </div>
-
-              {forgotMessage && (
-                <div className={`mb-4 p-3 rounded-xl text-sm text-center ${forgotMessage.includes("هي") ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"}`}>
-                  {forgotMessage}
-                </div>
-              )}
-
-              <button
-                onClick={handleForgotPassword}
-                disabled={forgotLoading}
-                className="w-full bg-[#1976D2] hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition"
-              >
-                {forgotLoading ? "جاري البحث..." : "استعادة كلمة المرور"}
-              </button>
-
-              <button
-                onClick={() => {
-                  setShowForgot(false);
-                  setForgotMessage("");
-                  setForgotEmail("");
-                }}
-                className="w-full mt-3 text-gray-500 hover:text-gray-700 py-2 rounded-xl transition"
-              >
-                ← العودة لتسجيل الدخول
-              </button>
-            </div>
-          )}
-        </div>
+    <div style={{ maxWidth: 400, margin: "40px auto", padding: 20, background: "#fff", borderRadius: 16, boxShadow: "0 2px 10px rgba(0,0,0,0.1)", position: "relative" }}>
+      <button onClick={() => navigate("/")} style={{ position: "absolute", top: 15, right: 20, background: "transparent", border: "none", fontSize: 24, cursor: "pointer", color: "#888" }}>✖</button>
+      <h2 style={{ textAlign: "center", marginBottom: 20 }}>تسجيل الدخول</h2>
+      <form onSubmit={handleLogin}>
+        <input type="email" placeholder="البريد الإلكتروني" value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: "100%", padding: 10, marginBottom: 15, borderRadius: 8, border: "1px solid #ddd", boxSizing: "border-box" }} required />
+        <input type="password" placeholder="كلمة المرور" value={password} onChange={(e) => setPassword(e.target.value)} style={{ width: "100%", padding: 10, marginBottom: 15, borderRadius: 8, border: "1px solid #ddd", boxSizing: "border-box" }} required />
+        {error && <div style={{ color: "red", marginBottom: 10, textAlign: "center" }}>{error}</div>}
+        <button type="submit" disabled={loading} style={{ background: "#f97316", color: "#fff", padding: 10, width: "100%", borderRadius: 8, border: "none", cursor: "pointer", fontWeight: "bold" }}>
+          {loading ? "جاري الدخول..." : "دخول"}
+        </button>
+      </form>
+      <div style={{ marginTop: 15, textAlign: "center" }}>
+        <button onClick={() => navigate("/signup")} style={{ background: "none", border: "none", color: "#1976D2", cursor: "pointer" }}>ليس لديك حساب؟ سجل الآن</button>
       </div>
     </div>
   );

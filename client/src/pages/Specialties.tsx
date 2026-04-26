@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import React from 'react';
+=======
+
+>>>>>>> temp-preview
 import React, { useState } from "react";
 
 interface SpecialtiesProps {

@@ -1,0 +1,3 @@
+[build.environment]
+  SUPABASE_URL = "https://lvoecyolzmfowqsbnbdf.supabase.co"
+  SUPABASE_SERVICE_ROLE_KEY = "sb_secret_WpsWes9agYvYtfsCR5YQkA_5I1VyGHf"

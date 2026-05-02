@@ -213,6 +213,14 @@ export default function PublicProfile() {
     loadingToast.style.zIndex = "9999";
     document.body.appendChild(loadingToast);
 
+    // حفظ حالة النبذة وتوسيعها مؤقتاً إذا كانت طويلة
+    const wasExpanded = expandedBio;
+    if (viewUser.bio && viewUser.bio.length > 100 && !expandedBio) {
+      setExpandedBio(true);
+      // انتظار حتى يعاد التصيير
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+
     try {
       const pdf = new jsPDF("p", "mm", "a4");
       const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -226,6 +234,11 @@ export default function PublicProfile() {
         hiddenSelectors.forEach(sel => {
           cloneProfile.querySelectorAll(sel).forEach(el => (el as HTMLElement).style.display = "none");
         });
+        // إجبار النبذة على الظهور كاملة في النسخة (احتياطاً)
+        const bioParagraph = cloneProfile.querySelector(".profile-bio");
+        if (bioParagraph && viewUser.bio) {
+          bioParagraph.textContent = viewUser.bio;
+        }
         cloneProfile.style.padding = "20px";
         cloneProfile.style.backgroundColor = "#fff";
         cloneProfile.style.width = "100%";
@@ -245,7 +258,6 @@ export default function PublicProfile() {
       for (let i = 0; i < postElements.length; i++) {
         const postEl = postElements[i] as HTMLElement;
         const clonePost = postEl.cloneNode(true) as HTMLElement;
-        // إخفاء أزرار التكبير والتفاعلات
         const hiddenSelectors = [".zoom-btn", ".interaction-buttons", ".comment-input-area"];
         hiddenSelectors.forEach(sel => {
           clonePost.querySelectorAll(sel).forEach(el => (el as HTMLElement).style.display = "none");
@@ -271,6 +283,10 @@ export default function PublicProfile() {
       alert("حدث خطأ أثناء إنشاء PDF");
     } finally {
       document.body.removeChild(loadingToast);
+      // إعادة النبذة إلى حالتها الأصلية
+      if (!wasExpanded && expandedBio) {
+        setExpandedBio(false);
+      }
     }
   };
 
@@ -291,9 +307,12 @@ export default function PublicProfile() {
       </div>
 
       {/* المنطقة التي سيتم تصديرها (كل محتوى الملف الشخصي والمنشورات) */}
-        {/* معلومات الملف الشخصي - مع id للتصدير */}
+        {/* ✅ الصورة الشخصية أصبحت قابلة للنقر للتكبير */}
         <div id="profile-info-only" style={{ padding: "20px 16px", backgroundColor: "#fff", borderBottom: "1px solid #eee", textAlign: "center" }}>
-          <div style={{ width: 100, height: 100, borderRadius: "50%", overflow: "hidden", margin: "0 auto 12px auto", background: "#eee" }}>
+          <div 
+            style={{ width: 100, height: 100, borderRadius: "50%", overflow: "hidden", margin: "0 auto 12px auto", background: "#eee", cursor: "pointer" }} 
+            onClick={() => viewUser.avatar_url && setShowAvatarModal(true)}
+          >
             {viewUser.avatar_url ? <img src={viewUser.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : "👤"}
           </div>
           <h2 style={{ margin: "0 0 4px 0" }}>{viewUser.full_name}</h2>
@@ -381,6 +400,7 @@ export default function PublicProfile() {
         </div>
       )}
 
+      {/* ✅ مودال تكبير الصورة الشخصية */}
       {showAvatarModal && viewUser.avatar_url && (
         <div style={modalOverlay} onClick={() => setShowAvatarModal(false)}>
           <div style={{ ...modalContent, backgroundColor: "#000", justifyContent: "center", alignItems: "center" }} onClick={(e) => e.stopPropagation()}>

@@ -6,6 +6,49 @@ import { Lock, Eye, EyeOff, Save } from 'lucide-react';
 
 export default function ResetPassword() {
   const navigate = useNavigate();
+  
+  // متغير اللغة: نقرأه من localStorage أو نضبطه على العربية
+  const [locale, setLocale] = useState<"ar" | "en">(() => {
+    const saved = localStorage.getItem("appLocale");
+    return saved === "en" ? "en" : "ar";
+  });
+  
+  const translations = {
+    ar: {
+      title: "إعادة تعيين كلمة المرور",
+      subtitle: "أدخل كلمة المرور الجديدة",
+      newPassword: "كلمة المرور الجديدة",
+      confirmPassword: "تأكيد كلمة المرور",
+      updateBtn: "تحديث كلمة المرور",
+      updating: "جاري التحديث...",
+      backToLogin: "← العودة لتسجيل الدخول",
+      errorMismatch: "كلمتا المرور غير متطابقتين",
+      errorLength: "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
+      successMsg: "تم تغيير كلمة المرور بنجاح",
+      invalidLink: "رابط غير صالح",
+    },
+    en: {
+      title: "Reset Password",
+      subtitle: "Enter your new password",
+      newPassword: "New password",
+      confirmPassword: "Confirm password",
+      updateBtn: "Update password",
+      updating: "Updating...",
+      backToLogin: "← Back to login",
+      errorMismatch: "Passwords do not match",
+      errorLength: "Password must be at least 6 characters",
+      successMsg: "Password changed successfully",
+      invalidLink: "Invalid link",
+    },
+  };
+  const t = translations[locale];
+  
+  const toggleLanguage = () => {
+    const newLocale = locale === "ar" ? "en" : "ar";
+    setLocale(newLocale);
+    localStorage.setItem("appLocale", newLocale);
+  };
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -14,23 +57,22 @@ export default function ResetPassword() {
   const [success, setSuccess] = useState("");
 
   useEffect(() => {
-    // التحقق من وجود token في URL
     const hash = window.location.hash;
     if (!hash.includes("access_token")) {
-      setError("رابط غير صالح");
+      setError(t.invalidLink);
     }
-  }, []);
+  }, [t]);
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (password !== confirmPassword) {
-      setError("كلمتا المرور غير متطابقتين");
+      setError(t.errorMismatch);
       return;
     }
 
     if (password.length < 6) {
-      setError("كلمة المرور يجب أن تكون 6 أحرف على الأقل");
+      setError(t.errorLength);
       return;
     }
 
@@ -44,7 +86,7 @@ export default function ResetPassword() {
     if (error) {
       setError(error.message);
     } else {
-      setSuccess("تم تغيير كلمة المرور بنجاح");
+      setSuccess(t.successMsg);
       setTimeout(() => {
         navigate("/login");
       }, 2000);
@@ -56,17 +98,23 @@ export default function ResetPassword() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#1976D2]/10 to-[#FF9800]/10 flex items-center justify-center py-16" dir="rtl">
       <div className="max-w-md w-full mx-4">
+        {/* زر الترجمة في أعلى البطاقة */}
+        <div className="flex justify-end mb-2">
+          <button onClick={toggleLanguage} className="bg-gray-200 hover:bg-gray-300 rounded-full px-3 py-1 text-sm font-semibold">
+            {locale === "ar" ? "🇸🇦 English" : "🇺🇸 العربية"}
+          </button>
+        </div>
         
         <div className="bg-white rounded-2xl shadow-2xl p-8">
           
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-[#FF9800] mb-2">إعادة تعيين كلمة المرور</h1>
-            <p className="text-gray-500">أدخل كلمة المرور الجديدة</p>
+            <h1 className="text-3xl font-bold text-[#FF9800] mb-2">{t.title}</h1>
+            <p className="text-gray-500">{t.subtitle}</p>
           </div>
 
           <form onSubmit={handleResetPassword}>
             <div className="mb-5">
-              <label className="block mb-2 font-semibold text-gray-700">كلمة المرور الجديدة</label>
+              <label className="block mb-2 font-semibold text-gray-700">{t.newPassword}</label>
               <div className="relative">
                 <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                 <input
@@ -88,7 +136,7 @@ export default function ResetPassword() {
             </div>
 
             <div className="mb-5">
-              <label className="block mb-2 font-semibold text-gray-700">تأكيد كلمة المرور</label>
+              <label className="block mb-2 font-semibold text-gray-700">{t.confirmPassword}</label>
               <div className="relative">
                 <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                 <input
@@ -119,7 +167,7 @@ export default function ResetPassword() {
               disabled={loading}
               className="w-full bg-[#FF9800] hover:bg-orange-500 text-white font-bold py-3 rounded-xl transition flex items-center justify-center gap-2"
             >
-              {loading ? "جاري التحديث..." : "تحديث كلمة المرور"}
+              {loading ? t.updating : t.updateBtn}
               <Save size={18} />
             </button>
           </form>
@@ -129,7 +177,7 @@ export default function ResetPassword() {
               onClick={() => navigate("/login")}
               className="text-[#1976D2] hover:text-[#FF9800] transition"
             >
-              ← العودة لتسجيل الدخول
+              {t.backToLogin}
             </button>
           </div>
         </div>

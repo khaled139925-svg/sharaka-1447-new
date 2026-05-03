@@ -196,9 +196,12 @@ export default function PublicProfile() {
 
   const handleEdit = () => navigate("/profile");
 
-  // ✅ دالة PDF الجديدة التي تلتقط المعلومات الشخصية وكل منشور في صفحة منفصلة
+  // ✅ دالة PDF محسنة للجوال واللاب توب
   const generateFullPDF = async () => {
     if (!viewUser) return;
+    
+    // كشف إذا كان الجهاز جوالاً
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     
     const loadingToast = document.createElement("div");
     loadingToast.innerText = "جاري إنشاء PDF، يرجى الانتظار...";
@@ -217,13 +220,16 @@ export default function PublicProfile() {
     const wasExpanded = expandedBio;
     if (viewUser.bio && viewUser.bio.length > 100 && !expandedBio) {
       setExpandedBio(true);
-      // انتظار حتى يعاد التصيير
-      await new Promise(resolve => setTimeout(resolve, 200));
+      // على الجوال، ننتظر أطول لضمان إعادة التصيير
+      await new Promise(resolve => setTimeout(resolve, isMobile ? 500 : 200));
     }
 
     try {
       const pdf = new jsPDF("p", "mm", "a4");
       const pdfWidth = pdf.internal.pageSize.getWidth();
+      
+      // تحديد جودة التصوير (أقل للجوال لتوفير الذاكرة)
+      const scale = isMobile ? 1.5 : 2;
       
       // 1. التقاط معلومات الملف الشخصي (بدون المنشورات)
       const profileElement = document.getElementById("profile-info-only");
@@ -246,7 +252,12 @@ export default function PublicProfile() {
         cloneProfile.style.top = "-9999px";
         cloneProfile.style.left = "-9999px";
         document.body.appendChild(cloneProfile);
-        const canvas = await html2canvas(cloneProfile, { scale: 2, useCORS: true });
+        const canvas = await html2canvas(cloneProfile, { 
+          scale: scale, 
+          useCORS: true,
+          logging: false,
+          allowTaint: false
+        });
         const imgData = canvas.toDataURL("image/png");
         const imgHeight = (canvas.height * pdfWidth) / canvas.width;
         pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, imgHeight);
@@ -269,7 +280,12 @@ export default function PublicProfile() {
         clonePost.style.top = "-9999px";
         clonePost.style.left = "-9999px";
         document.body.appendChild(clonePost);
-        const canvas = await html2canvas(clonePost, { scale: 2, useCORS: true });
+        const canvas = await html2canvas(clonePost, { 
+          scale: scale, 
+          useCORS: true,
+          logging: false,
+          allowTaint: false
+        });
         const imgData = canvas.toDataURL("image/png");
         const imgHeight = (canvas.height * pdfWidth) / canvas.width;
         pdf.addPage();
@@ -280,7 +296,7 @@ export default function PublicProfile() {
       pdf.save(`${viewUser.full_name || "profile"}_full.pdf`);
     } catch (error) {
       console.error(error);
-      alert("حدث خطأ أثناء إنشاء PDF");
+      alert("حدث خطأ أثناء إنشاء PDF. حاول مرة أخرى أو قلل عدد المنشورات.");
     } finally {
       document.body.removeChild(loadingToast);
       // إعادة النبذة إلى حالتها الأصلية
@@ -294,6 +310,9 @@ export default function PublicProfile() {
   if (loading) return <div style={{ padding: 20 }}>⏳ جاري التحقق...</div>;
 
   const zoomBtnStyle = { position: "absolute" as const, top: 10, right: 10, background: "rgba(0,0,0,0.6)", color: "#fff", border: "none", borderRadius: 20, padding: "5px 10px", cursor: "pointer", fontSize: 12, zIndex: 2 };
+
+  // تحديد ما إذا كان الجهاز جوالاً لتعديل بعض الأنماط (اختياري)
+  const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
   return (
     <div style={{ background: "#fafafa", minHeight: "100vh" }}>

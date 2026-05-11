@@ -51,7 +51,7 @@ export default function Profile() {
       send: "إرسال",
       createDocument: "إنشاء مستند",
       receiverName: "اسم المستلم",
-      receiverPhone: "رقم الجوال",
+      receiverPhone: "رقم الجوال (اختياري)",
       paymentMethod: "طريقة الدفع (اختياري)",
       items: "البنود (بيان - سعر)",
       addItem: "+ إضافة بيان",
@@ -80,6 +80,9 @@ export default function Profile() {
       price: "السعر",
       stamp: "الختم",
       signature: "التوقيع",
+      purchaseVoucher: "قسيمة شراء",
+      giftVoucher: "قسيمة هدية",
+      makePublic: "نشر القسيمة للجمهور (ستظهر في معرض القسائم)",
     },
     en: {
       back: "Back",
@@ -113,7 +116,7 @@ export default function Profile() {
       send: "Send",
       createDocument: "Create document",
       receiverName: "Receiver name",
-      receiverPhone: "Phone number",
+      receiverPhone: "Phone (optional)",
       paymentMethod: "Payment method (optional)",
       items: "Items (description - price)",
       addItem: "+ Add item",
@@ -142,6 +145,9 @@ export default function Profile() {
       price: "Price",
       stamp: "Stamp",
       signature: "Signature",
+      purchaseVoucher: "Purchase Voucher",
+      giftVoucher: "Gift Voucher",
+      makePublic: "Make voucher public (appears in vouchers gallery)",
     },
   };
   const t = translations[locale];
@@ -150,6 +156,52 @@ export default function Profile() {
     setLocale(newLocale);
     localStorage.setItem("appLocale", newLocale);
   };
+
+  // --- لغة خاصة بنافذة إنشاء المستند ---
+  const [docLocale, setDocLocale] = useState<"ar" | "en">("ar");
+  const docTranslations = {
+    ar: {
+      title: "إنشاء مستند",
+      invoice: "فاتورة",
+      quote: "عرض سعر",
+      purchaseVoucher: "قسيمة شراء",
+      giftVoucher: "قسيمة هدية",
+      receiverName: "اسم المستلم",
+      receiverPhone: "رقم الجوال (اختياري)",
+      paymentMethod: "طريقة الدفع (اختياري)",
+      items: "البنود (بيان - سعر)",
+      addItem: "+ إضافة بيان",
+      total: "المجموع",
+      send: "إرسال المستند",
+      cancel: "إلغاء",
+      makePublic: "نشر القسيمة للجمهور",
+      stamp: "الختم",
+      signature: "التوقيع",
+      description: "البيان",
+      price: "السعر",
+    },
+    en: {
+      title: "Create Document",
+      invoice: "Invoice",
+      quote: "Quote",
+      purchaseVoucher: "Purchase Voucher",
+      giftVoucher: "Gift Voucher",
+      receiverName: "Receiver name",
+      receiverPhone: "Phone (optional)",
+      paymentMethod: "Payment method (optional)",
+      items: "Items (description - price)",
+      addItem: "+ Add item",
+      total: "Total",
+      send: "Send document",
+      cancel: "Cancel",
+      makePublic: "Make voucher public",
+      stamp: "Stamp",
+      signature: "Signature",
+      description: "Description",
+      price: "Price",
+    },
+  };
+  const docT = docLocale === "ar" ? docTranslations.ar : docTranslations.en;
 
   const [user, setUser] = useState<any>(null);
   const [posts, setPosts] = useState<any[]>([]);
@@ -190,7 +242,8 @@ export default function Profile() {
     receiver_name: "",
     receiver_phone: "",
     items: [{ description: "", price: "" }],
-    payment_method: ""
+    payment_method: "",
+    is_public: false,
   });
   const [signature, setSignature] = useState<File | null>(null);
   const [stamp, setStamp] = useState<File | null>(null);
@@ -393,8 +446,13 @@ export default function Profile() {
     if (!invoiceRef.current) { alert("❌ لم يتم العثور على الفاتورة"); return; }
     const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
     if (!currentUser.id) { alert("❌ يجب تسجيل الدخول"); return; }
-    const cleanedPhone = formatPhoneNumber(invoiceData.receiver_phone);
-    if (!cleanedPhone || cleanedPhone.length < 10) { alert("❌ رقم الهاتف غير صحيح"); return; }
+
+    // رقم الهاتف اختياري - لا نتحقق من صحته إجبارياً
+    let cleanedPhone = "";
+    if (invoiceData.receiver_phone && invoiceData.receiver_phone.trim() !== "") {
+      cleanedPhone = formatPhoneNumber(invoiceData.receiver_phone);
+    }
+
     const invNumber = `INV-${Date.now()}`;
     setInvoiceNumber(invNumber);
     const pTag = invoiceRef.current.querySelector("p:first-of-type");
@@ -405,22 +463,28 @@ export default function Profile() {
       const fileName = `invoice-${invNumber}.png`;
       const { error: uploadError } = await supabase.storage.from("invoices").upload(fileName, blob, { contentType: "image/png" });
       if (uploadError) { alert("❌ فشل رفع الصورة: " + uploadError.message); return; }
-      const { data: urlData } = supabase.storage.from("invoices").getPublicUrl(fileName);
+      const { data: urlData } = await supabase.storage.from("invoices").getPublicUrl(fileName);
       const imageUrl = urlData.publicUrl;
       await supabase.from("invoices").insert({
         sender_id: currentUser.id, sender_name: currentUser.full_name, sender_phone: currentUser.phone, sender_logo: currentUser.avatar_url,
         receiver_name: invoiceData.receiver_name, receiver_phone: invoiceData.receiver_phone, type: invoiceData.type,
-        items: invoiceData.items, total: total, payment_method: invoiceData.payment_method, pdf_url: imageUrl, status: "pending"
+        items: invoiceData.items, total: total, payment_method: invoiceData.payment_method, pdf_url: imageUrl, status: "pending",
+        is_public: invoiceData.is_public,
       });
-      const message = `${invoiceData.type === "invoice" ? "فاتورة" : "عرض سعر"}\nرقم: ${invNumber}\n\n${invoiceData.items.map(i => `• ${i.description} - ${i.price}`).join("\n")}\n\nالمجموع: ${total}\n\nرابط الفاتورة:\n${imageUrl}`;
+      const typeName = invoiceData.type === "invoice" ? "فاتورة" : invoiceData.type === "quote" ? "عرض سعر" : invoiceData.type === "purchase_voucher" ? "قسيمة شراء" : "قسيمة هدية";
+      const message = `${typeName}\nرقم: ${invNumber}\n\n${invoiceData.items.map(i => `• ${i.description} - ${i.price}`).join("\n")}\n\nالمجموع: ${total}\n\nرابط الفاتورة:\n${imageUrl}`;
       const encodedMessage = encodeURIComponent(message);
-      const waLink1 = `https://wa.me/${cleanedPhone}?text=${encodedMessage}`;
-      const waLink2 = `https://api.whatsapp.com/send?phone=${cleanedPhone}&text=${encodedMessage}`;
-      const win = window.open(waLink1, "_blank");
-      setTimeout(() => { if (!win || win.closed) window.open(waLink2, "_blank"); }, 800);
-      alert("✅ تم إرسال الفاتورة وحفظها");
+      if (cleanedPhone && cleanedPhone.length >= 10) {
+        const waLink1 = `https://wa.me/${cleanedPhone}?text=${encodedMessage}`;
+        const waLink2 = `https://api.whatsapp.com/send?phone=${cleanedPhone}&text=${encodedMessage}`;
+        const win = window.open(waLink1, "_blank");
+        setTimeout(() => { if (!win || win.closed) window.open(waLink2, "_blank"); }, 800);
+        alert("✅ تم إرسال المستند وحفظه");
+      } else {
+        alert("✅ تم حفظ المستند (لم يتم إرسال واتساب لعدم وجود رقم المستلم)");
+      }
       setShowInvoiceModal(false);
-      setInvoiceData({ type: "invoice", receiver_name: "", receiver_phone: "", items: [{ description: "", price: "" }], payment_method: "" });
+      setInvoiceData({ type: "invoice", receiver_name: "", receiver_phone: "", items: [{ description: "", price: "" }], payment_method: "", is_public: false });
       setSignature(null); setStamp(null); setSignaturePreview(null); setStampPreview(null); setInvoiceNumber("");
     });
   };
@@ -551,28 +615,52 @@ export default function Profile() {
         {showInvoiceModal && (
           <div style={modalOverlay} onClick={() => setShowInvoiceModal(false)}>
             <div style={{ ...modalContentSmallStyle, width: "90%", maxWidth: 500, maxHeight: "90%", overflowY: "auto" }} onClick={(e) => e.stopPropagation()}>
-              <h3>{t.createDocument}</h3>
-              <select value={invoiceData.type} onChange={(e) => setInvoiceData({ ...invoiceData, type: e.target.value })} style={input}><option value="invoice">{t.invoice}</option><option value="quote">عرض سعر</option></select>
-              <input placeholder={t.receiverName} value={invoiceData.receiver_name} onChange={e => setInvoiceData({ ...invoiceData, receiver_name: e.target.value })} style={input} />
-              <input placeholder={t.receiverPhone} value={invoiceData.receiver_phone} onChange={e => setInvoiceData({ ...invoiceData, receiver_phone: e.target.value })} style={input} />
-              <input placeholder={t.paymentMethod} value={invoiceData.payment_method} onChange={e => setInvoiceData({ ...invoiceData, payment_method: e.target.value })} style={input} />
-              <label>{t.items}</label>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                <h3>{docT.title}</h3>
+                <button onClick={() => setDocLocale(docLocale === "ar" ? "en" : "ar")} style={{ background: "#f0f0f0", border: "none", borderRadius: 20, padding: "4px 10px", cursor: "pointer", fontSize: 12 }}>
+                  {docLocale === "ar" ? "English" : "العربية"}
+                </button>
+              </div>
+              <select value={invoiceData.type} onChange={(e) => setInvoiceData({ ...invoiceData, type: e.target.value })} style={input}>
+                <option value="invoice">{docT.invoice}</option>
+                <option value="quote">{docT.quote}</option>
+                <option value="purchase_voucher">{docT.purchaseVoucher}</option>
+                <option value="gift_voucher">{docT.giftVoucher}</option>
+              </select>
+              <input placeholder={docT.receiverName} value={invoiceData.receiver_name} onChange={e => setInvoiceData({ ...invoiceData, receiver_name: e.target.value })} style={input} />
+              <input placeholder={docT.receiverPhone} value={invoiceData.receiver_phone} onChange={e => setInvoiceData({ ...invoiceData, receiver_phone: e.target.value })} style={input} />
+              <input placeholder={docT.paymentMethod} value={invoiceData.payment_method} onChange={e => setInvoiceData({ ...invoiceData, payment_method: e.target.value })} style={input} />
+
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
+                <input type="checkbox" id="isPublicCheckbox" checked={invoiceData.is_public} onChange={(e) => setInvoiceData({ ...invoiceData, is_public: e.target.checked })} />
+                <label htmlFor="isPublicCheckbox">{docT.makePublic}</label>
+              </div>
+
+              <label>{docT.items}</label>
               {invoiceData.items.map((item, idx) => (
                 <div key={idx} style={{ display: "flex", gap: 5, marginBottom: 8 }}>
-                  <input type="text" placeholder={`البيان ${idx + 1}`} value={item.description} onChange={(e) => handleItemChange(idx, "description", e.target.value)} style={{ flex: 2, ...input }} />
-                  <input type="text" placeholder={t.price} value={item.price} onChange={(e) => handleItemChange(idx, "price", e.target.value)} style={{ flex: 1, ...input }} />
+                  <input type="text" placeholder={`${docT.description} ${idx+1}`} value={item.description} onChange={(e) => handleItemChange(idx, "description", e.target.value)} style={{ flex: 2, ...input }} />
+                  <input type="text" placeholder={docT.price} value={item.price} onChange={(e) => handleItemChange(idx, "price", e.target.value)} style={{ flex: 1, ...input }} />
                   {invoiceData.items.length > 1 && <button onClick={() => removeItem(idx)} style={{ ...btnRedSmall, padding: "0 10px" }}>✖</button>}
                 </div>
               ))}
-              <button onClick={addItem} style={{ ...btnGreen, padding: "5px 12px", fontSize: 12 }}>{t.addItem}</button>
-              <p style={{ marginTop: 10, fontWeight: "bold" }}>{t.total}: {total}</p>
-              <div style={{ marginTop: 10 }}><input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if(f) { setStamp(f); const reader = new FileReader(); reader.onloadend = () => setStampPreview(reader.result as string); reader.readAsDataURL(f); } }} /><br />
-              <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if(f) { setSignature(f); const reader = new FileReader(); reader.onloadend = () => setSignaturePreview(reader.result as string); reader.readAsDataURL(f); } }} /></div>
+              <button onClick={addItem} style={{ ...btnGreen, padding: "5px 12px", fontSize: 12 }}>{docT.addItem}</button>
+              <p style={{ marginTop: 10, fontWeight: "bold" }}>{docT.total}: {total}</p>
+              <div style={{ marginTop: 10 }}>
+                <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if(f) { setStamp(f); const reader = new FileReader(); reader.onloadend = () => setStampPreview(reader.result as string); reader.readAsDataURL(f); } }} /><br />
+                <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if(f) { setSignature(f); const reader = new FileReader(); reader.onloadend = () => setSignaturePreview(reader.result as string); reader.readAsDataURL(f); } }} />
+              </div>
               {stampPreview && <img src={stampPreview} style={{ width: 50, height: 50 }} />}
               {signaturePreview && <img src={signaturePreview} style={{ width: 50, height: 50 }} />}
               <div ref={invoiceRef} id="invoice" style={{ width: 800, padding: 30, background: "#fff", fontFamily: "Arial", direction: "rtl", color: "#000", position: "absolute", top: -9999, left: -9999 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div><h2>{invoiceData.type === "invoice" ? "فاتورة" : "عرض سعر"}</h2><p>{t.invoiceNumber} {invoiceNumber || "غير محدد"}</p><p>{t.date}: {new Date().toLocaleDateString()}</p></div>
+                  <div>
+                    <h2>
+                      {invoiceData.type === "invoice" ? "فاتورة" : invoiceData.type === "quote" ? "عرض سعر" : invoiceData.type === "purchase_voucher" ? "قسيمة شراء" : "قسيمة هدية"}
+                    </h2>
+                    <p>{t.invoiceNumber} {invoiceNumber || "غير محدد"}</p>
+                    <p>{t.date}: {new Date().toLocaleDateString()}</p>
+                  </div>
                   {user.avatar_url && <img src={user.avatar_url} crossOrigin="anonymous" style={{ width: 80 }} />}
                 </div>
                 <hr />
@@ -591,8 +679,8 @@ export default function Profile() {
                   <div><p>{t.signature}</p>{signaturePreview ? <img src={signaturePreview} width="120" /> : (user.avatar_url && <img src={user.avatar_url} width="80" />)}</div>
                 </div>
               </div>
-              <button style={btnGreen} onClick={sendInvoice}>{t.sendDoc}</button>
-              <button style={btnRed} onClick={() => setShowInvoiceModal(false)}>{t.cancel}</button>
+              <button style={btnGreen} onClick={sendInvoice}>{docT.send}</button>
+              <button style={btnRed} onClick={() => setShowInvoiceModal(false)}>{docT.cancel}</button>
             </div>
           </div>
         )}

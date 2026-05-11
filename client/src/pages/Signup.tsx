@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 
-// قائمة رموز الدول (كما هي، كاملة)
+// قائمة رموز الدول (بنفس الترتيب الأصلي دون تغيير)
 const countryCodes = [
   { code: "+20", country: "مصر" },
   { code: "+966", country: "السعودية" },
@@ -75,6 +75,9 @@ export default function Signup() {
       avatarUploadFail: "فشل رفع الصورة",
       registerSuccess: "تم التسجيل بنجاح، يمكنك الآن تسجيل الدخول",
       close: "إغلاق",
+      userTypeLabel: "نوع الحساب",
+      individual: "فرد",
+      company: "شركة / منشأة",
     },
     en: {
       title: "Create new account",
@@ -92,6 +95,9 @@ export default function Signup() {
       avatarUploadFail: "Failed to upload image",
       registerSuccess: "Registration successful, you can now log in",
       close: "Close",
+      userTypeLabel: "Account type",
+      individual: "Individual",
+      company: "Company / Establishment",
     },
   };
   const t = locale === "ar" ? translations.ar : translations.en;
@@ -103,6 +109,7 @@ export default function Signup() {
     specialty: "",
     bio: "",
   });
+  const [userType, setUserType] = useState<'individual' | 'company'>('individual');
   const [countryCode, setCountryCode] = useState("+966");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [avatar, setAvatar] = useState<File | null>(null);
@@ -170,6 +177,7 @@ export default function Signup() {
       is_admin: false,
       country_code: countryCode,
       country_name: selectedCountry?.country || "",
+      user_type: userType,
     });
 
     if (insertError) {
@@ -197,6 +205,20 @@ export default function Signup() {
       <form onSubmit={handleSubmit}>
         <input placeholder={t.fullName} value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })} style={inputStyle} required />
         <input placeholder={t.email} type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} style={inputStyle} required />
+        
+        {/* حقل نوع الحساب */}
+        <div style={{ marginBottom: 15 }}>
+          <label style={{ display: "block", marginBottom: 5, fontWeight: "bold" }}>{t.userTypeLabel}</label>
+          <select
+            value={userType}
+            onChange={(e) => setUserType(e.target.value as 'individual' | 'company')}
+            style={inputStyle}
+          >
+            <option value="individual">{t.individual}</option>
+            <option value="company">{t.company}</option>
+          </select>
+        </div>
+
         <div style={{ display: "flex", gap: 10, marginBottom: 5 }}>
           <select value={countryCode} onChange={e => setCountryCode(e.target.value)} style={{ ...inputStyle, width: "30%" }} required>
             {countryCodes.map(c => <option key={c.code} value={c.code}>{c.code} {c.country}</option>)}

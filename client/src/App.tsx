@@ -9,6 +9,9 @@ import AdminPanel from "./pages/AdminPanel";
 import AdminSettings from "./pages/AdminSettings";
 import MyInvoice from "./pages/MyInvoice";
 import MyInvoices from "./pages/MyInvoices";
+// استيراد صفحات القسائم العامة الجديدة
+import PublicVouchers from "./pages/PublicVouchers";
+import VoucherDetails from "./pages/VoucherDetails";
 
 function App() {
   return (
@@ -24,6 +27,9 @@ function App() {
           <Route path="/admin-settings" element={<AdminSettings />} />
           <Route path="/my-invoice" element={<MyInvoice />} />
           <Route path="/my-invoices" element={<MyInvoices />} />
+          {/* المساران الجديدان للقسائم العامة */}
+          <Route path="/vouchers" element={<PublicVouchers />} />
+          <Route path="/voucher/:id" element={<VoucherDetails />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

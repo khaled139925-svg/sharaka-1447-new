@@ -58,7 +58,7 @@ const countryTranslations: Record<string, { ar: string; en: string }> = {
 const getCountryName = (countryAr: string, locale: string) => {
   if (locale === "ar") return countryAr;
   const translation = countryTranslations[countryAr];
-  return translation ? translation.en : countryAr; // إذا لم يوجد ترجمة، نرجع الاسم العربي
+  return translation ? translation.en : countryAr;
 };
 
 export default function Home() {
@@ -68,6 +68,14 @@ export default function Home() {
     return saved === "en" ? "en" : "ar";
   });
 
+  // العبارة الجديدة أسفل الشعار (الأولى)
+  const sloganAr = "موسوعة القوى العاملة: شراكة توفر فرص عمل للجميع، محلياً وعالمياً";
+  const sloganEn = "The Encyclopedia of the Workforce: A partnership that provides job opportunities for everyone, locally and globally";
+
+  // العبارة الثانية: بنك الهدايا والقسائم الشرائية
+  const voucherBankAr = "🎁 بنك الهدايا والقسائم الشرائية – استعرض أحدث القسائم والعروض";
+  const voucherBankEn = "🎁 Gift & Purchase Vouchers Bank – Browse latest vouchers and offers";
+
   const translations = {
     ar: {
       siteName: "شراكة",
@@ -76,6 +84,9 @@ export default function Home() {
       signup: "تسجيل",
       logout: "تسجيل خروج",
       allCountries: "🌍 جميع البلدان",
+      allUsers: "الكل",
+      individual: "أفراد",
+      company: "شركات / منشآت",
       noBio: "لا يوجد نبذة",
       noSpecialty: "بدون تخصص",
       followers: "متابع",
@@ -106,6 +117,9 @@ export default function Home() {
       signup: "Sign up",
       logout: "Logout",
       allCountries: "🌍 All countries",
+      allUsers: "All",
+      individual: "Individuals",
+      company: "Companies / Establishments",
       noBio: "No bio",
       noSpecialty: "No specialty",
       followers: "Followers",
@@ -136,6 +150,7 @@ export default function Home() {
   const [consultants, setConsultants] = useState<any[]>([]);
   const [countries, setCountries] = useState<string[]>([]);
   const [selectedCountry, setSelectedCountry] = useState("");
+  const [userTypeFilter, setUserTypeFilter] = useState<"all" | "individual" | "company">("all");
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -183,13 +198,15 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    let filtered = allConsultants;
     if (selectedCountry) {
-      const filtered = allConsultants.filter(c => c.country_name === selectedCountry);
-      setConsultants(orderUsers(filtered));
-    } else {
-      setConsultants(allConsultants);
+      filtered = filtered.filter(c => c.country_name === selectedCountry);
     }
-  }, [selectedCountry, allConsultants]);
+    if (userTypeFilter !== "all") {
+      filtered = filtered.filter(c => c.user_type === userTypeFilter);
+    }
+    setConsultants(orderUsers(filtered));
+  }, [selectedCountry, allConsultants, userTypeFilter]);
 
   useEffect(() => {
     const map: any = {};
@@ -283,7 +300,17 @@ export default function Home() {
         flexWrap: "wrap",
         gap: 8,
       }}>
-        <img src="/logo.png" alt="شعار" style={{ width: 90, cursor: "pointer", animation: "pulse 2s infinite" }} onClick={() => navigate("/")} />
+        {/* الجزء الخاص بالشعار والعبارات تحته */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+          <img src="/logo.png" alt="شعار" style={{ width: 90, cursor: "pointer", animation: "pulse 2s infinite" }} onClick={() => navigate("/")} />
+          <div style={{ fontSize: 13, color: "#555", marginTop: 6, fontWeight: "500", maxWidth: "280px", textAlign: "center" }}>
+            {locale === "ar" ? sloganAr : sloganEn}
+          </div>
+          {/* العبارة الثانية: بنك الهدايا والقسائم */}
+          <div style={{ fontSize: 12, color: "#e67e22", marginTop: 4, fontWeight: "bold", maxWidth: "280px", textAlign: "center" }}>
+            {locale === "ar" ? voucherBankAr : voucherBankEn}
+          </div>
+        </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
           {currentUser?.is_admin && <button onClick={() => navigate("/admin")} style={{ background: "#8b5cf6", color: "#fff", padding: "6px 12px", borderRadius: 8, border: "none", cursor: "pointer" }}>{t.adminPanel}</button>}
           {!currentUser ? (
@@ -294,6 +321,10 @@ export default function Home() {
           ) : (
             <button onClick={() => { localStorage.removeItem("user"); setCurrentUser(null); navigate("/"); }} style={{ background: "#ef4444", color: "#fff", padding: "6px 12px", borderRadius: 8, border: "none", cursor: "pointer" }}>{t.logout}</button>
           )}
+          {/* زر معرض القسائم العامة */}
+          <button onClick={() => navigate("/vouchers")} style={{ background: "#10b981", color: "#fff", padding: "6px 12px", borderRadius: 8, border: "none", cursor: "pointer", fontWeight: "bold" }}>
+            🎁 {locale === "ar" ? "معرض القسائم" : "Vouchers Gallery"}
+          </button>
           <button onClick={toggleLanguage} style={{ background: "#f0f0f0", border: "none", borderRadius: 30, padding: "6px 12px", cursor: "pointer", fontWeight: "bold", fontSize: 14 }}>{locale === "ar" ? "🇸🇦 English" : "🇺🇸 العربية"}</button>
         </div>
       </div>
@@ -312,6 +343,21 @@ export default function Home() {
         </div>
       )}
 
+      {/* فلتر نوع الحساب (أفراد / شركات) */}
+      {countries.length > 0 && (
+        <div style={{ padding: "12px 16px", backgroundColor: "#fff", borderBottom: "1px solid #eee" }}>
+          <select
+            value={userTypeFilter}
+            onChange={(e) => setUserTypeFilter(e.target.value as "all" | "individual" | "company")}
+            style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid #ddd", background: "#fff", fontSize: 16 }}
+          >
+            <option value="all">{t.allUsers}</option>
+            <option value="individual">{t.individual}</option>
+            <option value="company">{t.company}</option>
+          </select>
+        </div>
+      )}
+
       {/* قائمة المستخدمين */}
       <div>
         {consultants.map(c => (
@@ -321,7 +367,11 @@ export default function Home() {
               {c.avatar_url ? <img src={c.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : "👤"}
             </div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: "bold", fontSize: 16, marginBottom: 2 }}>{c.full_name}</div>
+              <div style={{ fontWeight: "bold", fontSize: 16, marginBottom: 2, display: "flex", alignItems: "center", gap: 6 }}>
+                {c.full_name}
+                {c.user_type === "company" && <span style={{ fontSize: 12, background: "#e2e8f0", padding: "2px 6px", borderRadius: 12 }}>🏢</span>}
+                {c.user_type === "individual" && <span style={{ fontSize: 12, background: "#e2e8f0", padding: "2px 6px", borderRadius: 12 }}>👤</span>}
+              </div>
               <div style={{ color: "#666", fontSize: 13, marginBottom: 2 }}>{c.specialty || t.noSpecialty}</div>
               <div style={{ fontSize: 12, color: "#888" }}>{followersMap[c.id] || 0} {t.followers}</div>
               {c.country_name && <div style={{ fontSize: 12, color: "#22c55e", marginTop: 2 }}>📍 {getCountryName(c.country_name, locale)}</div>}
@@ -330,7 +380,7 @@ export default function Home() {
         ))}
       </div>
 
-      {/* نوافذ تسجيل الدخول والتسجيل (نفس السابق) */}
+      {/* نوافذ تسجيل الدخول */}
       {showLogin && (
         <div style={overlay}>
           <div style={modal}>
@@ -347,6 +397,7 @@ export default function Home() {
         </div>
       )}
 
+      {/* نوافذ تسجيل جديد */}
       {showRegister && (
         <div style={overlay}>
           <div style={modal}>
